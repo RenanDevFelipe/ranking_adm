@@ -1,6 +1,6 @@
 import React from "react";
 
-const EmailIput = ({ value, onChange, placeholder = "Digitw seu E-mail", name = "email" }) => {
+const EmailIput = ({ value, onChange, placeholder = "Digite seu E-mail", name = "email" }) => {
     return (
         <input
 
