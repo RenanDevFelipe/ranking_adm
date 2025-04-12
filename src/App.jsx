@@ -9,11 +9,12 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
-      <Route path="/home" element={
+      {/* <Route path="/home" element={
         <PrivateRoute>
           <Home />
         </PrivateRoute>
-      } />
+      } /> */}
+      <Route path='/home' element ={<Home />} />
     </Routes>
   );
 }

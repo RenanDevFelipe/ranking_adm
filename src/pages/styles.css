@@ -8,39 +8,78 @@
     list-style: none;
 }
 
+body {
+    position: fixed;
+}
+
 :root {
     --colorPrimary: #FF6200;
     --colorSecundary: #fff;
     --colorBlack: #000;
-    --BSPrimary:rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    --BSPrimary: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    --colorDark: #262233;
+    --colorDarkForm: #342E45;
 }
 
 .div-form-login-body {
     display: flex;
-    width: 80%;
+    justify-content: space-around;
+    width: 100%;
     height: 100vh;
+    background-color: var(--colorDark);
 
-    & .div-first-part-login{
-        background-color: var(--colorPrimary);
-        width: 100%;
+    & .div-first-part-login {
+        width: 70%;
         height: 100vh;
-    }
 
-    & span {
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        margin-left: 8%;
-        margin-top: 3%;
-        & h1 {
-            color: var(--colorSecundary);
-            font-size: 40px;
+        & span {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            margin-left: 10%;
+
+            & h1 {
+                color: var(--colorPrimary);
+                font-size: 40px;
+                margin-top: 3%;
+            }
+
+            & img {
+                width: 60%;
+                height: 60%;
+                margin-left: 10px;
+                margin-top: -3%;
+            }
         }
 
-        & img {
-            width: 70%;
-            height: 70%;
-            margin-left: 8px;
+
+    }
+
+    & .div-form-login{
+        box-shadow: var(--BSPrimary);
+        background-color: var(--colorDarkForm);
+        padding: 40px;
+        margin-top: 10%;
+        margin-right: 8%;
+        border-radius: 2%;
+        width: 16%;
+        height: 45vh;
+
+        & h1{
+            color: var(--colorPrimary);
+            margin-bottom: 4%;
+        }
+
+        & #login-submit {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid transparent;
+            background-color: var(--colorPrimary);
+            color: var(--colorDarkForm);
+            cursor: pointer;
+            margin-top: 8%;
+            font-weight: bold;
+            border-radius: 5px;
         }
     }
 }

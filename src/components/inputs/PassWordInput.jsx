@@ -20,7 +20,7 @@ const PasswordInput = ({ value, onChange, placeholder = "Password", name = "pass
                 onClick={() => setShow((prev) => !prev)}
                 className="toggle-btn"
             >
-                {show ? "ocultar" : "Mostrar"}
+                {show ? "Hide" : "Show"}
             </button>
         </div>
     );

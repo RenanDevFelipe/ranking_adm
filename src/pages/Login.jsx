@@ -26,10 +26,11 @@ const Login = () => {
         </span>
       </div>
       <div className='div-form-login'>
+        <h1>Login</h1>
         <form onSubmit={handleSubmit}>
           <EmailInput value={form.email} onChange={handleChange} />
           <PasswordInput value={form.password} onChange={handleChange} />
-          <button type="submit">Entrar</button>
+          <button type="submit" id='login-submit'>Entrar</button>
         </form>
       </div>
     </div>
