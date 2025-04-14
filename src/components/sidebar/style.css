@@ -1,0 +1,123 @@
+
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+/* Estilos da Sidebar */
+.sidebar {
+    width: 20%;
+    background-color: #2c3e50;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #34495e;
+}
+
+.sidebar-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.sidebar-menu {
+    flex: 1;
+    padding: 20px 0;
+}
+
+.menu-section {
+    margin-bottom: 15px;
+}
+
+.section-title {
+    display: block;
+    padding: 10px 20px;
+    font-weight: 600;
+    color: #ecf0f1;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.submenu {
+    list-style: none;
+    padding-left: 20px;
+}
+
+.submenu li {
+    padding: 8px 20px;
+    cursor: pointer;
+    color: #bdc3c7;
+}
+
+.submenu li:hover {
+    background-color: #34495e;
+    color: white;
+}
+
+.menu-item {
+    position: absolute;
+    bottom: 0;
+    padding: 10px 20px;
+    cursor: pointer;
+    color: #bdc3c7;
+}
+
+.menu-item:hover {
+    background-color: #34495e;
+    color: white;
+}
+
+.section-title.clickable {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-title.clickable:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.arrow-icon {
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+    margin-left: 8px;
+}
+
+.arrow-icon.open {
+    transform: rotate(180deg);
+}
+
+.submenu {
+    display: contents;
+    list-style: none;
+    padding-left: 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.submenu.active {
+    max-height: 500px; /* Ajuste conforme necessário */
+}
+
+.submenu li {
+    padding: 8px 20px;
+    cursor: pointer;
+    color: #bdc3c7;
+}
+
+.submenu li:hover {
+    background-color: #34495e;
+    color: white;
+}

@@ -1,0 +1,68 @@
+
+.user-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    width: 150px;                                  
+
+    border: 1px solid var(--colorDark);
+    box-shadow: var(--BSPrimary);
+    background-color: var(--colorDarkForm);
+
+}
+
+.user-name {
+    color: var(--textColor);
+    font-size: 0.9rem;
+}
+
+.user-role {
+    color: var(--textColor);
+    font-size: 0.8rem;
+}
+
+.user-action {
+    color: var(--textColor);
+    background-color: var(--colorPrimary);
+    width: 100%;
+    text-align: center;
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 5px 0;
+}
+.user-action:hover{
+    background-color: var(--colorDark);
+}
+
+.stats-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.stats-label {
+    color: #bdc3c7;
+    font-size: 0.8rem;
+}
+
+.stats-value {
+    color: #ecf0f1;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.search-box{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 10px;
+
+}
+.search{
+    width: 50%;
+    padding: 5px;
+    border: 1px solid var(--colorPrimary);
+}

@@ -9,6 +9,7 @@
 }
 
 body {
+    width: 100%;
     position: fixed;
 }
 
@@ -17,10 +18,10 @@ body {
     --colorPrimary-light: #FF6200;
     --colorSecundary-light: #fff;
     --colorBlack-light: #000;
-    --colorDark-light: #f5f5f5;
+    --colorDark-light: #f5f4f4;
     --colorDarkForm-light: #ffffff;
     --textColor-light: #333;
-    --BSprimary-light:  #FF6200 0px 1px 20px;
+    --BSprimary-light:  #FF6200 0px 3px 8px;
     
     /* Cores Dark Mode (padrão) */
     --colorPrimary-dark: #FF6200;
@@ -29,7 +30,7 @@ body {
     --colorDark-dark: #262233;
     --colorDarkForm-dark: #342E45;
     --textColor-dark: #fff;
-    --BSPrimary-dark: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    --BSPrimary-dark: rgba(109, 108, 108, 0.24) 0px 3px 8px;
 
     
     /* Variáveis ativas (inicialmente dark) */
@@ -190,4 +191,28 @@ body {
             cursor: not-allowed;
           }
     }
+}
+
+
+/* Estilos do rodapé da sidebar */
+.app-container{
+    width: 100%;
+}
+.sidebar-footer {
+    width: 80%;
+    padding: 20px;
+    background-color: var(--colorDark);
+}
+.container-user{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+.user-info {
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 50px;
+    padding-top: 10px;
 }
