@@ -1,19 +1,20 @@
-import React from "react";
+import React from 'react';
 
-const EmailIput = ({ value, onChange, placeholder = "Digite seu E-mail", name = "email" }) => {
-    return (
-        <input
-
-            type="email"
-            name={name}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            required
-            className="input-style"
-        />
-    );
+const EmailInput = ({ error, ...props }) => {
+  return (
+    <div className="input-container">
+      <input
+        id="email"
+        type="email"
+        name="email"
+        autoComplete="email"
+        placeholder="Digite seu E-mail"
+        className="input-style"
+        {...props}
+      />
+      {error && <span className="error-text">{error}</span>}
+    </div>
+  );
 };
 
-
-export default EmailIput;
+export default EmailInput;

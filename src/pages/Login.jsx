@@ -1,20 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema } from '../schemas/auth.ts';
+import { authService } from '../services/authService.ts';
 import EmailInput from '../components/inputs/EmailInput';
 import PasswordInput from '../components/inputs/PassWordInput';
 import imgLogin from '../utils/img/Marketing-rafiki.png';
 import './styles.css';
-
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { login, logout } from '../utils/auth.js';
+import { FaSun, FaMoon } from 'react-icons/fa';
 
 const Login = () => {
-  const [form, setForm] = useState({ email: '', password: '' });
+  const navigate = useNavigate();
+  const [darkMode, setDarkMode] = useState(() => {
+    // Verifica se há preferência salva no localStorage
+    const savedMode = localStorage.getItem('darkMode');
+    return savedMode ? JSON.parse(savedMode) : true; // Dark mode como padrão
+  });
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError
+  } = useForm({
+    resolver: zodResolver(loginSchema)
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(form); // Aqui você conecta com a API
+  // Aplica o tema ao body
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.remove('light-mode');
+    } else {
+      document.body.classList.add('light-mode');
+    }
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+  }, [darkMode]);
+
+  const onSubmit = async (data) => {
+    try {
+      const response = await authService.login(data);
+      
+      if (!response.access_token) {
+        throw new Error('Email ou senha incorreto!');
+      }
+      
+      login({
+        access_token: response.access_token,
+        id_ixc: response.id_ixc,
+        email: response.email,
+        nome: response.nome
+      });
+      
+      toast.success('Login realizado com sucesso!');
+      navigate('/home');
+      
+    } catch (error) {
+      logout();
+      
+      let errorMessage = 'Email ou senha incorreto!';
+      
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError('root', {
+        type: 'manual',
+        message: errorMessage
+      });
+      
+      console.error('Erro no login:', error);
+    }
   };
 
   return (
@@ -26,11 +86,48 @@ const Login = () => {
         </span>
       </div>
       <div className='div-form-login'>
+        <div className="theme-toggle-container">
+          <button 
+            className="theme-toggle"
+            onClick={() => setDarkMode(!darkMode)}
+            aria-label={darkMode ? 'Ativar light mode' : 'Ativar dark mode'}
+          >
+            {darkMode ? (
+              <>
+                <FaMoon /> Dark Mode
+              </>
+            ) : (
+              <>
+                <FaSun /> Light Mode
+              </>
+            )}
+          </button>
+        </div>
+        
         <h1>Login</h1>
-        <form onSubmit={handleSubmit}>
-          <EmailInput value={form.email} onChange={handleChange} />
-          <PasswordInput value={form.password} onChange={handleChange} />
-          <button type="submit" id='login-submit'>Entrar</button>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <EmailInput 
+            {...register('email')}
+            error={errors.email?.message}
+          />
+          <PasswordInput 
+            {...register('password')}
+            error={errors.password?.message}
+          />
+          
+          {errors.root && (
+            <div className="error-message">
+              {errors.root.message}
+            </div>
+          )}
+          
+          <button 
+            type="submit" 
+            id='login-submit'
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Carregando...' : 'Entrar'}
+          </button>
         </form>
       </div>
     </div>
