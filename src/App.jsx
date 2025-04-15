@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import './App.css';
 import PrivateRoute from './routes/PrivateRoute';
+import Tutorial from './pages/tutorial';
 
 export default function App() {
   
@@ -15,7 +16,7 @@ export default function App() {
           <Home />
         </PrivateRoute>
       } />
-      {/* <Route path='/home' element ={<Home />} /> */}
+       <Route path='/tutoriais' element ={<Tutorial />} /> 
     </Routes>
   );
 }

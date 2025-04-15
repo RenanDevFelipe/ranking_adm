@@ -5,7 +5,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    width: 150px;                                  
+    width: 220px;                                  
 
     border: 1px solid var(--colorDark);
     box-shadow: var(--BSPrimary);
