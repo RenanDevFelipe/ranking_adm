@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import Sidebar from '../components/sidebar';
-import "./styles.css";
-import Card from '../components/card';
-import { getColaboradores, getSetores } from '../services/api.ts';
-import defaultAvatar from "../utils/img/mickael.jpg";
-import { logout } from '../utils/auth';
+import Sidebar from '../../components/sidebar/index.jsx';
+import "../styles.css";
+import Card from '../../components/card';
+import { getColaboradores, getSetores, deleteColaborador } from '../../services/api.ts';
+import defaultAvatar from "../../utils/img/mickael.jpg";
+import { logout } from '../../utils/auth.js';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 
-export default function Home() {
+export default function Colaborador() {
     const [colaboradores, setColaboradores] = useState([]);
     const [setores, setSetores] = useState([]);
     const [loading, setLoading] = useState({
@@ -16,21 +19,20 @@ export default function Home() {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [darkMode, setDarkMode] = useState(() => {
-        // Verifica se há preferência salva no localStorage
         const savedMode = localStorage.getItem('darkMode');
-        return savedMode ? JSON.parse(savedMode) : true; // Dark mode como padrão
-      });
-
+        return savedMode ? JSON.parse(savedMode) : true;
+    });
+    const navigate = useNavigate();
 
     // Aplica o tema ao body
-      useEffect(() => {
+    useEffect(() => {
         if (darkMode) {
-          document.body.classList.remove('light-mode');
+            document.body.classList.remove('light-mode');
         } else {
-          document.body.classList.add('light-mode');
+            document.body.classList.add('light-mode');
         }
         localStorage.setItem('darkMode', JSON.stringify(darkMode));
-      }, [darkMode]);
+    }, [darkMode]);
 
     useEffect(() => {
         let isMounted = true;
@@ -38,7 +40,6 @@ export default function Home() {
 
         const fetchData = async () => {
             try {
-                // Busca colaboradores e setores em paralelo
                 const [colabsData, setoresData] = await Promise.all([
                     getColaboradores(token),
                     getSetores(token)
@@ -73,12 +74,51 @@ export default function Home() {
         return () => {
             isMounted = false;
         };
-    }, [logout]);
+    }, []);
 
-    // Encontra o nome do setor pelo ID
     const getNomeSetor = (idSetor) => {
         const setor = setores.find(s => s.id_setor === idSetor);
         return setor ? setor.nome_setor : 'Setor não especificado';
+    };
+
+    const handleEdit = (id) => {
+        navigate(`/Colaborador/${id}`);
+    };
+
+    const handleDelete = async (id, nome) => {
+        const result = await Swal.fire({
+            title: 'Tem certeza?',
+            text: `Você está prestes a excluir o colaborador ${nome}. Esta ação não pode ser desfeita!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#FF6200',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, excluir!',
+            cancelButtonText: 'Cancelar'
+        });
+   
+        if (result.isConfirmed) {
+            try {
+                const token = localStorage.getItem('access_token');
+                await deleteColaborador(token, id);
+                
+                // Atualiza a lista de colaboradores após exclusão
+                setColaboradores(colaboradores.filter(colab => colab.id_colaborador !== id));
+                
+                Swal.fire(
+                    'Excluído!',
+                    'O colaborador foi excluído com sucesso.',
+                    'success'
+                );
+            } catch (err) {
+                console.error("Erro ao excluir colaborador:", err);
+                Swal.fire(
+                    'Erro!',
+                    'Ocorreu um erro ao tentar excluir o colaborador.',
+                    'error'
+                );
+            }
+        }
     };
 
     const filteredColaboradores = colaboradores.filter(colab =>
@@ -134,13 +174,27 @@ export default function Home() {
                         <div className="user-info">
                             {filteredColaboradores.length > 0 ? (
                                 filteredColaboradores.map((colab) => (
-                                    <Card
-                                        key={colab.id_colaborador}
-                                        logo={defaultAvatar} // Substitua por colab.foto se disponível
-                                        name={colab.nome_colaborador}
-                                        role={getNomeSetor(colab.setor_colaborador)}
-                                        action="Avaliar"
-                                    />
+                                    <div key={colab.id_colaborador} className="colaborador-card">
+                                        <Card
+                                            logo={defaultAvatar}
+                                            name={colab.nome_colaborador}
+                                            role={getNomeSetor(colab.setor_colaborador)}
+                                        />
+                                        <div className="action-buttons">
+                                            <button 
+                                                className="edit-button"
+                                                onClick={() => handleEdit(colab.id_colaborador)}
+                                            >
+                                                <FaEdit /> Editar
+                                            </button>
+                                            <button 
+                                                className="delete-button"
+                                                onClick={() => handleDelete(colab.id_colaborador, colab.nome_colaborador)}
+                                            >
+                                                <FaTrash /> Excluir
+                                            </button>
+                                        </div>
+                                    </div>
                                 ))
                             ) : searchTerm ? (
                                 <p className="no-results">Nenhum colaborador encontrado para "{searchTerm}"</p>
@@ -150,6 +204,14 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
+                
+                {/* Botão flutuante para adicionar novo colaborador */}
+                <button 
+                    className="add-button"
+                    onClick={() => navigate('/colaborador/0')}
+                >
+                    <FaPlus />
+                </button>
             </div>
         </div>
     );

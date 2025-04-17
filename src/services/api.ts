@@ -64,7 +64,7 @@ export const getDailyRanking = async (date: string, id: number, token: string): 
     const response = await api.post('Ranking/RankingDiario', {
       id: id,
       data_request: date
-    },{
+    }, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -87,11 +87,11 @@ export const getColaboradores = async (token: string): Promise<Colaborador[]> =>
         }
       }
     );
-    
+
     if (!response.data.registros || !Array.isArray(response.data.registros)) {
       throw new Error('Formato de dados inválido na resposta da API');
     }
-    
+
     return response.data.registros;
   } catch (error: any) {
     console.error('Erro ao buscar colaboradores:', error);
@@ -115,7 +115,7 @@ interface RankingItem {
 }
 
 
-interface Setores{
+interface Setores {
   id_setor: number;
   nome_setor: string;
 }
@@ -131,11 +131,11 @@ export const getSetores = async (token: string): Promise<Setores[]> => {
         }
       }
     );
-    
+
     if (!response.data.registros || !Array.isArray(response.data.registros)) {
       throw new Error('Formato de dados inválido na resposta da API');
     }
-    
+
     return response.data.registros;
   } catch (error: any) {
     console.error('Erro ao buscar Setores:', error);
@@ -143,7 +143,7 @@ export const getSetores = async (token: string): Promise<Setores[]> => {
   }
 };
 
-interface Avaliacoes{
+interface Avaliacoes {
   id: string;
   id_cliente: string;
   cliente: string;
@@ -155,7 +155,7 @@ interface Avaliacoes{
 }
 
 export const getAvaliacoes = async (
-  token: string, 
+  token: string,
   query: string, // Agora explicitamente string
   data_fechamento: string
 ): Promise<Avaliacoes[]> => {
@@ -224,36 +224,94 @@ interface RankingMensalItem {
   media_setor: SetorData[];
 }
 
-interface tutorial{
-    id: number;
-    title: string;
-    descricao: string;
-    url_view: string;
-    url_download: string;
-    criado_por: string;
-    data_criacao: string;
-    name_icon: string;
+interface tutorial {
+  id: number;
+  title: string;
+  descricao: string;
+  url_view: string;
+  url_download: string;
+  criado_por: string;
+  data_criacao: string;
+  name_icon: string;
 }
 
 
 export const getTutoriais = async (token: string): Promise<tutorial[]> => {
-    try {
-      const response = await api.get(
-        'Tutorial/getAll',
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+  try {
+    const response = await api.get(
+      'Tutorial/getAll',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      );
-      
-      if (!response.data.registros || !Array.isArray(response.data.registros)) {
-        throw new Error('Formato de dados inválido na resposta da API');
       }
-      
-      return response.data.registros;
-    } catch (error: any) {
-      console.error('Erro ao buscar Tutoriais:', error);
-      throw new Error(error.response?.data?.message || 'Erro ao carregar Tutoriais');
+    );
+
+    if (!response.data.registros || !Array.isArray(response.data.registros)) {
+      throw new Error('Formato de dados inválido na resposta da API');
     }
-  };
+
+    return response.data.registros;
+  } catch (error: any) {
+    console.error('Erro ao buscar Tutoriais:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao carregar Tutoriais');
+  }
+};
+
+export const deleteColaborador = async (token: string, id: number) => {
+  try {
+    const response = await api.delete(
+      `Colaborador/delete/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao deletar colaborador:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao deletar colaborador');
+  }
+}
+
+export const getColaboradorById = async (token: string, id: number) => {
+  try {
+    const response = await api.post(
+      `Colaborador/getOne`,
+      { id },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao buscar colaborador:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao buscar colaborador');
+  }
+}
+
+export const addColaborador = async (token: string, formData: FormData) => {
+  try {
+    const response = await api.post("Colaborador/Post", formData, {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao adicionar colaborador:', error);
+
+    // Verificação mais segura do erro
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao adicionar colaborador';
+
+    throw new Error(errorMessage);
+  }
+};

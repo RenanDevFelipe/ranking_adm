@@ -55,6 +55,7 @@
 }
 
 .submenu li {
+    margin-left: 20px;
     padding: 8px 20px;
     cursor: pointer;
     color: #bdc3c7;

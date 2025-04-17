@@ -1,12 +1,23 @@
 import React, { useState } from 'react';
 import './style.css';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
     const [showRankingSubmenu, setShowRankingSubmenu] = useState(false);
+    const [showSettingSubmenu, setShowSettingSubmenu] = useState(false);
+    let navigate = useNavigate();
 
     const toggleRankingSubmenu = () => {
         setShowRankingSubmenu(!showRankingSubmenu);
     };
+
+    const toggleSettingSubmenu = () => {
+        setShowSettingSubmenu(!showSettingSubmenu);
+    }
+
+    function navegacao(url){
+        return () => navigate(url);
+    }
 
     return (
         <div className="sidebar">
@@ -17,9 +28,9 @@ const Sidebar = () => {
             <nav className="sidebar-menu">
                 <ul>
                     <li className="menu-section">
-                        <span className="section-title">Avaliar</span>
-                        <span className="section-title">O.S Aberta</span>
-                        <span className="section-title">Ranking por Setor</span>
+                        <span className="section-title clickable">Avaliar</span>
+                        <span className="section-title clickable">O.S Aberta</span>
+                        <span className="section-title clickable">Ranking por Setor</span>
                         <span 
                             className="section-title clickable" 
                             onClick={toggleRankingSubmenu}
@@ -36,9 +47,25 @@ const Sidebar = () => {
                                 <li>Ranking Anual</li>
                             </ul>
                         )}
-                        <span className="section-title">Guias e Tutoriais</span>
+                        <span className="section-title clickable">Guias e Tutoriais</span>
+                        <span 
+                            className="section-title clickable" 
+                            onClick={toggleSettingSubmenu}
+                        >
+                            Configurações
+                            <span className={`arrow-icon ${showSettingSubmenu ? 'open' : ''}`}>
+                                ▼
+                            </span>
+                        </span>
+                        {showSettingSubmenu && (
+                            <ul className="submenu">
+                                <li>Usuario</li>
+                                <li>Setor</li>
+                                <li onClick={navegacao("/colaboradores")}>Colaborador</li>
+                            </ul>
+                        )}
+                        
                     </li>
-                    <li className="menu-item">Settings</li>
                 </ul>
             </nav>
         </div>
