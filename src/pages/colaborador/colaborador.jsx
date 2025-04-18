@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../../components/sidebar';
 import "../styles.css";
-import { getColaboradorById, getSetores, addColaborador } from '../../services/api.ts';
+import { getColaboradorById, getSetores, addColaborador, updateColaborador } from '../../services/api.ts';
 import { logout } from '../../utils/auth';
 import Swal from 'sweetalert2';
 
@@ -22,10 +22,12 @@ export default function AddColaborador() {
 
     // Dados do formulário
     const [formData, setFormData] = useState({
+        id_colaborador: 0,
         id_ixc: 0,
         nome_colaborador: '',
         setor_colaborador: null,
-        url_image: ''
+        imagem: '',
+        action: '',
     });
 
     // Aplica o tema ao body
@@ -53,15 +55,17 @@ export default function AddColaborador() {
                     setIsEditMode(true);
                     const colaboradorData = await getColaboradorById(token, id);
                     setFormData({
+                        id_colaborador: colaboradorData.id_colaborador || 0,
                         id_ixc: colaboradorData.id_ixc || 0,
                         nome_colaborador: colaboradorData.nome_colaborador,
                         setor_colaborador: colaboradorData.setor_colaborador,
-                        url_image: colaboradorData.url_image || ''
+                        imagem: colaboradorData.imagem || '',
+                        action: colaboradorData.action || ''
                     });
                     
                     // Se já existir uma imagem, mostra o preview
-                    if (colaboradorData.url_image) {
-                        setPreviewImage(colaboradorData.url_image);
+                    if (colaboradorData.imagem) {
+                        setPreviewImage(colaboradorData.imagem);
                     }
                 }
             } catch (err) {
@@ -109,15 +113,24 @@ export default function AddColaborador() {
         try {
             // Cria um FormData para enviar o arquivo
             const formDataToSend = new FormData();
+            formDataToSend.append('id_colaborador', formData.id_colaborador);
             formDataToSend.append('nome_colaborador', formData.nome_colaborador);
             formDataToSend.append('setor_colaborador', formData.setor_colaborador);
             formDataToSend.append('id_ixc', formData.id_ixc);
+            formDataToSend.append('action', isEditMode   ? "update" : "create");
             
             if (selectedFile) {
-                formDataToSend.append('image', selectedFile);
+                formDataToSend.append('imagem', selectedFile);
             }
 
-            if (!isEditMode) {
+            if (isEditMode) {
+                await updateColaborador(token, formDataToSend);
+                Swal.fire(
+                    'Sucesso!',
+                    'Colaborador editado com sucesso.',
+                    'success'
+                );
+            } else{
                 await addColaborador(token, formDataToSend);
                 Swal.fire(
                     'Sucesso!',
@@ -184,6 +197,22 @@ export default function AddColaborador() {
                                     onChange={handleInputChange}
                                     required
                                 />
+                                <input 
+                                    type="hidden"
+                                    id='action'
+                                    name='action'
+                                    value={formData.action}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                                <input 
+                                    type="hidden"
+                                    id='id_colaborador'
+                                    name='id_colaborador'
+                                    value={formData.id_colaborador}
+                                    onChange={handleInputChange}
+                                    required
+                                />
                             </div>
 
                             <div className="form-group">
@@ -244,7 +273,7 @@ export default function AddColaborador() {
                                 <button 
                                     type="button" 
                                     className="cancel-button"
-                                    onClick={() => navigate('/colaborador')}
+                                    onClick={() => navigate('/colaboradores')}
                                 >
                                     Cancelar
                                 </button>

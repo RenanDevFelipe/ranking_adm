@@ -261,12 +261,15 @@ export const getTutoriais = async (token: string): Promise<tutorial[]> => {
 export const deleteColaborador = async (token: string, id: number) => {
   try {
     const response = await api.delete(
-      `Colaborador/delete/${id}`,
+      `Colaborador/Delete`,
+      
       {
+        data: { id },   
         headers: {
           Authorization: `Bearer ${token}`
         }
       }
+      
     );
 
     return response.data;
@@ -299,6 +302,7 @@ export const addColaborador = async (token: string, formData: FormData) => {
   try {
     const response = await api.post("Colaborador/Post", formData, {
       headers: {
+        'Content-Type': 'multipart/form-data',
         Authorization: token ? `Bearer ${token}` : '',
       },
     });
@@ -315,3 +319,26 @@ export const addColaborador = async (token: string, formData: FormData) => {
     throw new Error(errorMessage);
   }
 };
+
+export const updateColaborador = async (token: string, formData: FormData) => {
+
+  try {
+    const response = await api.post("Colaborador/Post", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(error);
+
+    // Verificação mais segura do erro
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao adicionar colaborador';
+
+    throw new Error(errorMessage);
+  }
+}

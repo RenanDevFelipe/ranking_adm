@@ -5,6 +5,7 @@ import Card from '../components/card';
 import { getColaboradores, getSetores } from '../services/api.ts';
 import defaultAvatar from "../utils/img/mickael.jpg";
 import { logout } from '../utils/auth';
+import { useTheme } from '../context/ThemeContext.js';
 
 export default function Home() {
     const [colaboradores, setColaboradores] = useState([]);
@@ -15,11 +16,7 @@ export default function Home() {
     });
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [darkMode, setDarkMode] = useState(() => {
-        // Verifica se há preferência salva no localStorage
-        const savedMode = localStorage.getItem('darkMode');
-        return savedMode ? JSON.parse(savedMode) : true; // Dark mode como padrão
-      });
+    const { darkMode } = useTheme();
 
 
     // Aplica o tema ao body
