@@ -13,7 +13,7 @@ export default function AddColaborador() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [setores, setSetores] = useState([]);
-    const [darkMode, setDarkMode] = useState(() => {
+    const [darkMode] = useState(() => {
         const savedMode = localStorage.getItem('darkMode');
         return savedMode ? JSON.parse(savedMode) : true;
     });

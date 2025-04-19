@@ -101,18 +101,18 @@ export const getColaboradores = async (token: string): Promise<Colaborador[]> =>
 
 
 
-interface RankingItem {
-  id: number;
-  colaborador_id: number;
-  data: string;
-  media_geral: string;
-  media_estoque: string;
-  media_n2: string;
-  media_n3: string;
-  media_rh: string;
-  media_sucesso: string;
-  posicao?: number;
-}
+// interface RankingItem {
+//   id: number;
+//   colaborador_id: number;
+//   data: string;
+//   media_geral: string;
+//   media_estoque: string;
+//   media_n2: string;
+//   media_n3: string;
+//   media_rh: string;
+//   media_sucesso: string;
+//   posicao?: number;
+// }
 
 
 interface Setores {

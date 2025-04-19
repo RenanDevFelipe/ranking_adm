@@ -17,7 +17,7 @@
         });
         const [error, setError] = useState(null);
         const [searchTerm, setSearchTerm] = useState('');
-        const [darkMode, setDarkMode] = useState(() => {
+        const [darkMode] = useState(() => {
             const savedMode = localStorage.getItem('darkMode');
             return savedMode ? JSON.parse(savedMode) : true;
         });

@@ -10,20 +10,31 @@ import AddColaborador from './pages/colaborador/colaborador.jsx';
 import { ThemeProvider } from './context/ThemeContext.js';
 
 export default function App() {
-  
-  return (
-    <ThemeProvider>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/home" element={
-          <PrivateRoute>
-            <Home />
-          </PrivateRoute>
-        } />
-        <Route path='/tutoriais' element ={<Tutorial />} /> 
-        <Route path='/colaboradores' element ={<Colaborador />} /> 
-        <Route path='/colaborador/:id' element ={<AddColaborador />} /> 
-      </Routes>
-    </ThemeProvider>
-  );
+    return (
+        <ThemeProvider>
+            <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/home" element={
+                    <PrivateRoute>
+                        <Home />
+                    </PrivateRoute>
+                } />
+                <Route path="/tutoriais" element={
+                    <PrivateRoute>
+                        <Tutorial />
+                    </PrivateRoute>
+                } />
+                <Route path="/colaboradores" element={
+                    <PrivateRoute>
+                        <Colaborador />
+                    </PrivateRoute>
+                } />
+                <Route path="/colaborador/:id" element={
+                    <PrivateRoute>
+                        <AddColaborador />
+                    </PrivateRoute>
+                } />
+            </Routes>
+        </ThemeProvider>
+    );
 }

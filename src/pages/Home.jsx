@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/sidebar';
 import "./styles.css";
 import Card from '../components/card';
 import { getColaboradores, getSetores } from '../services/api.ts';
-import defaultAvatar from "../utils/img/mickael.jpg";
 import { logout } from '../utils/auth';
 import { useTheme } from '../context/ThemeContext.js';
 
+
 export default function Home() {
+    const navigate = useNavigate();
     const [colaboradores, setColaboradores] = useState([]);
     const [setores, setSetores] = useState([]);
     const [loading, setLoading] = useState({
@@ -17,6 +19,14 @@ export default function Home() {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const { darkMode } = useTheme();
+
+    // Verifica se o usuário está logado ao carregar a página
+    useEffect(() => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            navigate('/'); // Redireciona para a página de login se não houver token
+        }
+    }, [navigate]);
 
 
     // Aplica o tema ao body
@@ -50,6 +60,7 @@ export default function Home() {
                     if (err.response?.status === 401) {
                         setError('Sessão expirada. Redirecionando para login...');
                         logout();
+                        navigate('/');
                     } else {
                         setError(err.message || 'Erro ao carregar dados');
                     }
@@ -70,7 +81,7 @@ export default function Home() {
         return () => {
             isMounted = false;
         };
-    }, [logout]);
+    }, [navigate]);
 
     // Encontra o nome do setor pelo ID
     const getNomeSetor = (idSetor) => {
@@ -133,7 +144,7 @@ export default function Home() {
                                 filteredColaboradores.map((colab) => (
                                     <Card
                                         key={colab.id_colaborador}
-                                        logo={defaultAvatar} // Substitua por colab.foto se disponível
+                                        logo={'https://'+colab.url_image} 
                                         name={colab.nome_colaborador}
                                         role={getNomeSetor(colab.setor_colaborador)}
                                         action="Avaliar"

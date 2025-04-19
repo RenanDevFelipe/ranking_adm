@@ -5,7 +5,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    width: 220px;                                  
+    width: 200px;                                  
 
     border: 1px solid var(--colorDark);
     box-shadow: var(--BSPrimary);
@@ -65,4 +65,12 @@
     width: 50%;
     padding: 5px;
     border: 1px solid var(--colorPrimary);
+}
+.user-logo {
+    width: 200px; /* ou o tamanho desejado */
+    height: 250px; /* mesmo valor para manter proporção quadrada */
+    object-fit: cover; /* ou 'contain' dependendo do efeito desejado */
+   /* border-radius: 50%;  opcional para imagens redondas */
+    /* margin: 10px 0; espaçamento opcional */
+    overflow: hidden; /* garante que nada ultrapasse os limites */
 }

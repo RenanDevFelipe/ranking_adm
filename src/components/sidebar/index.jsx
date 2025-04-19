@@ -42,7 +42,7 @@ const Sidebar = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('user_name');
-        localStorage.removeItem('token');
+        localStorage.removeItem('access_token');
         navigate('/');
     }
 
@@ -55,7 +55,7 @@ const Sidebar = () => {
             <nav className="sidebar-menu">
                 <ul>
                     <li className="menu-section">
-                        <div className="menu-item" onClick={navegacao("/avaliar")}>
+                        <div className="menu-item" onClick={navegacao("/home")}>
                             <AvaliarIcon className="menu-icon" />
                             <span className="section-title clickable">Avaliar</span>
                         </div>
