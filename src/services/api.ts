@@ -187,7 +187,7 @@ export const getAvaliacoes = async (
 export const getRankingMensal = async (token: string, data_request: string): Promise<RankingMensalItem[]> => {
   try {
     const response = await api.post(
-      'Ranking/GetRankingMensal',
+      'Ranking/RankingMensal',
       { data_request },
       {
         headers: {

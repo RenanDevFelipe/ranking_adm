@@ -8,6 +8,7 @@ import Tutorial from './pages/tutorial/';
 import AddTutorial from './pages/tutorial/tutorial.jsx';
 import Colaborador from './pages/colaborador/index.jsx';
 import AddColaborador from './pages/colaborador/colaborador.jsx';
+import RankingMensal from './pages/ranking-mensal/index.jsx'
 import { ThemeProvider } from './context/ThemeContext.js';
 
 export default function App() {
@@ -38,6 +39,11 @@ export default function App() {
                 <Route path="/colaborador/:id" element={
                     <PrivateRoute>
                         <AddColaborador />
+                    </PrivateRoute>
+                } />
+                <Route path="/ranking-mensal" element={
+                    <PrivateRoute>
+                        <RankingMensal />
                     </PrivateRoute>
                 } />
             </Routes>
