@@ -258,6 +258,52 @@ export const getTutoriais = async (token: string): Promise<tutorial[]> => {
   }
 };
 
+export const addTutorial = async (token: string , formData: FormData) =>{
+  try {
+    const response = await api.post("Tutorial/Post", formData, {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao adicionar Tutorial:', error);
+
+    // Verificação mais segura do erro
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao adicionar tutorial';
+
+    throw new Error(errorMessage);
+  }
+}
+
+export const deleteTutorial = async (token: string, id: number) => {
+  try {
+    const response = await api.delete(
+      `Tutorial/Delete`,
+      
+      {
+        data: { id },   
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+      
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao deletar Tutorial:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao deletar Tutorial');
+  }
+}
+
+
+
+
+
 export const deleteColaborador = async (token: string, id: number) => {
   try {
     const response = await api.delete(
@@ -276,6 +322,49 @@ export const deleteColaborador = async (token: string, id: number) => {
   } catch (error: any) {
     console.error('Erro ao deletar colaborador:', error);
     throw new Error(error.response?.data?.message || 'Erro ao deletar colaborador');
+  }
+}
+
+
+export const updateTutorial = async (token: string, formData: FormData) => {
+
+  try {
+    const response = await api.patch("Tutorial/Update", formData, {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(error);
+
+    // Verificação mais segura do erro
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao atualizar tutorial';
+
+    throw new Error(errorMessage);
+  }
+}
+
+
+export const getTutorialById = async (token: string, id: number) => {
+  try {
+    const response = await api.post(
+      `Tutorial/getOne`,
+      { id },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+
+    );
+    return response.data.registro;
+  } catch (error: any) {
+    console.error('Erro ao buscar Tutorial:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao buscar Tutorial');
   }
 }
 

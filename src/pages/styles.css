@@ -230,10 +230,14 @@ body {
 /* Tutoriais */
 
 .tutorial-container {
-    padding: 20px;
     min-height: 100vh;
     transition: background-color 0.3s, color 0.3s;
 }
+.container-conteudo{
+    margin-left: 20%;
+    padding: 10px;
+}
+
 
 .dark-mode {
     background-color: var(--colorDark);
@@ -339,6 +343,7 @@ body {
     gap: 20px;
 }
 
+
 .tutorial-card {
     background-color: #f8f9fa;
     border-radius: 8px;
@@ -368,6 +373,21 @@ body {
 .tutorial-description {
     color: #7f8c8d;
     margin-bottom: 15px;
+}
+
+
+.container-link{
+    display: flex;
+    justify-content: space-around;    
+}
+.container-actions{
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+    gap: 10px;
+}
+.container-actions svg{
+    cursor: pointer;
 }
 
 .tutorial-link {
@@ -579,4 +599,15 @@ input[type="file"] {
 .light-mode input[type="file"] {
     background-color: var(--colorDarkForm-light);
     border-color: #ced4da;
+}
+
+/* formulario tutorial */
+
+.css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input.css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input.css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input{
+    display: flex;
+    color: var(--textColor);
+}
+
+.css-1umw9bq-MuiSvgIcon-root{
+    color: var(--textColor);
 }
