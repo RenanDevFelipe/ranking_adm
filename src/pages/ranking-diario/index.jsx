@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../../components/sidebar/index.jsx';
 import "../styles.css";
-import { getRankingMensal, getColaboradores } from '../../services/api.ts';
+import { getRankingDiario, getColaboradores } from '../../services/api.ts';
 import { logout } from '../../utils/auth.js';
 import { 
   Table, 
@@ -27,7 +27,7 @@ import {
   KeyboardArrowUp,
 } from '@mui/icons-material';
 
-export default function RankingMensal() {
+export default function RankingDiario() {
     const theme = useTheme();
     const [darkMode, setDarkMode] = useState(() => {
         const savedMode = localStorage.getItem('darkMode');
@@ -53,9 +53,11 @@ export default function RankingMensal() {
     // Define a data inicial (mês atual)
     useEffect(() => {
         const currentDate = new Date();
+        const day = currentDate.getDate();
         const month = currentDate.getMonth() + 1;
         const year = currentDate.getFullYear();
-        const formattedDate = `${year}-${month.toString().padStart(2, '0')}`;
+        const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${day}`;
+        console.log(formattedDate);
         setSearchDate(formattedDate);
     }, []);
 
@@ -73,7 +75,7 @@ export default function RankingMensal() {
         try {
             // Carrega ranking e colaboradores em paralelo
             const [ranking, colaboradoresData] = await Promise.all([
-                getRankingMensal(token, date), 
+                getRankingDiario(token, date), 
                 getColaboradores(token)
             ]);
             
@@ -197,11 +199,11 @@ export default function RankingMensal() {
             <div className="main-content">
                 <div className="ranking-container">
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                        <h1>Ranking Mensal</h1>
+                        <h1>Ranking Diario</h1>
                         <Box display="flex" alignItems="center">
                             <TextField
-                                label="Mês/Ano"
-                                type="month"
+                                label="Dia/Mês/Ano"
+                                type="date"
                                 value={searchDate}
                                 onChange={handleDateChange}
                                 InputLabelProps={{
@@ -231,12 +233,11 @@ export default function RankingMensal() {
                             {rankingData.length > 1 && (
                                 <Grid item xs={12} sm={4} className="podium-item second-place">
                                     <Avatar 
-                                        src={getColaboradorFoto(rankingData[1].tecnico)}
+                                        src={getColaboradorFoto(rankingData[1].colaborador)}
                                         sx={getAvatarStyle(2)}
                                     />
-                                    <Typography variant="h6">{rankingData[1].tecnico}</Typography>
-                                    <Typography variant="subtitle1">Média: {rankingData[1].media_mensal}</Typography>
-                                    <Typography variant="body2">Dias com nota 10: {rankingData[1].meta_mensal.total_dias_batidos}</Typography>
+                                    <Typography variant="h6">{rankingData[1].colaborador}</Typography>
+                                    <Typography variant="subtitle1">Média: {rankingData[1].media_total}</Typography>
                                 </Grid>
                             )}
                             
@@ -244,12 +245,11 @@ export default function RankingMensal() {
                             {rankingData.length > 0 && (
                                 <Grid item xs={12} sm={4} className="podium-item first-place">
                                     <Avatar 
-                                        src={getColaboradorFoto(rankingData[0].tecnico)}
+                                        src={getColaboradorFoto(rankingData[0].colaborador)}
                                         sx={getAvatarStyle(1)}
                                     />
-                                    <Typography variant="h5">{rankingData[0].tecnico}</Typography>
-                                    <Typography variant="subtitle1">Média: {rankingData[0].media_mensal}</Typography>
-                                    <Typography variant="body2">Dias com nota 10: {rankingData[0].meta_mensal.total_dias_batidos}</Typography>
+                                    <Typography variant="h5">{rankingData[0].colaborador}</Typography>
+                                    <Typography variant="subtitle1">Média: {rankingData[0].media_total}</Typography>
                                 </Grid>
                             )}
                             
@@ -257,12 +257,11 @@ export default function RankingMensal() {
                             {rankingData.length > 2 && (
                                 <Grid item xs={12} sm={4} className="podium-item third-place">
                                     <Avatar 
-                                        src={getColaboradorFoto(rankingData[2].tecnico)}
+                                        src={getColaboradorFoto(rankingData[2].colaborador)}
                                         sx={getAvatarStyle(3)}
                                     />
-                                    <Typography variant="h6">{rankingData[2].tecnico}</Typography>
-                                    <Typography variant="subtitle1">Média: {rankingData[2].media_mensal}</Typography>
-                                    <Typography variant="body2">Dias com nota 10: {rankingData[2].meta_mensal.total_dias_batidos}</Typography>
+                                    <Typography variant="h6">{rankingData[2].colaborador}</Typography>
+                                    <Typography variant="subtitle1">Média: {rankingData[2].media_total}</Typography>
                                 </Grid>
                             )}
                         </Grid>
@@ -276,9 +275,7 @@ export default function RankingMensal() {
                                     <TableCell>Posição</TableCell>
                                     <TableCell>Colaborador</TableCell>
                                     <TableCell align="right">Total Avaliações</TableCell>
-                                    <TableCell align="right">Média Mensal</TableCell>
-                                    <TableCell align="right">Dias Nota 10</TableCell>
-                                    <TableCell align="right">Meta do Mês</TableCell>
+                                    <TableCell align="right">Média Diaria</TableCell>
                                     <TableCell />
                                 </TableRow>
                             </TableHead>
@@ -298,17 +295,15 @@ export default function RankingMensal() {
                                             <TableCell className='avatar-colocacao'>
                                                 <p>{row.colocacao}°</p>
                                                 <Avatar 
-                                                    src={getColaboradorFoto(row.tecnico)}
+                                                    src={getColaboradorFoto(row.colaborador)}
                                                     sx={getAvatarStyle(row.colocacao)}
                                                 />
                                             </TableCell>
                                             <TableCell component="th" scope="row">
-                                                {row.tecnico}
+                                                {row.colaborador}
                                             </TableCell>
                                             <TableCell align="right">{row.total_registros}</TableCell>
-                                            <TableCell align="right">{row.media_mensal}</TableCell>
-                                            <TableCell align="right">{row.meta_mensal.total_dias_batidos}</TableCell>
-                                            <TableCell align="right">{row.meta_mensal.meta_do_mes}</TableCell>
+                                            <TableCell align="right">{row.media_total}</TableCell>
                                             <TableCell>
                                                 <IconButton
                                                     aria-label="expand row"
@@ -343,7 +338,7 @@ export default function RankingMensal() {
                                                                                 {setor.setor}
                                                                             </TableCell>
                                                                             <TableCell align="right">{setor.total_registros}</TableCell>
-                                                                            <TableCell align="right">{setor.media_mensal}</TableCell>
+                                                                            <TableCell align="right">{setor.media_diaria}</TableCell>
                                                                             <TableCell align="right">{setor.soma_pontuacao}</TableCell>
                                                                         </TableRow>
                                                                     ))}

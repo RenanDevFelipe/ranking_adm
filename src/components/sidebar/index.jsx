@@ -83,7 +83,7 @@ const Sidebar = () => {
                         
                         {showRankingSubmenu && (
                             <ul className="submenu">
-                                <li>
+                                <li onClick={navegacao("/ranking-diario")}>
                                     <RankingDiarioIcon className="submenu-icon" />
                                     Ranking Diário
                                 </li>

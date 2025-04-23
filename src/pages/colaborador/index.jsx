@@ -129,10 +129,9 @@
         if (isLoading) {
             return (
                 <div className="app-container">
-                    <Sidebar />
-                    <div className="loading-spinner">
+                    <div className="loading-container">
                         <div className="spinner"></div>
-                        <p>Carregando dados...</p>
+                        <p>Carregando Dados...</p>
                     </div>
                 </div>
             );

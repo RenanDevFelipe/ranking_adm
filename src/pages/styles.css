@@ -200,7 +200,7 @@ body {
 .app-container{
     background-color: var(--colorDark);
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
 }
 .error-container{
     position: relative;
@@ -261,7 +261,7 @@ body {
 .spinner {
     border: 4px solid rgba(0, 0, 0, 0.1);
     border-radius: 50%;
-    border-top: 4px solid #3498db;
+    border-top: 4px solid var(--colorPrimary);
     width: 40px;
     height: 40px;
     animation: spin 1s linear infinite;
@@ -614,9 +614,13 @@ input[type="file"] {
 
 /* ranking mensal */
 
-.main-content{
+.ranking-container{
     margin-left: 20%;
     color: var(--textColor);
+    padding: 10px;
+}
+.ranking-container h1{
+    text-align: center;
 }
 
 .css-1xwxv7r-MuiTable-root{
@@ -624,4 +628,72 @@ input[type="file"] {
 }
 .css-1orzuox-MuiTableCell-root{
     color: var(--textColor)!important;
+}
+.css-to33az-MuiTableCell-root{
+    color: var(--textColor)!important;
+}
+.css-1dc80h3-MuiTableCell-root{
+    color: var(--textColor)!important;
+
+}
+.avatar-colocacao{
+    display: flex!important;
+    flex-direction: row!important;
+    align-items: center!important;
+    gap: 10px!important;
+}
+.css-3ssuu9-MuiTableCell-root{
+    color: var(--textColor)!important;
+}
+.css-1mzfs9c-MuiPaper-root-MuiCard-root{
+    background-color: var(--colorDarkForm)!important;
+    color: var(--textColor)!important;
+}
+.css-g6bqb5-MuiTableCell-root {
+    color: var(--textColor)!important;
+}
+.css-1ais0ar-MuiTableCell-root{
+    color: var(--textColor)!important;
+}
+.css-jiabcu-MuiTableCell-root{
+    color: var(--textColor)!important;
+}
+.css-17j8okc-MuiTableCell-root{
+    color: var(--textColor)!important;
+}
+.css-16wblaj-MuiInputBase-input-MuiOutlinedInput-input{
+    color: var(--textColor)!important;
+}
+.css-1ll44ll-MuiOutlinedInput-notchedOutline{
+    border-color: var(--textColor)!important;
+}
+.css-113d811-MuiFormLabel-root-MuiInputLabel-root{
+    color: var(--textColor)!important;
+}
+.css-17fpwt7-MuiGrid-root{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    border-radius: 10px;
+    padding: 10px;
+
+}
+
+.first-place{
+    box-shadow: 1px 1px 22px -4px #FFD700;
+    border: 1px solid #FFD700;
+
+}
+.second-place{
+    box-shadow: 1px 1px 22px -4px #C0C0C0;
+    border: 1px solid #C0C0C0;
+}
+.third-place{
+    box-shadow: 1px 1px 22px -4px #CD7F32;
+    border: 1px solid #CD7F32;
+}
+
+.css-v08z5u {
+    justify-content: space-around!important;
 }

@@ -184,6 +184,32 @@ export const getAvaliacoes = async (
   }
 }
 
+
+
+export const getRankingDiario = async (token: string, data_request: string): Promise<RankingDiarioItem[]> => {
+  try {
+    const response = await api.post(
+      'Ranking/RankingDiario',
+      { data_request },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    // Verifica se a resposta tem a estrutura esperada
+    if (!response.data || !response.data.ranking_diario || !Array.isArray(response.data.ranking_diario)) {
+      throw new Error('Formato de dados inválido na resposta da API');
+    }
+
+    return response.data.ranking_diario;
+  } catch (error: any) {
+    console.error('Erro ao buscar ranking diario:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao carregar ranking diario');
+  }
+};
+
 export const getRankingMensal = async (token: string, data_request: string): Promise<RankingMensalItem[]> => {
   try {
     const response = await api.post(
@@ -214,6 +240,21 @@ interface SetorData {
   total_registros: number;
   media_mensal: string;
   soma_pontuacao: string;
+}
+
+interface SetorDataDiario {
+  id_setor: number;
+  setor: string;
+  total_registros: number;
+  media_diaria: string;
+  soma_pontuacao: string;
+}
+
+interface RankingDiarioItem {
+  colaborador: string;
+  colocacao: number;
+  media_total: string;
+  media_setor: SetorDataDiario[];
 }
 
 interface RankingMensalItem {
