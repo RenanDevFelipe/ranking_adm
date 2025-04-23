@@ -87,7 +87,7 @@ const Sidebar = () => {
                                     <RankingDiarioIcon className="submenu-icon" />
                                     Ranking Diário
                                 </li>
-                                <li>
+                                <li onClick={navegacao("/ranking-mensal")}>
                                     <RankingMensalIcon className="submenu-icon" />
                                     Ranking Mensal
                                 </li>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/index.jsx';
 import "../styles.css";
-import { getRankingMensal } from '../../services/api.ts';
+import { getRankingMensal, getColaboradores } from '../../services/api.ts';
 import { logout } from '../../utils/auth.js';
 import Swal from 'sweetalert2';
 import { 
@@ -24,10 +24,7 @@ import {
 } from '@mui/material';
 import { 
   KeyboardArrowDown, 
-  KeyboardArrowUp,
-  EmojiEvents,
-  MilitaryTech,
-  WorkspacePremium
+  KeyboardArrowUp
 } from '@mui/icons-material';
 
 export default function RankingMensal() {
@@ -40,6 +37,7 @@ export default function RankingMensal() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [rankingData, setRankingData] = useState([]);
+    const [colaboradores, setColaboradores] = useState([]);
     const [expandedRows, setExpandedRows] = useState({});
 
     // Aplica o tema ao body
@@ -52,7 +50,7 @@ export default function RankingMensal() {
         localStorage.setItem('darkMode', JSON.stringify(darkMode));
     }, [darkMode]);
 
-    // Carrega dados do ranking
+    // Carrega dados do ranking e colaboradores
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         const currentDate = new Date();
@@ -60,27 +58,45 @@ export default function RankingMensal() {
         const year = currentDate.getFullYear();
         const dataRequest = `${year}-${month.toString().padStart(2, '0')}`;
         
-        const fetchRankingData = async () => {
+        const fetchData = async () => {
             try {
-                const data = await getRankingMensal(token, dataRequest);
-                console.log(data);
-                setRankingData(data || []);
-                console.log(rankingData);
+                // Carrega ranking e colaboradores em paralelo
+                const [ranking, colaboradoresData] = await Promise.all([
+                    getRankingMensal(token, dataRequest),
+                    getColaboradores(token)
+                ]);
+                
+                setRankingData(ranking || []);
+                setColaboradores(colaboradoresData || []);
+                console.log(colaboradoresData)
+                console.log(colaboradores);
             } catch (err) {
-                console.error("Erro ao carregar ranking mensal:", err);
+                console.error("Erro ao carregar dados:", err);
                 if (err.response?.status === 401) {
                     setError('Sessão expirada. Redirecionando para login...');
                     logout();
                 } else {
-                    setError(err.message || 'Erro ao carregar ranking mensal');
+                    setError(err.message || 'Erro ao carregar dados');
                 }
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchRankingData();
+        fetchData();
     }, []);
+
+    // Encontra a foto do colaborador pelo nome
+    const getColaboradorFoto = (nome) => {
+        const colaborador = colaboradores.find(colab => 
+            colab.nome_colaborador.toLowerCase() === nome.toLowerCase()
+        );
+        
+        // Verifica se a URL da imagem começa com http, se não, adiciona https://
+        const url = colaborador?.url_image || 'default.png';
+        return url.startsWith('http') ? url : `https://${url}`;
+        
+    };
 
     const handleRowClick = (index) => {
         setExpandedRows(prev => ({
@@ -89,21 +105,43 @@ export default function RankingMensal() {
         }));
     };
 
-    const getMedalIcon = (position) => {
-        switch(position) {
-            case 1: return <EmojiEvents sx={{ color: '#FFD700', fontSize: 40 }} />;
-            case 2: return <MilitaryTech sx={{ color: '#C0C0C0', fontSize: 40 }} />;
-            case 3: return <WorkspacePremium sx={{ color: '#CD7F32', fontSize: 40 }} />;
-            default: return position;
-        }
-    };
-
+    // Estilo do avatar baseado na posição
     const getAvatarStyle = (position) => {
+        const baseStyle = { 
+            width: 80, 
+            height: 80,
+            borderWidth: 4,
+            borderStyle: 'solid',
+            objectFit: 'cover'
+        };
+
         switch(position) {
-            case 1: return { bgcolor: '#FFD700', width: 60, height: 60 };
-            case 2: return { bgcolor: '#C0C0C0', width: 50, height: 50 };
-            case 3: return { bgcolor: '#CD7F32', width: 50, height: 50 };
-            default: return { bgcolor: theme.palette.primary.main };
+            case 1: 
+                return { 
+                    ...baseStyle, 
+                    borderColor: '#FFD700', // Ouro
+                    width: 90,
+                    height: 90,
+                    objectPosition: 'center top'
+                    
+                };
+            case 2: 
+                return { 
+                    ...baseStyle, 
+                    borderColor: '#C0C0C0', // Prata
+                    objectPosition: 'center top'
+                };
+            case 3: 
+                return { 
+                    ...baseStyle, 
+                    borderColor: '#CD7F32', // Bronze
+                    objectPosition: 'center top'
+                };
+            default: 
+                return { 
+                    ...baseStyle,
+                    borderColor: theme.palette.primary.main
+                };
         }
     };
 
@@ -149,9 +187,10 @@ export default function RankingMensal() {
                             {/* Segundo lugar */}
                             {rankingData.length > 1 && (
                                 <Grid item xs={12} sm={4} className="podium-item second-place">
-                                    <Avatar sx={getAvatarStyle(2)}>
-                                        {getMedalIcon(2)}
-                                    </Avatar>
+                                    <Avatar 
+                                        src={getColaboradorFoto(rankingData[1].tecnico)}
+                                        sx={getAvatarStyle(2)}
+                                    />
                                     <Typography variant="h6">{rankingData[1].tecnico}</Typography>
                                     <Typography variant="subtitle1">Média: {rankingData[1].media_mensal}</Typography>
                                     <Typography variant="body2">Dias com nota 10: {rankingData[1].meta_mensal.total_dias_batidos}</Typography>
@@ -161,9 +200,10 @@ export default function RankingMensal() {
                             {/* Primeiro lugar */}
                             {rankingData.length > 0 && (
                                 <Grid item xs={12} sm={4} className="podium-item first-place">
-                                    <Avatar sx={getAvatarStyle(1)}>
-                                        {getMedalIcon(1)}
-                                    </Avatar>
+                                    <Avatar 
+                                        src={getColaboradorFoto(rankingData[0].tecnico)}
+                                        sx={getAvatarStyle(1)}
+                                    />
                                     <Typography variant="h5">{rankingData[0].tecnico}</Typography>
                                     <Typography variant="subtitle1">Média: {rankingData[0].media_mensal}</Typography>
                                     <Typography variant="body2">Dias com nota 10: {rankingData[0].meta_mensal.total_dias_batidos}</Typography>
@@ -173,9 +213,10 @@ export default function RankingMensal() {
                             {/* Terceiro lugar */}
                             {rankingData.length > 2 && (
                                 <Grid item xs={12} sm={4} className="podium-item third-place">
-                                    <Avatar sx={getAvatarStyle(3)}>
-                                        {getMedalIcon(3)}
-                                    </Avatar>
+                                    <Avatar 
+                                        src={getColaboradorFoto(rankingData[2].tecnico)}
+                                        sx={getAvatarStyle(3)}
+                                    />
                                     <Typography variant="h6">{rankingData[2].tecnico}</Typography>
                                     <Typography variant="subtitle1">Média: {rankingData[2].media_mensal}</Typography>
                                     <Typography variant="body2">Dias com nota 10: {rankingData[2].meta_mensal.total_dias_batidos}</Typography>
@@ -186,7 +227,7 @@ export default function RankingMensal() {
                     
                     {/* Tabela completa */}
                     <TableContainer component={Paper} sx={{ marginTop: 4 }}>
-                        <Table aria-label="ranking table">
+                        <Table aria-label="ranking table" >
                             <TableHead>
                                 <TableRow>
                                     <TableCell>Posição</TableCell>
@@ -211,7 +252,10 @@ export default function RankingMensal() {
                                             onClick={() => handleRowClick(index)}
                                         >
                                             <TableCell>
-                                                {row.colocacao <= 3 ? getMedalIcon(row.colocacao) : row.colocacao}
+                                                <Avatar 
+                                                    src={getColaboradorFoto(row.tecnico)}
+                                                    sx={getAvatarStyle(row.colocacao)}
+                                                />
                                             </TableCell>
                                             <TableCell component="th" scope="row">
                                                 {row.tecnico}

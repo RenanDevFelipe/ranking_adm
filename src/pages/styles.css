@@ -611,3 +611,17 @@ input[type="file"] {
 .css-1umw9bq-MuiSvgIcon-root{
     color: var(--textColor);
 }
+
+/* ranking mensal */
+
+.main-content{
+    margin-left: 20%;
+    color: var(--textColor);
+}
+
+.css-1xwxv7r-MuiTable-root{
+    background-color: var(--colorDarkForm)!important;
+}
+.css-1orzuox-MuiTableCell-root{
+    color: var(--textColor)!important;
+}
