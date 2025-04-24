@@ -1,6 +1,7 @@
 {
   "name": "ranking_adm",
   "version": "0.1.0",
+  "homepage": "https://ticonnecte.com.br/ranking_adm/",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.14.0",

@@ -5,6 +5,7 @@ import Logo from '../../utils/img/eliel.jpg';
 import { 
     Assessment as AvaliarIcon,
     Assignment as OsIcon,
+    Checklist as ChecklistIcon,
     Leaderboard as RankingSetorIcon,
     MenuBook as TutoriaisIcon,
     Settings as ConfiguracoesIcon,
@@ -24,6 +25,7 @@ const Sidebar = () => {
     const { darkMode, toggleDarkMode } = useTheme();
     const [showRankingSubmenu, setShowRankingSubmenu] = useState(false);
     const [showSettingSubmenu, setShowSettingSubmenu] = useState(false);
+    const [showChecklistSubmenu, setShowChecklistSubmenu] = useState(false);
     let navigate = useNavigate();
 
     const user = localStorage.getItem('user_name');
@@ -34,6 +36,9 @@ const Sidebar = () => {
 
     const toggleSettingSubmenu = () => {
         setShowSettingSubmenu(!showSettingSubmenu);
+    }
+    const toggleChecklistSubmenu = () => {
+        setShowChecklistSubmenu(!showChecklistSubmenu);
     }
 
     function navegacao(url) {
@@ -49,7 +54,7 @@ const Sidebar = () => {
     return (
         <div className={`sidebar ${darkMode ? 'dark' : 'light'}`}>
             <div className="sidebar-header">
-                <h2>TI Connect</h2>
+                <h2>Ranking TI</h2>
             </div>
             
             <nav className="sidebar-menu">
@@ -97,12 +102,35 @@ const Sidebar = () => {
                                 </li>
                             </ul>
                         )}
+
+                        <div 
+                            className="menu-item" 
+                            onClick={toggleChecklistSubmenu}
+                        >
+                            <RankingSetorIcon className="menu-icon" />
+                            <span className="section-title clickable">Checklists</span>
+                            <span className={`arrow-icon ${showChecklistSubmenu ? 'open' : ''}`}>
+                                ▼
+                            </span>
+                        </div>
+                        
+                        {showChecklistSubmenu && (
+                            <ul className="submenu">
+                                <li onClick={navegacao("/checklists")}>
+                                    <RankingDiarioIcon className="submenu-icon" />
+                                    Checklists
+                                </li>
+                                <li onClick={navegacao("/assuntos")}>
+                                    <RankingMensalIcon className="submenu-icon" />
+                                    Assuntos OS
+                                </li>
+                            </ul>
+                        )}
                         
                         <div className="menu-item" onClick={navegacao("/tutoriais")}>
                             <TutoriaisIcon className="menu-icon" />
                             <span className="section-title clickable">Guias e Tutoriais</span>
                         </div>
-                        
                         <div 
                             className="menu-item" 
                             onClick={toggleSettingSubmenu}

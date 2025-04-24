@@ -6,14 +6,14 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus } from 'react-icons/fa';
 
 export default function Tutorial() {
     const [tutoriais, setTutoriais] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [darkMode, setDarkMode] = useState(() => {
+    const [darkMode] = useState(() => {
         const savedMode = localStorage.getItem('darkMode');
         return savedMode ? JSON.parse(savedMode) : true;
     });

@@ -472,3 +472,31 @@ export const updateColaborador = async (token: string, formData: FormData) => {
     throw new Error(errorMessage);
   }
 }
+
+interface assunto{
+  id: number;
+  name: string;
+
+}
+
+export const addAssunto = async (token: string, formData: FormData) => {
+  try {
+    const response = await api.post("Assunto/Post", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao adicionar assunto:', error);
+
+    // Verificação mais segura do erro
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao adicionar assunto';
+
+    throw new Error(errorMessage);
+  }
+};
