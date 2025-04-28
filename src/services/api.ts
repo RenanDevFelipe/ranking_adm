@@ -500,3 +500,133 @@ export const addAssunto = async (token: string, formData: FormData) => {
     throw new Error(errorMessage);
   }
 };
+
+
+export const getAssuntos = async (token: String) => {
+  try {
+    const response = await api.get("Assunto/getAll", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+    });
+    return response.data.registros;
+  } catch (error: any) {
+    console.error('Erro ao buscar assuntos:', error);
+
+    // Verificação mais segura do erro
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao buscar assuntos';
+
+    throw new Error(errorMessage);
+  }
+};
+
+
+export const getAssuntoById = async (token: string, id: number) => {
+  try {
+    const response = await api.post(
+      `Assunto/getOne`,
+      { id },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+
+    );
+    return response.data.registro;
+  } catch (error: any) {
+    console.error('Erro ao buscar Assunto:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao buscar assunto');
+  }
+}
+
+export const updateAssunto = async (token: string, formData: FormData) => {
+
+  try {
+    const response = await api.post("Assunto/Post", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data.registro;
+  } catch (error: any) {
+    console.error(error);
+
+    // Verificação mais segura do erro
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao atualizar assunto';
+
+    throw new Error(errorMessage);
+  }
+}
+
+
+export const deleteAssunto = async (token: string, id: number) => {
+  try {
+    const response = await api.delete(
+      `Assunto/Delete`,
+      
+      {
+        data: { id },   
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+      
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao deletar Assunto:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao deletar Assunto');
+  }
+}
+
+
+export const addChecklist = async (token: string, formData: FormData) => {
+  try {
+    const response = await api.post("Checklist/Post", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao adicionar checklist:', error);
+
+    // Verificação mais segura do erro
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao adicionar checklist';
+
+    throw new Error(errorMessage);
+  }
+};
+
+
+export const ChecklistGetFiltered = async (token: string, id: number) => {
+  try {
+    const response = await api.post(
+      `Checklist/getFiltered`,
+      { id },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao buscar Assunto:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao buscar assunto');
+  }
+}

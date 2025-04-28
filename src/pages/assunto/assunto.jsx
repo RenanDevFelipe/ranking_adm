@@ -1,5 +1,5 @@
 import Sidebar from '../../components/sidebar/index.jsx';
-import { addAssunto } from '../../services/api.ts';
+import { addAssunto,getAssuntoById,updateAssunto } from '../../services/api.ts';
 import "../styles.css";
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -44,12 +44,12 @@ export default function AddAssunto() {
                 // Se for modo de edição, carrega os dados do colaborador
                 if (id && id !== "0") {
                     setIsEditMode(true);
-                    // const assuntoData = await getAssuntoById(token, id);
-                    // setFormData({
-                    //     id: assuntoData.id || 0,
-                    //     name: assuntoData.name || '',
-                    //     action: assuntoData.action || ''
-                    // });
+                    const assuntoData = await getAssuntoById(token, id);
+                    setFormData({
+                        id: assuntoData.id || 0,
+                        name: assuntoData.name || '',
+                        action: assuntoData.action || ''
+                    });
                     
                 }
                 
@@ -89,7 +89,7 @@ export default function AddAssunto() {
             formDataToSend.append('action', isEditMode ? "update" : "create");
 
             if (isEditMode) {
-                // await updateAssunto(token, formDataToSend);
+                await updateAssunto(token, formDataToSend);
                 Swal.fire(
                     'Sucesso!',
                     'Assunto editado com sucesso.',

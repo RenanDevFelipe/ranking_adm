@@ -13,7 +13,9 @@ import RankingDiario from './pages/ranking-diario/index.jsx'
 import Checklists from './pages/checklist/index.jsx';
 import AddAssunto from './pages/assunto/assunto.jsx';
 import Assunto from './pages/assunto/index.jsx';
+import Checklist from './pages/checklist/checklist.jsx'
 import { ThemeProvider } from './context/ThemeContext.js';
+
 
 
 export default function App() {
@@ -69,6 +71,11 @@ export default function App() {
                     <Route path="/assunto/:id" element={
                         <PrivateRoute>
                             <AddAssunto />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/checklist/:id" element={
+                        <PrivateRoute>
+                            <Checklist />
                         </PrivateRoute>
                     } />
                 </Routes>
