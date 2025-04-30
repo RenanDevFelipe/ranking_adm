@@ -30,14 +30,14 @@ export default function Home() {
 
 
     // Aplica o tema ao body
-      useEffect(() => {
+    useEffect(() => {
         if (darkMode) {
-          document.body.classList.remove('light-mode');
+            document.body.classList.remove('light-mode');
         } else {
-          document.body.classList.add('light-mode');
+            document.body.classList.add('light-mode');
         }
         localStorage.setItem('darkMode', JSON.stringify(darkMode));
-      }, [darkMode]);
+    }, [darkMode]);
 
     useEffect(() => {
         let isMounted = true;
@@ -97,13 +97,10 @@ export default function Home() {
 
     if (isLoading) {
         return (
-            <div className="app-container">
-                <Sidebar />
-                <div className="loading-spinner">
+                <div className="loading-container">
                     <div className="spinner"></div>
                     <p>Carregando dados...</p>
                 </div>
-            </div>
         );
     }
 
@@ -113,7 +110,7 @@ export default function Home() {
                 <Sidebar />
                 <div className="error-container">
                     <div className="error-message">{error}</div>
-                    <button 
+                    <button
                         className="retry-button"
                         onClick={() => window.location.reload()}
                     >
@@ -130,9 +127,9 @@ export default function Home() {
             <div className="main-content">
                 <div className="sidebar-footer">
                     <div className='search-box'>
-                        <input 
-                            placeholder='Pesquise pelo nome do técnico' 
-                            className="search" 
+                        <input
+                            placeholder='Pesquise pelo nome do técnico'
+                            className="search"
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -144,10 +141,11 @@ export default function Home() {
                                 filteredColaboradores.map((colab) => (
                                     <Card
                                         key={colab.id_colaborador}
-                                        logo={'https://'+colab.url_image} 
+                                        logo={'https://' + colab.url_image}
                                         name={colab.nome_colaborador}
                                         role={getNomeSetor(colab.setor_colaborador)}
                                         action="Avaliar"
+                                        onClick={() => navigate(`/avaliar/${colab.id_ixc}`)}
                                     />
                                 ))
                             ) : searchTerm ? (

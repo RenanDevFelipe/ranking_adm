@@ -1,0 +1,320 @@
+/* Estilos para o container principal */
+.avaliacao-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.avaliacao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.date-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-filter label {
+    font-weight: 500;
+}
+
+.date-filter input {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+/* Estatísticas */
+.avaliacao-stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background-color: #f5f5f5;
+    padding: 15px 25px;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 120px;
+}
+
+.dark-mode .stat-card {
+    background-color: #2d2d2d;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    display: block;
+    color: #FF6200;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #666;
+}
+
+.dark-mode .stat-label {
+    color: #aaa;
+}
+
+/* Lista de avaliações */
+.avaliacao-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 18px;
+}
+
+/* Card de avaliação */
+.avaliacao-card {
+    width: 45%;
+    height: fit-content;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .avaliacao-card {
+    background-color: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.avaliacao-card.finalizada {
+    opacity: 0.8;
+    border-left: 4px solid #4CAF50;
+}
+
+.avaliacao-card:not(.finalizada) {
+    border-top: 4px solid #FF6200;
+}
+
+.avaliacao-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.dark-mode .avaliacao-header {
+    border-bottom-color: #444;
+}
+
+.avaliacao-id {
+    font-weight: bold;
+    color: #333;
+}
+
+.dark-mode .avaliacao-id {
+    color: #ddd;
+}
+
+.avaliacao-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.avaliacao-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.avaliacao-info {
+    flex: 1;
+}
+
+.avaliacao-info h3 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.dark-mode .avaliacao-info h3 {
+    color: #eee;
+}
+
+.avaliacao-data, .avaliacao-assunto {
+    margin: 5px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.dark-mode .avaliacao-data,
+.dark-mode .avaliacao-assunto {
+    color: #aaa;
+}
+
+.avaliacao-mensagem {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    font-size: 14px;
+    white-space: pre-line;
+}
+
+.dark-mode .avaliacao-mensagem {
+    background-color: #333;
+}
+
+.avaliacao-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    min-width: 150px;
+}
+
+.avaliacao-button {
+    padding: 8px 16px;
+    background-color: #FF6200;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.avaliacao-button:hover {
+    background-color: #e55600;
+}
+
+.avaliacao-nota {
+    font-size: 14px;
+    color: #333;
+}
+
+.dark-mode .avaliacao-nota {
+    color: #ddd;
+}
+
+.avaliacao-nota span {
+    font-weight: bold;
+    color: #FF6200;
+    font-size: 16px;
+}
+
+/* Estilos para o checklist */
+.checklist-container {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .checklist-container {
+    background-color: #2d2d2d;
+    border-color: #444;
+}
+
+.checklist-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.checklist-item label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.checklist-item input[type="text"],
+.checklist-item input[type="number"] {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    max-width: 300px;
+}
+
+.dark-mode .checklist-item input[type="text"],
+.dark-mode .checklist-item input[type="number"] {
+    background-color: #333;
+    color: #fff;
+    border-color: #555;
+}
+
+.checklist-item input[type="checkbox"] {
+    min-width: 20px;
+    min-height: 20px;
+}
+
+.checklist-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.checklist-actions button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.checklist-actions .submit-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+
+.checklist-actions .submit-button:hover {
+    background-color: #3e8e41;
+}
+
+.checklist-actions .cancel-button {
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+}
+
+.checklist-actions .cancel-button:hover {
+    background-color: #e0e0e0;
+}
+
+.dark-mode .checklist-actions .cancel-button {
+    background-color: #333;
+    border-color: #555;
+    color: #fff;
+}
+
+.dark-mode .checklist-actions .cancel-button:hover {
+    background-color: #444;
+}
+
+.checklist-loading {
+    text-align: center;
+    padding: 10px;
+    color: #666;
+}
+
+.dark-mode .checklist-loading {
+    color: #aaa;
+}

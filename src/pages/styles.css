@@ -202,6 +202,7 @@ body {
     width: 100%;
     min-height: 100vh;
 }
+
 .error-container{
     position: relative;
     left: 50%;
@@ -234,9 +235,12 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 .container-conteudo{
+    min-height: 100vh;
     margin-left: 20%;
     padding: 10px;
+    background-color: var(--colorDark);
 }
+
 
 
 .dark-mode {
@@ -321,8 +325,8 @@ body {
 }
 
 .dark-mode .search-input {
-    background-color: #333;
-    color: #fff;
+    background-color: var(--colorDarkForm);
+    color: var(--textColor);
     border-color: #444;
 }
 
@@ -345,7 +349,7 @@ body {
 
 
 .tutorial-card {
-    background-color: #f8f9fa;
+    background-color: var(--colorDarkForm);
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -353,7 +357,7 @@ body {
 }
 
 .dark-mode .tutorial-card {
-    background-color: #2d2d2d;
+    background-color: var(--colorDarkForm);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
@@ -834,6 +838,9 @@ input[type="file"] {
     border-radius: 8px;
     padding: 15px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .dark-mode .field-card {
@@ -910,4 +917,26 @@ input[type="file"] {
     text-align: center;
     margin-top: 50px;
     color: var(--text-secondary);
+}
+
+/* Checklist form */
+.main-content{
+    width: 100%;
+}
+.main-content h3{
+    color: var(--textColor);
+}
+.card-title{
+    color: var(--textColor);
+}
+
+.css-19qnlrw-MuiFormLabel-root-MuiInputLabel-root{
+    color: var(--textColor)!important;
+}
+.css-155wbr6-MuiButtonBase-root-MuiIconButton-root{
+    color: var(--textColor)!important; 
+}
+.css-74d805-MuiButtonBase-root-MuiButton-root{
+    background-color: var(--colorPrimary)!important;
+    color: var(--textColor)!important;
 }

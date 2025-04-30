@@ -4,6 +4,8 @@ export const login = (userData) => {
   localStorage.setItem('user_id', userData.id_ixc);
   localStorage.setItem('user_email', userData.email);
   localStorage.setItem('user_name', userData.nome);
+  localStorage.setItem('user_role', userData.role);
+  localStorage.setItem('user_setor', userData.setor);
   
   // Opcional: Armazenar o objeto completo como JSON
   localStorage.setItem('auth_user', JSON.stringify(userData));
@@ -16,6 +18,8 @@ export const logout = () => {
   localStorage.removeItem('user_email');
   localStorage.removeItem('user_name');
   localStorage.removeItem('auth_user');
+  localStorage.removeItem('user_role');
+  localStorage.removeItem('user_setor');
 };
 
 // Verifica se o usuário está logado
@@ -44,4 +48,8 @@ export const getUserEmail = () => {
 
 export const getUserName = () => {
   return localStorage.getItem('user_name');
+};
+
+export const getUserRole = () => {
+  return localStorage.getItem('user_role');
 };

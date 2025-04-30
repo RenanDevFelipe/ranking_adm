@@ -234,6 +234,31 @@ export const getRankingMensal = async (token: string, data_request: string): Pro
   }
 };
 
+export const getRelatorio = async (token: string, data_request: string) => {
+  try {
+    const response = await api.post(
+      'Ranking/relatorio',
+      { data_request },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    // // Verifica se a resposta tem a estrutura esperada
+    // if (!response.data || !response.data || !Array.isArray(response.data)) {
+    //   throw new Error('Formato de dados inválido na resposta da API');
+    // }
+
+    return response.data;
+  } catch (error: any) {
+    console.error(error);
+    throw new Error(error.response?.data?.message);
+  }
+};
+
+
 interface SetorData {
   id_setor: number;
   setor: string;
@@ -610,6 +635,50 @@ export const addChecklist = async (token: string, formData: FormData) => {
     throw new Error(errorMessage);
   }
 };
+
+export const updateChecklist = async (token: string, formData: FormData) => {
+  try {
+    const response = await api.post("Checklist/Post", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao adicionar checklist:', error);
+
+    // Verificação mais segura do erro
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao adicionar checklist';
+
+    throw new Error(errorMessage);
+  }
+};
+
+
+export const deleteChecklist = async (token: string, id: number) => {
+  try {
+    const response = await api.delete(
+      `Checklist/Delete`,
+      
+      {
+        data: { id },   
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+      
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao deletar Checklist:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao deletar Checklist');
+  }
+}
 
 
 export const ChecklistGetFiltered = async (token: string, id: number) => {

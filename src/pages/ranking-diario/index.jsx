@@ -167,12 +167,10 @@ export default function RankingDiario() {
 
     if (loading) {
         return (
-            <div className="app-container">
                 <div className="loading-container">
                     <div className="spinner"></div>
                     <p>Carregando Ranking...</p>
                 </div>
-            </div>
         );
     }
 

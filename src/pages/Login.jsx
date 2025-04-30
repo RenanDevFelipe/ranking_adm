@@ -40,7 +40,9 @@
           access_token: response.access_token,
           id_ixc: response.id_ixc,
           email: response.email,
-          nome: response.nome
+          nome: response.nome,
+          role: response.role,
+          setor: response.setor.id_setor
         });
         
         toast.success('Login realizado com sucesso!');

@@ -1,30 +1,30 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../../components/sidebar/index.jsx';
 import "../styles.css";
-import { getRankingMensal, getColaboradores } from '../../services/api.ts';
+import { getRankingMensal, getColaboradores, getRelatorio } from '../../services/api.ts';
 import { logout } from '../../utils/auth.js';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper, 
-  Avatar, 
-  Collapse, 
-  IconButton,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  useTheme,
-  TextField,
-  Box
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Avatar,
+    Collapse,
+    IconButton,
+    Typography,
+    Card,
+    CardContent,
+    Grid,
+    useTheme,
+    TextField,
+    Box
 } from '@mui/material';
-import { 
-  KeyboardArrowDown, 
-  KeyboardArrowUp,
+import {
+    KeyboardArrowDown,
+    KeyboardArrowUp,
 } from '@mui/icons-material';
 
 export default function RankingMensal() {
@@ -39,6 +39,10 @@ export default function RankingMensal() {
     const [colaboradores, setColaboradores] = useState([]);
     const [expandedRows, setExpandedRows] = useState({});
     const [searchDate, setSearchDate] = useState('');
+    const [relatorio, setRelatorio] = useState('');
+    const [token, setToken] = useState('');
+
+
 
     // Aplica o tema ao body
     useEffect(() => {
@@ -57,6 +61,7 @@ export default function RankingMensal() {
         const year = currentDate.getFullYear();
         const formattedDate = `${year}-${month.toString().padStart(2, '0')}`;
         setSearchDate(formattedDate);
+        setToken(localStorage.getItem('access_token'));
     }, []);
 
     // Carrega dados do ranking e colaboradores
@@ -69,18 +74,18 @@ export default function RankingMensal() {
     const fetchData = async (date) => {
         const token = localStorage.getItem('access_token');
         setLoading(true);
-        
+
         try {
             // Carrega ranking e colaboradores em paralelo
             const [ranking, colaboradoresData] = await Promise.all([
-                getRankingMensal(token, date), 
+                getRankingMensal(token, date),
                 getColaboradores(token)
             ]);
-            
+
             setRankingData((ranking || []).filter(item => !item?.erro));
             setColaboradores(colaboradoresData || []);
 
-            console.log('rankingData: ',ranking)
+            console.log('rankingData: ', ranking)
 
         } catch (err) {
             console.error("Erro ao carregar dados:", err);
@@ -105,11 +110,11 @@ export default function RankingMensal() {
         if (!nome || !colaboradores || colaboradores.length === 0) {
             return 'https://ticonnecte.com.br/ranking_api/api/uploads/default.png';
         }
-        
-        const colaborador = colaboradores.find(colab => 
+
+        const colaborador = colaboradores.find(colab =>
             colab.nome_colaborador && colab.nome_colaborador.toLowerCase() === nome.toLowerCase()
         );
-        
+
         // Verifica se a URL da imagem começa com http, se não, adiciona https://
         const url = colaborador?.url_image || 'default.png';
         return url.startsWith('http') ? url : `https://${url}`;
@@ -122,41 +127,73 @@ export default function RankingMensal() {
         }));
     };
 
+    const handleRelatorio = async () => {
+        try {
+            const response = await getRelatorio(token, searchDate);
+
+            // Cria um Blob com o conteúdo XML
+            const blob = new Blob([response], { type: 'application/vnd.ms-excel' });
+
+            // Cria um link para download
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+
+            // Define o nome do arquivo com a data do relatório
+            const formattedDate = searchDate.replace('-', '_');
+            link.download = `Relatorio_Mensal_${formattedDate}.xls`;
+
+            // Dispara o download
+            document.body.appendChild(link);
+            link.click();
+
+            // Limpa o objeto URL
+            setTimeout(() => {
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 100);
+
+        } catch (error) {
+            console.error("Erro ao gerar relatório:", error);
+            // Adicione aqui a lógica para exibir mensagem de erro ao usuário
+        }
+    };
+
     // Estilo do avatar baseado na posição
     const getAvatarStyle = (position) => {
-        const baseStyle = { 
-            width: 70, 
+        const baseStyle = {
+            width: 70,
             height: 70,
             borderWidth: 4,
             borderStyle: 'solid',
             objectFit: 'cover'
         };
 
-        switch(position) {
-            case 1: 
-                return { 
-                    ...baseStyle, 
+        switch (position) {
+            case 1:
+                return {
+                    ...baseStyle,
                     borderColor: '#FFD700', // Ouro
                     width: 100,
                     height: 100,
                     objectPosition: 'center top',
                 };
-            case 2: 
-                return { 
-                    ...baseStyle, 
+            case 2:
+                return {
+                    ...baseStyle,
                     borderColor: '#C0C0C0', // Prata
                     width: 80,
                     height: 80,
                     objectPosition: 'center top'
                 };
-            case 3: 
-                return { 
-                    ...baseStyle, 
+            case 3:
+                return {
+                    ...baseStyle,
                     borderColor: '#CD7F32', // Bronze
                     objectPosition: 'center top'
                 };
-            default: 
-                return { 
+            default:
+                return {
                     ...baseStyle,
                     borderColor: theme.palette.primary.main
                 };
@@ -165,12 +202,10 @@ export default function RankingMensal() {
 
     if (loading) {
         return (
-            <div className="app-container">
                 <div className="loading-container">
                     <div className="spinner"></div>
                     <p>Carregando Ranking...</p>
                 </div>
-            </div>
         );
     }
 
@@ -180,7 +215,7 @@ export default function RankingMensal() {
                 <Sidebar darkMode={darkMode} setDarkMode={setDarkMode} />
                 <div className="error-container">
                     <div className="error-message">{error}</div>
-                    <button 
+                    <button
                         className="retry-button"
                         onClick={() => window.location.reload()}
                     >
@@ -190,6 +225,8 @@ export default function RankingMensal() {
             </div>
         );
     }
+
+
 
     return (
         <div className="app-container">
@@ -222,15 +259,29 @@ export default function RankingMensal() {
                                 Buscar
                             </Button> */}
                         </Box>
+                        <button
+                            onClick={() => handleRelatorio()}
+                            style={{
+                                padding: '8px 16px',
+                                backgroundColor: '#4CAF50',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                marginLeft: '10px'
+                            }}
+                        >
+                            GERAR RELATÓRIO EXCEL
+                        </button>
                     </Box>
-                    
+
                     {/* Pódio - Top 3 */}
                     <div className="podium-container">
                         <Grid container spacing={3} justifyContent="center" alignItems="flex-end">
                             {/* Segundo lugar */}
                             {rankingData.length > 1 && (
                                 <Grid item xs={12} sm={4} className="podium-item second-place">
-                                    <Avatar 
+                                    <Avatar
                                         src={getColaboradorFoto(rankingData[1].tecnico)}
                                         sx={getAvatarStyle(2)}
                                     />
@@ -239,11 +290,11 @@ export default function RankingMensal() {
                                     <Typography variant="body2">Dias com nota 10: {rankingData[1].meta_mensal.total_dias_batidos}</Typography>
                                 </Grid>
                             )}
-                            
+
                             {/* Primeiro lugar */}
                             {rankingData.length > 0 && (
                                 <Grid item xs={12} sm={4} className="podium-item first-place">
-                                    <Avatar 
+                                    <Avatar
                                         src={getColaboradorFoto(rankingData[0].tecnico)}
                                         sx={getAvatarStyle(1)}
                                     />
@@ -252,11 +303,11 @@ export default function RankingMensal() {
                                     <Typography variant="body2">Dias com nota 10: {rankingData[0].meta_mensal.total_dias_batidos}</Typography>
                                 </Grid>
                             )}
-                            
+
                             {/* Terceiro lugar */}
                             {rankingData.length > 2 && (
                                 <Grid item xs={12} sm={4} className="podium-item third-place">
-                                    <Avatar 
+                                    <Avatar
                                         src={getColaboradorFoto(rankingData[2].tecnico)}
                                         sx={getAvatarStyle(3)}
                                     />
@@ -267,7 +318,7 @@ export default function RankingMensal() {
                             )}
                         </Grid>
                     </div>
-                    
+
                     {/* Tabela completa */}
                     <TableContainer component={Paper} sx={{ marginTop: 4 }}>
                         <Table aria-label="ranking table">
@@ -284,11 +335,11 @@ export default function RankingMensal() {
                             </TableHead>
                             <TableBody>
                                 {rankingData.map((row, index) => (
-                                
+
                                     <>
-                                        <TableRow 
-                                            key={row.tecnico} 
-                                            sx={{ 
+                                        <TableRow
+                                            key={row.tecnico}
+                                            sx={{
                                                 '& > *': { borderBottom: 'unset' },
                                                 cursor: 'pointer',
                                                 backgroundColor: expandedRows[index] ? theme.palette.action.selected : 'inherit'
@@ -297,7 +348,7 @@ export default function RankingMensal() {
                                         >
                                             <TableCell className='avatar-colocacao'>
                                                 <p>{row.colocacao}°</p>
-                                                <Avatar 
+                                                <Avatar
                                                     src={getColaboradorFoto(row.tecnico)}
                                                     sx={getAvatarStyle(row.colocacao)}
                                                 />

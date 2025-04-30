@@ -14,71 +14,78 @@ import Checklists from './pages/checklist/index.jsx';
 import AddAssunto from './pages/assunto/assunto.jsx';
 import Assunto from './pages/assunto/index.jsx';
 import Checklist from './pages/checklist/checklist.jsx'
+import Avaliar from './pages/avaliacoes/index.jsx';
 import { ThemeProvider } from './context/ThemeContext.js';
 
 
 
 export default function App() {
     return (
-            <ThemeProvider>
-                <Routes>
-                    <Route path="/" element={<Login />} />
-                    <Route path="/home" element={
-                        <PrivateRoute>
-                            <Home />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/tutoriais" element={
-                        <PrivateRoute>
-                            <Tutorial />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/tutorial/:id" element={
-                        <PrivateRoute>
-                            <AddTutorial />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/colaboradores" element={
-                        <PrivateRoute>
-                            <Colaborador />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/colaborador/:id" element={
-                        <PrivateRoute>
-                            <AddColaborador />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/ranking-mensal" element={
-                        <PrivateRoute>
-                            <RankingMensal />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/ranking-diario" element={
-                        <PrivateRoute>
-                            <RankingDiario />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/checklists" element={
-                        <PrivateRoute>
-                            <Checklists />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/assuntos" element={
-                        <PrivateRoute>
-                            <Assunto />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/assunto/:id" element={
-                        <PrivateRoute>
-                            <AddAssunto />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/checklist/:id" element={
-                        <PrivateRoute>
-                            <Checklist />
-                        </PrivateRoute>
-                    } />
-                </Routes>
-            </ThemeProvider>
+        <ThemeProvider>
+            <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/home" element={
+                    <PrivateRoute>
+                        <Home />
+                    </PrivateRoute>
+                } />
+                <Route path="/tutoriais" element={
+                    <PrivateRoute>
+                        <Tutorial />
+                    </PrivateRoute>
+                } />
+                <Route path="/tutorial/:id" element={
+                    <PrivateRoute>
+                        <AddTutorial />
+                    </PrivateRoute>
+                } />
+                <Route path="/colaboradores" element={
+                    <PrivateRoute>
+                        <Colaborador />
+                    </PrivateRoute>
+                } />
+                <Route path="/colaborador/:id" element={
+                    <PrivateRoute>
+                        <AddColaborador />
+                    </PrivateRoute>
+                } />
+                <Route path="/ranking-mensal" element={
+                    <PrivateRoute>
+                        <RankingMensal />
+                    </PrivateRoute>
+                } />
+                <Route path="/ranking-diario" element={
+                    <PrivateRoute>
+                        <RankingDiario />
+                    </PrivateRoute>
+                } />
+                <Route path="/checklists" element={
+                    <PrivateRoute>
+                        <Checklists />
+                    </PrivateRoute>
+                } />
+                <Route path="/assuntos" element={
+                    <PrivateRoute>
+                        <Assunto />
+                    </PrivateRoute>
+                } />
+                <Route path="/assunto/:id" element={
+                    <PrivateRoute>
+                        <AddAssunto />
+                    </PrivateRoute>
+                } />
+                <Route path="/checklist/:id" element={
+                    <PrivateRoute>
+                        <Checklist />
+                    </PrivateRoute>
+                } />
+                <Route path="/avaliar/:id" element={
+                    <PrivateRoute>
+                        <Avaliar />
+                    </PrivateRoute>
+                } />
+
+            </Routes>
+        </ThemeProvider>
     );
 }
