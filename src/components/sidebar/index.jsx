@@ -5,7 +5,6 @@ import Logo from '../../utils/img/eliel.jpg';
 import { 
     Assessment as AvaliarIcon,
     Assignment as OsIcon,
-    Checklist as ChecklistIcon,
     Leaderboard as RankingSetorIcon,
     MenuBook as TutoriaisIcon,
     Settings as ConfiguracoesIcon,
@@ -21,7 +20,8 @@ import {
   } from '@mui/icons-material';
 import { useTheme } from '../../context/ThemeContext';
 
-const Sidebar = () => {
+
+const Sidebar = ({ isVisible }) => {
     const { darkMode, toggleDarkMode } = useTheme();
     const [showRankingSubmenu, setShowRankingSubmenu] = useState(false);
     const [showSettingSubmenu, setShowSettingSubmenu] = useState(false);
@@ -52,7 +52,7 @@ const Sidebar = () => {
     }
 
     return (
-        <div className={`sidebar ${darkMode ? 'dark' : 'light'}`}>
+        <div className={`sidebar ${darkMode ? 'dark' : 'light'} ${isVisible ? '' : 'hidden'}`}>
             <div className="sidebar-header">
                 <h2>Ranking TI</h2>
             </div>
@@ -107,7 +107,7 @@ const Sidebar = () => {
                             className="menu-item" 
                             onClick={toggleChecklistSubmenu}
                         >
-                            <RankingSetorIcon className="menu-icon" />
+                            <RankingDiarioIcon className="menu-icon" />
                             <span className="section-title clickable">Checklists</span>
                             <span className={`arrow-icon ${showChecklistSubmenu ? 'open' : ''}`}>
                                 ▼

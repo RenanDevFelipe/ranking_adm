@@ -2,20 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../../components/sidebar';
 import "../styles.css";
-import { getTutorialById, addChecklist, updateTutorial, getAssuntos } from '../../services/api.ts';
+import { addChecklist, getAssuntos } from '../../services/api.ts';
 import { logout } from '../../utils/auth';
 import Swal from 'sweetalert2';
 import {
-    PictureAsPdf as PictureAsPdfIcon,
-    OndemandVideo as OndemandVideoIcon,
-    Link as LinkIcon,
-    Description as DescriptionIcon
-} from '@mui/icons-material';
-import {
     Select,
     MenuItem,
-    ListItemIcon,
-    ListItemText,
     InputLabel,
     FormControl
 } from '@mui/material';
@@ -32,6 +24,11 @@ export default function Checklist() {
         const savedMode = localStorage.getItem('darkMode');
         return savedMode ? JSON.parse(savedMode) : true;
     });
+    const [isSidebarVisible] = useState(true);
+
+    // const toggleSidebar = () => {
+    //     setIsSidebarVisible(!isSidebarVisible);
+    // };
 
     // Dados do formulário
     const [formData, setFormData] = useState({
@@ -112,7 +109,7 @@ export default function Checklist() {
             ...updatedFields[index],
             [name]: value
         };
-        
+
         setFormData(prev => ({
             ...prev,
             fields: updatedFields
@@ -138,7 +135,7 @@ export default function Checklist() {
         if (formData.fields.length > 1) {
             const updatedFields = [...formData.fields];
             updatedFields.splice(index, 1);
-            
+
             setFormData(prev => ({
                 ...prev,
                 fields: updatedFields
@@ -190,7 +187,6 @@ export default function Checklist() {
     if (loading) {
         return (
             <div className="app-container">
-                <Sidebar />
                 <div className="loading-spinner">
                     <div className="spinner"></div>
                     <p>Carregando dados...</p>
@@ -202,7 +198,7 @@ export default function Checklist() {
     if (error) {
         return (
             <div className="app-container">
-                <Sidebar />
+                <Sidebar isVisible={isSidebarVisible} />
                 <div className="error-container">
                     <div className="error-message">{error}</div>
                     <button
@@ -218,7 +214,7 @@ export default function Checklist() {
 
     return (
         <div className="app-container">
-            <Sidebar />
+            <Sidebar isVisible={isSidebarVisible} />
             <div className="main-content">
                 <div className="sidebar-footer">
                     <div className="form-container">
@@ -249,7 +245,7 @@ export default function Checklist() {
                             {formData.fields.map((field, index) => (
                                 <div key={index} className="field-group">
                                     <h3>Campo {index + 1}</h3>
-                                    
+
                                     <div className="form-group">
                                         <label htmlFor={`label-${index}`}>Nome do campo</label>
                                         <input

@@ -3,33 +3,34 @@ import Sidebar from '../../components/sidebar/index.jsx';
 import "../styles.css";
 import { getRankingDiario, getColaboradores } from '../../services/api.ts';
 import { logout } from '../../utils/auth.js';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper, 
-  Avatar, 
-  Collapse, 
-  IconButton,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  useTheme,
-  TextField,
-  Box
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Avatar,
+    Collapse,
+    IconButton,
+    Typography,
+    Card,
+    CardContent,
+    Grid,
+    useTheme,
+    TextField,
+    Box
 } from '@mui/material';
-import { 
-  KeyboardArrowDown, 
-  KeyboardArrowUp,
+import {
+    KeyboardArrowDown,
+    KeyboardArrowUp,
 } from '@mui/icons-material';
+import DehazeIcon from '@mui/icons-material/Dehaze';
 
 export default function RankingDiario() {
     const theme = useTheme();
-    const [darkMode, setDarkMode] = useState(() => {
+    const [darkMode] = useState(() => {
         const savedMode = localStorage.getItem('darkMode');
         return savedMode ? JSON.parse(savedMode) : true;
     });
@@ -39,6 +40,11 @@ export default function RankingDiario() {
     const [colaboradores, setColaboradores] = useState([]);
     const [expandedRows, setExpandedRows] = useState({});
     const [searchDate, setSearchDate] = useState('');
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+    const toggleSidebar = () => {
+        setIsSidebarVisible(!isSidebarVisible);
+    };
 
     // Aplica o tema ao body
     useEffect(() => {
@@ -71,18 +77,18 @@ export default function RankingDiario() {
     const fetchData = async (date) => {
         const token = localStorage.getItem('access_token');
         setLoading(true);
-        
+
         try {
             // Carrega ranking e colaboradores em paralelo
             const [ranking, colaboradoresData] = await Promise.all([
-                getRankingDiario(token, date), 
+                getRankingDiario(token, date),
                 getColaboradores(token)
             ]);
-            
+
             setRankingData((ranking || []).filter(item => !item?.erro));
             setColaboradores(colaboradoresData || []);
 
-            console.log('rankingData: ',ranking)
+            console.log('rankingData: ', ranking)
 
         } catch (err) {
             console.error("Erro ao carregar dados:", err);
@@ -107,11 +113,11 @@ export default function RankingDiario() {
         if (!nome || !colaboradores || colaboradores.length === 0) {
             return 'https://ticonnecte.com.br/ranking_api/api/uploads/default.png';
         }
-        
-        const colaborador = colaboradores.find(colab => 
+
+        const colaborador = colaboradores.find(colab =>
             colab.nome_colaborador && colab.nome_colaborador.toLowerCase() === nome.toLowerCase()
         );
-        
+
         // Verifica se a URL da imagem começa com http, se não, adiciona https://
         const url = colaborador?.url_image || 'default.png';
         return url.startsWith('http') ? url : `https://${url}`;
@@ -126,39 +132,39 @@ export default function RankingDiario() {
 
     // Estilo do avatar baseado na posição
     const getAvatarStyle = (position) => {
-        const baseStyle = { 
-            width: 70, 
+        const baseStyle = {
+            width: 70,
             height: 70,
             borderWidth: 4,
             borderStyle: 'solid',
             objectFit: 'cover'
         };
 
-        switch(position) {
-            case 1: 
-                return { 
-                    ...baseStyle, 
+        switch (position) {
+            case 1:
+                return {
+                    ...baseStyle,
                     borderColor: '#FFD700', // Ouro
                     width: 100,
                     height: 100,
                     objectPosition: 'center top',
                 };
-            case 2: 
-                return { 
-                    ...baseStyle, 
+            case 2:
+                return {
+                    ...baseStyle,
                     borderColor: '#C0C0C0', // Prata
                     width: 80,
                     height: 80,
                     objectPosition: 'center top'
                 };
-            case 3: 
-                return { 
-                    ...baseStyle, 
+            case 3:
+                return {
+                    ...baseStyle,
                     borderColor: '#CD7F32', // Bronze
                     objectPosition: 'center top'
                 };
-            default: 
-                return { 
+            default:
+                return {
                     ...baseStyle,
                     borderColor: theme.palette.primary.main
                 };
@@ -167,20 +173,20 @@ export default function RankingDiario() {
 
     if (loading) {
         return (
-                <div className="loading-container">
-                    <div className="spinner"></div>
-                    <p>Carregando Ranking...</p>
-                </div>
+            <div className="loading-container">
+                <div className="spinner"></div>
+                <p>Carregando Ranking...</p>
+            </div>
         );
     }
 
     if (error) {
         return (
             <div className="app-container">
-                <Sidebar darkMode={darkMode} setDarkMode={setDarkMode} />
+                <Sidebar isVisible={isSidebarVisible} />
                 <div className="error-container">
                     <div className="error-message">{error}</div>
-                    <button 
+                    <button
                         className="retry-button"
                         onClick={() => window.location.reload()}
                     >
@@ -193,8 +199,14 @@ export default function RankingDiario() {
 
     return (
         <div className="app-container">
-            <Sidebar darkMode={darkMode} setDarkMode={setDarkMode} />
-            <div className="main-content">
+            <Sidebar isVisible={isSidebarVisible} />
+            <div className="main-content-diario">
+                <button
+                    className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
+                    onClick={toggleSidebar}
+                >
+                    {isSidebarVisible ? <DehazeIcon /> : '►'}
+                </button>
                 <div className="ranking-container">
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
                         <h1>Ranking Diario</h1>
@@ -223,14 +235,14 @@ export default function RankingDiario() {
                             </Button> */}
                         </Box>
                     </Box>
-                    
+
                     {/* Pódio - Top 3 */}
                     <div className="podium-container">
                         <Grid container spacing={3} justifyContent="center" alignItems="flex-end">
                             {/* Segundo lugar */}
                             {rankingData.length > 1 && (
                                 <Grid item xs={12} sm={4} className="podium-item second-place">
-                                    <Avatar 
+                                    <Avatar
                                         src={getColaboradorFoto(rankingData[1].colaborador)}
                                         sx={getAvatarStyle(2)}
                                     />
@@ -238,11 +250,11 @@ export default function RankingDiario() {
                                     <Typography variant="subtitle1">Média: {rankingData[1].media_total}</Typography>
                                 </Grid>
                             )}
-                            
+
                             {/* Primeiro lugar */}
                             {rankingData.length > 0 && (
                                 <Grid item xs={12} sm={4} className="podium-item first-place">
-                                    <Avatar 
+                                    <Avatar
                                         src={getColaboradorFoto(rankingData[0].colaborador)}
                                         sx={getAvatarStyle(1)}
                                     />
@@ -250,11 +262,11 @@ export default function RankingDiario() {
                                     <Typography variant="subtitle1">Média: {rankingData[0].media_total}</Typography>
                                 </Grid>
                             )}
-                            
+
                             {/* Terceiro lugar */}
                             {rankingData.length > 2 && (
                                 <Grid item xs={12} sm={4} className="podium-item third-place">
-                                    <Avatar 
+                                    <Avatar
                                         src={getColaboradorFoto(rankingData[2].colaborador)}
                                         sx={getAvatarStyle(3)}
                                     />
@@ -264,7 +276,7 @@ export default function RankingDiario() {
                             )}
                         </Grid>
                     </div>
-                    
+
                     {/* Tabela completa */}
                     <TableContainer component={Paper} sx={{ marginTop: 4 }}>
                         <Table aria-label="ranking table">
@@ -279,11 +291,11 @@ export default function RankingDiario() {
                             </TableHead>
                             <TableBody>
                                 {rankingData.map((row, index) => (
-                                
+
                                     <>
-                                        <TableRow 
-                                            key={row.tecnico} 
-                                            sx={{ 
+                                        <TableRow
+                                            key={row.tecnico}
+                                            sx={{
                                                 '& > *': { borderBottom: 'unset' },
                                                 cursor: 'pointer',
                                                 backgroundColor: expandedRows[index] ? theme.palette.action.selected : 'inherit'
@@ -292,7 +304,7 @@ export default function RankingDiario() {
                                         >
                                             <TableCell className='avatar-colocacao'>
                                                 <p>{row.colocacao}°</p>
-                                                <Avatar 
+                                                <Avatar
                                                     src={getColaboradorFoto(row.colaborador)}
                                                     sx={getAvatarStyle(row.colocacao)}
                                                 />

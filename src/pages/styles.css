@@ -223,6 +223,7 @@ body {
 .user-info {
     border-radius: 10px;
     display: flex;
+    justify-content: center;
     flex-wrap: wrap;
     gap: 50px;
     padding-top: 10px;
@@ -236,7 +237,6 @@ body {
 }
 .container-conteudo{
     min-height: 100vh;
-    margin-left: 20%;
     padding: 10px;
     background-color: var(--colorDark);
 }
@@ -314,6 +314,7 @@ body {
     justify-content: space-between;
     margin-bottom: 30px;
     gap: 15px;
+    margin-left: 5%;
 }
 
 .search-input {
@@ -342,13 +343,17 @@ body {
 
 /* Lista de tutoriais */
 .tutorials-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 50px;
+    padding-top: 10px;
 }
 
 
 .tutorial-card {
+    width: 280px;
     background-color: var(--colorDarkForm);
     border-radius: 8px;
     padding: 20px;
@@ -619,7 +624,6 @@ input[type="file"] {
 /* ranking mensal */
 
 .ranking-container{
-    margin-left: 20%;
     color: var(--textColor);
     padding: 10px;
 }
@@ -920,9 +924,11 @@ input[type="file"] {
 }
 
 /* Checklist form */
-.main-content{
+.main-content-form{
     width: 100%;
+    margin-left: 20%;
 }
+
 .main-content h3{
     color: var(--textColor);
 }
@@ -939,4 +945,117 @@ input[type="file"] {
 .css-74d805-MuiButtonBase-root-MuiButton-root{
     background-color: var(--colorPrimary)!important;
     color: var(--textColor)!important;
+}
+
+/* Estilo para o botão de toggle */
+.sidebar-toggle {
+    position: fixed;
+    left: 10px;
+    top: 15px;
+    z-index: 1000;
+    background: var(--colorDarkForm);
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.sidebar-toggle.dark {
+    color: var(--textColor-dark);
+    background-color: transparent;
+}
+
+.sidebar-toggle.light {
+    color: var(--textColor-light);
+    background-color: transparent;
+}
+
+/* Estilo para o botão dentro do search-box */
+.menu-toggle-button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+}
+
+/* Ajuste para o sidebar */
+.sidebar {
+    transition: transform 0.3s ease;
+}
+
+.sidebar.hidden {
+    transform: translateX(-100%);
+    width: 0;
+    overflow: hidden;
+}
+
+/* Ajuste para o conteúdo principal quando o sidebar está escondido */
+.main-content {
+    transition: margin-left 0.3s ease;
+    margin-left: 20%; 
+}
+.main-content-form{
+    transition: margin-left 0.3s ease;
+    margin-left: 20%; 
+}
+.main-content-avaliar{
+    width: 100%;
+    transition: margin-left 0.3s ease;
+    margin-left: 20%; 
+}
+.main-content-checklist{
+    width: 100%;
+    transition: margin-left 0.3s ease;
+    margin-left: 20%; 
+}
+.main-content-tutorial{
+    width: 100%;
+    transition: margin-left 0.3s ease;
+    margin-left: 20%; 
+}
+.main-content-diario{
+    width: 100%;
+    transition: margin-left 0.3s ease;
+    margin-left: 20%; 
+}
+.main-content-mensal{
+    width: 100%;
+    transition: margin-left 0.3s ease;
+    margin-left: 20%; 
+}
+.main-content-colaborador{
+    width: 100%;
+    transition: margin-left 0.3s ease;
+    margin-left: 20%; 
+}
+.sidebar.hidden +  .main-content  , .sidebar-footer {
+    margin-left: 0;
+}
+.sidebar.hidden +  .main-content-form  , .sidebar-footer {
+    margin-left: 0;
+}
+.sidebar.hidden +  .main-content-avaliar  , .container-conteudo {
+    margin-left: 0;
+}
+.sidebar.hidden +  .main-content-checklist  , .container-conteudo {
+    margin-left: 0;
+}
+.sidebar.hidden +  .main-content-tutorial  , .container-conteudo {
+    margin-left: 0;
+}
+.sidebar.hidden +  .main-content-diario  , .container-conteudo {
+    margin-left: 0;
+}
+.sidebar.hidden +  .main-content-mensal  , .container-conteudo {
+    margin-left: 0;
+}
+.sidebar.hidden +  .main-content-colaborador  , .container-conteudo {
+    margin-left: 0;
+}
+.avaliacao-header h2{
+    margin-left: 3%;
 }

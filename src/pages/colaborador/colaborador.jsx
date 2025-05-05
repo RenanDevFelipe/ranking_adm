@@ -5,6 +5,7 @@ import "../styles.css";
 import { getColaboradorById, getSetores, addColaborador, updateColaborador } from '../../services/api.ts';
 import { logout } from '../../utils/auth';
 import Swal from 'sweetalert2';
+import DehazeIcon from '@mui/icons-material/Dehaze';
 
 export default function AddColaborador() {
     const { id } = useParams();
@@ -29,6 +30,11 @@ export default function AddColaborador() {
         imagem: '',
         action: '',
     });
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+    const toggleSidebar = () => {
+        setIsSidebarVisible(!isSidebarVisible);
+    };
 
     // Aplica o tema ao body
     useEffect(() => {
@@ -43,7 +49,7 @@ export default function AddColaborador() {
     // Carrega dados iniciais
     useEffect(() => {
         const token = localStorage.getItem('access_token');
-        
+
         const fetchInitialData = async () => {
             try {
                 // Carrega lista de setores
@@ -62,7 +68,7 @@ export default function AddColaborador() {
                         imagem: colaboradorData.imagem || '',
                         action: colaboradorData.action || ''
                     });
-                    
+
                     // Se já existir uma imagem, mostra o preview
                     if (colaboradorData.imagem) {
                         setPreviewImage(colaboradorData.imagem);
@@ -96,7 +102,7 @@ export default function AddColaborador() {
         const file = e.target.files[0];
         if (file) {
             setSelectedFile(file);
-            
+
             // Cria um preview da imagem
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -117,8 +123,8 @@ export default function AddColaborador() {
             formDataToSend.append('nome_colaborador', formData.nome_colaborador);
             formDataToSend.append('setor_colaborador', formData.setor_colaborador);
             formDataToSend.append('id_ixc', formData.id_ixc);
-            formDataToSend.append('action', isEditMode   ? "update" : "create");
-            
+            formDataToSend.append('action', isEditMode ? "update" : "create");
+
             if (selectedFile) {
                 formDataToSend.append('imagem', selectedFile);
             }
@@ -130,7 +136,7 @@ export default function AddColaborador() {
                     'Colaborador editado com sucesso.',
                     'success'
                 );
-            } else{
+            } else {
                 await addColaborador(token, formDataToSend);
                 Swal.fire(
                     'Sucesso!',
@@ -151,23 +157,19 @@ export default function AddColaborador() {
 
     if (loading) {
         return (
-            <div className="app-container">
-                <Sidebar />
-                <div className="loading-spinner">
+                <div className="loading-container">
                     <div className="spinner"></div>
                     <p>Carregando dados...</p>
                 </div>
-            </div>
         );
     }
 
     if (error) {
         return (
             <div className="app-container">
-                <Sidebar />
                 <div className="error-container">
                     <div className="error-message">{error}</div>
-                    <button 
+                    <button
                         className="retry-button"
                         onClick={() => window.location.reload()}
                     >
@@ -180,12 +182,18 @@ export default function AddColaborador() {
 
     return (
         <div className="app-container">
-            <Sidebar />
-            <div className="main-content">
+            <Sidebar isVisible={isSidebarVisible} />
+            <div className="main-content-colaborador">
                 <div className="sidebar-footer">
+                    <button
+                        className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
+                        onClick={toggleSidebar}
+                    >
+                        {isSidebarVisible ? <DehazeIcon /> : '►'}
+                    </button>
                     <div className="form-container">
                         <h1>{isEditMode ? 'Editar Colaborador' : 'Adicionar Colaborador'}</h1>
-                        
+
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
                                 <label htmlFor="nome_colaborador">Nome do Colaborador</label>
@@ -197,7 +205,7 @@ export default function AddColaborador() {
                                     onChange={handleInputChange}
                                     required
                                 />
-                                <input 
+                                <input
                                     type="hidden"
                                     id='action'
                                     name='action'
@@ -205,7 +213,7 @@ export default function AddColaborador() {
                                     onChange={handleInputChange}
                                     required
                                 />
-                                <input 
+                                <input
                                     type="hidden"
                                     id='id_colaborador'
                                     name='id_colaborador'
@@ -255,30 +263,30 @@ export default function AddColaborador() {
                                 />
                                 {previewImage && (
                                     <div className="image-preview">
-                                        <img 
-                                            src={previewImage} 
-                                            alt="Preview" 
-                                            style={{ 
-                                                maxWidth: '200px', 
+                                        <img
+                                            src={previewImage}
+                                            alt="Preview"
+                                            style={{
+                                                maxWidth: '200px',
                                                 maxHeight: '200px',
                                                 marginTop: '10px',
                                                 borderRadius: '5px'
-                                            }} 
+                                            }}
                                         />
                                     </div>
                                 )}
                             </div>
 
                             <div className="form-actions">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     className="cancel-button"
                                     onClick={() => navigate('/colaboradores')}
                                 >
                                     Cancelar
                                 </button>
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     className="submit-button"
                                 >
                                     {isEditMode ? 'Atualizar' : 'Adicionar'}

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { getAssuntos, deleteAssunto } from '../../services/api.ts';
-import { logout } from '../../utils/auth.js'; 
+import { logout } from '../../utils/auth.js';
 import Sidebar from "../../components/sidebar/index.jsx";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FaPlus } from 'react-icons/fa';
+import DehazeIcon from '@mui/icons-material/Dehaze';
 
 export default function Assunto() {
     const [assuntos, setAssuntos] = useState([]);
@@ -18,6 +19,11 @@ export default function Assunto() {
         return savedMode ? JSON.parse(savedMode) : true;
     });
     const navigate = useNavigate();
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+    const toggleSidebar = () => {
+        setIsSidebarVisible(!isSidebarVisible);
+    };
 
     // Aplica o tema ao body
     useEffect(() => {
@@ -72,40 +78,40 @@ export default function Assunto() {
     };
 
     const handleDelete = async (id, nome) => {
-                const result = await Swal.fire({
-                    title: 'Tem certeza?',
-                    text: `Você está prestes a excluir o assunto ${nome}. Esta ação não pode ser desfeita!`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#FF6200',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Sim, excluir!',
-                    cancelButtonText: 'Cancelar'
-                });
-        
-                if (result.isConfirmed) {
-                    try {
-                        const token = localStorage.getItem('access_token');
-                        await deleteAssunto(token, id);
-                        
-                        // Atualiza a lista de colaboradores após exclusão
-                        setAssuntos(assuntos.filter(assunto => assunto.id !== id));
-                        
-                        Swal.fire(
-                            'Excluído!',
-                            'O Assunto foi excluído com sucesso.',
-                            'success'
-                        );
-                    } catch (err) {
-                        console.error("Erro ao excluir tutorial:", err);
-                        Swal.fire(
-                            'Erro!',
-                            err,
-                            'error'
-                        );
-                    }
-                }
-            };
+        const result = await Swal.fire({
+            title: 'Tem certeza?',
+            text: `Você está prestes a excluir o assunto ${nome}. Esta ação não pode ser desfeita!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#FF6200',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, excluir!',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const token = localStorage.getItem('access_token');
+                await deleteAssunto(token, id);
+
+                // Atualiza a lista de colaboradores após exclusão
+                setAssuntos(assuntos.filter(assunto => assunto.id !== id));
+
+                Swal.fire(
+                    'Excluído!',
+                    'O Assunto foi excluído com sucesso.',
+                    'success'
+                );
+            } catch (err) {
+                console.error("Erro ao excluir tutorial:", err);
+                Swal.fire(
+                    'Erro!',
+                    err,
+                    'error'
+                );
+            }
+        }
+    };
 
     if (loading) {
         return (
@@ -120,7 +126,7 @@ export default function Assunto() {
         return (
             <div className="error-container">
                 <div className="error-message">{error}</div>
-                <button 
+                <button
                     className="retry-button"
                     onClick={() => window.location.reload()}
                 >
@@ -132,48 +138,56 @@ export default function Assunto() {
 
     return (
         <div className={`tutorial-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
-            <Sidebar />
-            <div className='container-conteudo'>
-                <div className="search-container">
-                    <input
-                        type="text"
-                        placeholder="Pesquisar assuntos..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="search-input"
-                    />
-                    {/* <button 
+            <Sidebar isVisible={isSidebarVisible} />
+            <div className='main-content'>
+                <div className='container-conteudo'>
+                    <div className="search-container">
+                        <button
+                            className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
+                            onClick={toggleSidebar}
+                        >
+                            {isSidebarVisible ? <DehazeIcon /> : '►'}
+                        </button>
+                        <input
+                            type="text"
+                            placeholder="Pesquisar assuntos..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="search-input"
+                        />
+                        {/* <button 
                         onClick={() => setDarkMode(!darkMode)} 
                         className="theme-toggle"
                     >
                         {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
                     </button> */}
-                </div>
-
-                {filteredAssuntos.length > 0 ? (
-                    <div className="tutorials-grid">
-                        {filteredAssuntos.map((assunto) => (
-                            <div key={assunto.id} className="tutorial-card">
-                                <h3 className="tutorial-title">{assunto.name}</h3>
-                                <div className='container-actions'>
-                                    <EditIcon onClick={() => handleEdit(assunto.id)} />
-                                    <DeleteIcon onClick={() => handleDelete(assunto.id, assunto.title)}  />
-                                </div>
-                            </div>
-                        ))}
                     </div>
-                ) : searchTerm ? (
-                    <p className="no-results">Nenhum assunto encontrado para "{searchTerm}"</p>
-                ) : (
-                    <p className="no-results">Nenhum assunto disponível</p>
-                )}
+
+                    {filteredAssuntos.length > 0 ? (
+                        <div className="tutorials-grid">
+                            {filteredAssuntos.map((assunto) => (
+                                <div key={assunto.id} className="tutorial-card">
+                                    <h3 className="tutorial-title">{assunto.name}</h3>
+                                    <div className='container-actions'>
+                                        <EditIcon onClick={() => handleEdit(assunto.id)} />
+                                        <DeleteIcon onClick={() => handleDelete(assunto.id, assunto.title)} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : searchTerm ? (
+                        <p className="no-results">Nenhum assunto encontrado para "{searchTerm}"</p>
+                    ) : (
+                        <p className="no-results">Nenhum assunto disponível</p>
+                    )}
+                </div>
             </div>
             {/* Botão flutuante para adicionar novo colaborador */}
-            <button 
+            <button
                 className="add-button"
                 onClick={() => navigate('/assunto/0')}
             >
-            <FaPlus />
+                <FaPlus />
             </button>
         </div>
     );

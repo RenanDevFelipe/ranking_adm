@@ -6,6 +6,7 @@ import Card from '../components/card';
 import { getColaboradores, getSetores } from '../services/api.ts';
 import { logout } from '../utils/auth';
 import { useTheme } from '../context/ThemeContext.js';
+import DehazeIcon from '@mui/icons-material/Dehaze';
 
 
 export default function Home() {
@@ -19,6 +20,11 @@ export default function Home() {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const { darkMode } = useTheme();
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+    const toggleSidebar = () => {
+        setIsSidebarVisible(!isSidebarVisible);
+    };
 
     // Verifica se o usuário está logado ao carregar a página
     useEffect(() => {
@@ -97,10 +103,10 @@ export default function Home() {
 
     if (isLoading) {
         return (
-                <div className="loading-container">
-                    <div className="spinner"></div>
-                    <p>Carregando dados...</p>
-                </div>
+            <div className="loading-container">
+                <div className="spinner"></div>
+                <p>Carregando dados...</p>
+            </div>
         );
     }
 
@@ -123,10 +129,16 @@ export default function Home() {
 
     return (
         <div className="app-container">
-            <Sidebar />
+            <Sidebar isVisible={isSidebarVisible} />
             <div className="main-content">
                 <div className="sidebar-footer">
                     <div className='search-box'>
+                        <button
+                            className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
+                            onClick={toggleSidebar}
+                        >
+                            {isSidebarVisible ? <DehazeIcon/> : '►'}
+                        </button>
                         <input
                             placeholder='Pesquise pelo nome do técnico'
                             className="search"

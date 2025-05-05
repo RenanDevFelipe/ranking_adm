@@ -498,11 +498,6 @@ export const updateColaborador = async (token: string, formData: FormData) => {
   }
 }
 
-interface assunto{
-  id: number;
-  name: string;
-
-}
 
 export const addAssunto = async (token: string, formData: FormData) => {
   try {

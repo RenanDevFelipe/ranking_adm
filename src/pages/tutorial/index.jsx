@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { getTutoriais, deleteTutorial } from '../../services/api.ts';
-import { logout } from '../../utils/auth.js'; 
+import { logout } from '../../utils/auth.js';
 import Sidebar from "../../components/sidebar/index.jsx";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FaPlus } from 'react-icons/fa';
+import DehazeIcon from '@mui/icons-material/Dehaze';
 
 export default function Tutorial() {
     const [tutoriais, setTutoriais] = useState([]);
@@ -18,6 +19,11 @@ export default function Tutorial() {
         return savedMode ? JSON.parse(savedMode) : true;
     });
     const navigate = useNavigate();
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+    const toggleSidebar = () => {
+        setIsSidebarVisible(!isSidebarVisible);
+    };
 
     // Aplica o tema ao body
     useEffect(() => {
@@ -72,40 +78,40 @@ export default function Tutorial() {
     };
 
     const handleDelete = async (id, nome) => {
-                const result = await Swal.fire({
-                    title: 'Tem certeza?',
-                    text: `Você está prestes a excluir o tutorial ${nome}. Esta ação não pode ser desfeita!`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#FF6200',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Sim, excluir!',
-                    cancelButtonText: 'Cancelar'
-                });
-        
-                if (result.isConfirmed) {
-                    try {
-                        const token = localStorage.getItem('access_token');
-                        await deleteTutorial(token, id);
-                        
-                        // Atualiza a lista de colaboradores após exclusão
-                        setTutoriais(tutoriais.filter(tutorial => tutorial.id !== id));
-                        
-                        Swal.fire(
-                            'Excluído!',
-                            'O Tutorial foi excluído com sucesso.',
-                            'success'
-                        );
-                    } catch (err) {
-                        console.error("Erro ao excluir tutorial:", err);
-                        Swal.fire(
-                            'Erro!',
-                            'Ocorreu um erro ao tentar excluir o tutorial.',
-                            'error'
-                        );
-                    }
-                }
-            };
+        const result = await Swal.fire({
+            title: 'Tem certeza?',
+            text: `Você está prestes a excluir o tutorial ${nome}. Esta ação não pode ser desfeita!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#FF6200',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, excluir!',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const token = localStorage.getItem('access_token');
+                await deleteTutorial(token, id);
+
+                // Atualiza a lista de colaboradores após exclusão
+                setTutoriais(tutoriais.filter(tutorial => tutorial.id !== id));
+
+                Swal.fire(
+                    'Excluído!',
+                    'O Tutorial foi excluído com sucesso.',
+                    'success'
+                );
+            } catch (err) {
+                console.error("Erro ao excluir tutorial:", err);
+                Swal.fire(
+                    'Erro!',
+                    'Ocorreu um erro ao tentar excluir o tutorial.',
+                    'error'
+                );
+            }
+        }
+    };
 
     if (loading) {
         return (
@@ -120,7 +126,7 @@ export default function Tutorial() {
         return (
             <div className="error-container">
                 <div className="error-message">{error}</div>
-                <button 
+                <button
                     className="retry-button"
                     onClick={() => window.location.reload()}
                 >
@@ -132,73 +138,82 @@ export default function Tutorial() {
 
     return (
         <div className={`tutorial-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
-            <Sidebar />
-            <div className='container-conteudo'>
-                <div className="search-container">
-                    <input
-                        type="text"
-                        placeholder="Pesquisar tutoriais..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="search-input"
-                    />
-                    {/* <button 
+            <Sidebar isVisible={isSidebarVisible} />
+            <div className='main-content'>
+                <div className='container-conteudo'>
+                    <div className="search-container">
+                        <button
+                            className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
+                            onClick={toggleSidebar}
+                        >
+                            {isSidebarVisible ? <DehazeIcon /> : '►'}
+                        </button>
+                        <input
+                            type="text"
+                            placeholder="Pesquisar tutoriais..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="search-input"
+                        />
+                        {/* <button 
                         onClick={() => setDarkMode(!darkMode)} 
                         className="theme-toggle"
                     >
                         {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
                     </button> */}
+                    </div>
+
+                    {filteredTutoriais.length > 0 ? (
+                        <div className="tutorials-grid">
+                            {filteredTutoriais.map((tutorial) => (
+                                <div key={tutorial.id} className="tutorial-card">
+                                    <h3 className="tutorial-title">{tutorial.title}</h3>
+                                    {tutorial.descricao && (
+                                        <p className="tutorial-description">{tutorial.descricao}</p>
+                                    )}
+                                    <div className='container-link'>
+                                        {tutorial.url_view && (
+                                            <a
+                                                href={tutorial.url_view}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="tutorial-link"
+                                            >
+                                                Acessar Tutorial
+                                            </a>
+                                        )}
+                                        {tutorial.url_download && (
+                                            <a
+                                                href={tutorial.url_download}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="tutorial-link"
+                                            >
+                                                Baixar Tutorial
+                                            </a>
+                                        )}
+                                    </div>
+                                    <div className='container-actions'>
+                                        <EditIcon onClick={() => handleEdit(tutorial.id)} />
+                                        <DeleteIcon onClick={() => handleDelete(tutorial.id, tutorial.title)} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : searchTerm ? (
+                        <p className="no-results">Nenhum tutorial encontrado para "{searchTerm}"</p>
+                    ) : (
+                        <p className="no-results">Nenhum tutorial disponível</p>
+                    )}
                 </div>
 
-                {filteredTutoriais.length > 0 ? (
-                    <div className="tutorials-grid">
-                        {filteredTutoriais.map((tutorial) => (
-                            <div key={tutorial.id} className="tutorial-card">
-                                <h3 className="tutorial-title">{tutorial.title}</h3>
-                                {tutorial.descricao && (
-                                    <p className="tutorial-description">{tutorial.descricao}</p>
-                                )}
-                                <div className='container-link'>
-                                    {tutorial.url_view && (
-                                        <a 
-                                            href={tutorial.url_view} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="tutorial-link"
-                                        >
-                                            Acessar Tutorial
-                                        </a>
-                                    )}
-                                    {tutorial.url_download && (
-                                        <a 
-                                            href={tutorial.url_download}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="tutorial-link"
-                                        >
-                                            Baixar Tutorial
-                                        </a>
-                                    )}
-                                </div>
-                                <div className='container-actions'>
-                                    <EditIcon onClick={() => handleEdit(tutorial.id)} />
-                                    <DeleteIcon onClick={() => handleDelete(tutorial.id, tutorial.title)}  />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : searchTerm ? (
-                    <p className="no-results">Nenhum tutorial encontrado para "{searchTerm}"</p>
-                ) : (
-                    <p className="no-results">Nenhum tutorial disponível</p>
-                )}
             </div>
             {/* Botão flutuante para adicionar novo colaborador */}
-            <button 
+            <button
                 className="add-button"
                 onClick={() => navigate('/tutorial/0')}
             >
-            <FaPlus />
+                <FaPlus />
             </button>
         </div>
     );

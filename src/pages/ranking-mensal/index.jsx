@@ -26,10 +26,11 @@ import {
     KeyboardArrowDown,
     KeyboardArrowUp,
 } from '@mui/icons-material';
+import DehazeIcon from '@mui/icons-material/Dehaze';
 
 export default function RankingMensal() {
     const theme = useTheme();
-    const [darkMode, setDarkMode] = useState(() => {
+    const [darkMode] = useState(() => {
         const savedMode = localStorage.getItem('darkMode');
         return savedMode ? JSON.parse(savedMode) : true;
     });
@@ -39,8 +40,12 @@ export default function RankingMensal() {
     const [colaboradores, setColaboradores] = useState([]);
     const [expandedRows, setExpandedRows] = useState({});
     const [searchDate, setSearchDate] = useState('');
-    const [relatorio, setRelatorio] = useState('');
     const [token, setToken] = useState('');
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+    const toggleSidebar = () => {
+        setIsSidebarVisible(!isSidebarVisible);
+    };
 
 
 
@@ -202,17 +207,17 @@ export default function RankingMensal() {
 
     if (loading) {
         return (
-                <div className="loading-container">
-                    <div className="spinner"></div>
-                    <p>Carregando Ranking...</p>
-                </div>
+            <div className="loading-container">
+                <div className="spinner"></div>
+                <p>Carregando Ranking...</p>
+            </div>
         );
     }
 
     if (error) {
         return (
             <div className="app-container">
-                <Sidebar darkMode={darkMode} setDarkMode={setDarkMode} />
+                <Sidebar isVisible={isSidebarVisible} />
                 <div className="error-container">
                     <div className="error-message">{error}</div>
                     <button
@@ -230,8 +235,14 @@ export default function RankingMensal() {
 
     return (
         <div className="app-container">
-            <Sidebar darkMode={darkMode} setDarkMode={setDarkMode} />
-            <div className="main-content">
+            <Sidebar isVisible={isSidebarVisible} />
+            <div className="main-content-mensal">
+                <button
+                    className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
+                    onClick={toggleSidebar}
+                >
+                    {isSidebarVisible ? <DehazeIcon /> : '►'}
+                </button>
                 <div className="ranking-container">
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
                         <h1>Ranking Mensal</h1>

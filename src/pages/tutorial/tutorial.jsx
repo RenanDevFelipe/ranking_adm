@@ -10,18 +10,18 @@ import {
     OndemandVideo as OndemandVideoIcon,
     Link as LinkIcon,
     Description as DescriptionIcon
-  } from '@mui/icons-material';
-  import { 
+} from '@mui/icons-material';
+import {
     Select,
     MenuItem,
     ListItemIcon,
     ListItemText,
     InputLabel,
     FormControl
-  } from '@mui/material';
+} from '@mui/material';
+import DehazeIcon from '@mui/icons-material/Dehaze';
 
-  
-  
+
 
 export default function AddTutorial() {
     const { id } = useParams();
@@ -33,6 +33,11 @@ export default function AddTutorial() {
         const savedMode = localStorage.getItem('darkMode');
         return savedMode ? JSON.parse(savedMode) : true;
     });
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+    const toggleSidebar = () => {
+        setIsSidebarVisible(!isSidebarVisible);
+    };
 
     // Dados do formulário
     const [formData, setFormData] = useState({
@@ -58,7 +63,7 @@ export default function AddTutorial() {
     // Carrega dados iniciais
     useEffect(() => {
         const token = localStorage.getItem('access_token');
-        
+
         const fetchInitialData = async () => {
             try {
                 // Se for modo de edição, carrega os dados do tutorial
@@ -117,7 +122,7 @@ export default function AddTutorial() {
             formDataToSend.append('url_download', formData.url_download);
             formDataToSend.append('criado_por', formData.criado_por);
             formDataToSend.append('name_icon', formData.name_icon);
-            
+
             if (isEditMode) {
                 await updateTutorial(token, formDataToSend);
                 Swal.fire(
@@ -147,7 +152,7 @@ export default function AddTutorial() {
     if (loading) {
         return (
             <div className="app-container">
-                <Sidebar />
+                <Sidebar isVisible={isSidebarVisible} />
                 <div className="loading-spinner">
                     <div className="spinner"></div>
                     <p>Carregando dados...</p>
@@ -159,10 +164,10 @@ export default function AddTutorial() {
     if (error) {
         return (
             <div className="app-container">
-                <Sidebar />
+                <Sidebar isVisible={isSidebarVisible} />
                 <div className="error-container">
                     <div className="error-message">{error}</div>
-                    <button 
+                    <button
                         className="retry-button"
                         onClick={() => window.location.reload()}
                     >
@@ -175,12 +180,18 @@ export default function AddTutorial() {
 
     return (
         <div className="app-container">
-            <Sidebar />
-            <div className="main-content">
+            <Sidebar isVisible={isSidebarVisible} />
+            <div className="main-content-tutorial">
                 <div className="sidebar-footer">
+                    <button
+                        className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
+                        onClick={toggleSidebar}
+                    >
+                        {isSidebarVisible ? <DehazeIcon /> : '►'}
+                    </button>
                     <div className="form-container">
                         <h1>{isEditMode ? 'Editar Tutorial' : 'Adicionar Tutorial'}</h1>
-                        
+
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
                                 <label htmlFor="title">Título do Tutorial</label>
@@ -280,7 +291,7 @@ export default function AddTutorial() {
                                 </FormControl>
                             </div>
 
-                            <input 
+                            <input
                                 type="hidden"
                                 id='id'
                                 name='id'
@@ -289,15 +300,15 @@ export default function AddTutorial() {
                             />
 
                             <div className="form-actions">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     className="cancel-button"
                                     onClick={() => navigate('/tutoriais')}
                                 >
                                     Cancelar
                                 </button>
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     className="submit-button"
                                 >
                                     {isEditMode ? 'Atualizar' : 'Adicionar'}

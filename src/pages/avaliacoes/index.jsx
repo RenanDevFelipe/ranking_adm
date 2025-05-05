@@ -5,6 +5,7 @@ import "../styles.css";
 import AvaliacaoCard from '../../components/avaliacaoCard';
 import { getAvaliacoes } from '../../services/api.ts';
 import { useTheme } from '../../context/ThemeContext';
+import DehazeIcon from '@mui/icons-material/Dehaze';
 
 export default function Avaliar() {
     const { id } = useParams();
@@ -14,6 +15,11 @@ export default function Avaliar() {
     const [error, setError] = useState(null);
     const [dataSelecionada, setDataSelecionada] = useState('');
     const { darkMode } = useTheme();
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+    const toggleSidebar = () => {
+        setIsSidebarVisible(!isSidebarVisible);
+    };
 
     // Define a data inicial (hoje)
     useEffect(() => {
@@ -98,12 +104,18 @@ export default function Avaliar() {
 
     return (
         <div className={`app-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
-            <Sidebar />
-            <div className="main-content">
+            <Sidebar isVisible={isSidebarVisible} />
+            <div className="main-content-avaliar">
                 <div className="container-conteudo">
                     <div className="avaliacao-header">
                         <h2>Avaliações do Colaborador</h2>
                         <div className="date-filter">
+                            <button
+                                className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
+                                onClick={toggleSidebar}
+                            >
+                                {isSidebarVisible ? <DehazeIcon /> : '►'}
+                            </button>
                             <label htmlFor="dataFechamento">Filtrar por data:</label>
                             <input
                                 type="date"

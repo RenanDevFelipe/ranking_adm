@@ -1,10 +1,11 @@
 import Sidebar from '../../components/sidebar/index.jsx';
-import { addAssunto,getAssuntoById,updateAssunto } from '../../services/api.ts';
+import { addAssunto, getAssuntoById, updateAssunto } from '../../services/api.ts';
 import "../styles.css";
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { logout } from '../../utils/auth';
 import Swal from 'sweetalert2';
+import DehazeIcon from '@mui/icons-material/Dehaze';
 
 export default function AddAssunto() {
     const { id } = useParams();
@@ -16,8 +17,13 @@ export default function AddAssunto() {
         const savedMode = localStorage.getItem('darkMode');
         return savedMode ? JSON.parse(savedMode) : true;
     });
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
-    
+    const toggleSidebar = () => {
+        setIsSidebarVisible(!isSidebarVisible);
+    };
+
+
     // Dados do formulário
     const [formData, setFormData] = useState({
         id: 0,
@@ -50,9 +56,9 @@ export default function AddAssunto() {
                         name: assuntoData.name || '',
                         action: assuntoData.action || ''
                     });
-                    
+
                 }
-                
+
             } catch (err) {
                 console.error("Erro ao carregar dados:", err);
                 if (err.response?.status === 401) {
@@ -118,7 +124,7 @@ export default function AddAssunto() {
     if (loading) {
         return (
             <div className="app-container">
-                <Sidebar />
+                <Sidebar isVisible={isSidebarVisible} />
                 <div className="loading-spinner">
                     <div className="spinner"></div>
                     <p>Carregando dados...</p>
@@ -147,9 +153,15 @@ export default function AddAssunto() {
 
     return (
         <div className="app-container">
-            <Sidebar />
-            <div className="main-content">
+            <Sidebar isVisible={isSidebarVisible} />
+            <div className="main-content-form">
                 <div className="sidebar-footer">
+                    <button
+                        className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
+                        onClick={toggleSidebar}
+                    >
+                        {isSidebarVisible ? <DehazeIcon /> : '►'}
+                    </button>
                     <div className="form-container">
                         <h1>{isEditMode ? 'Editar Assunto' : 'Adicionar Assunto'}</h1>
 
