@@ -630,11 +630,23 @@ input[type="file"] {
 .ranking-container h1{
     text-align: center;
 }
-
-.css-1xwxv7r-MuiTable-root{
+.ranking-container table{
     background-color: var(--colorDarkForm)!important;
+    border: 1px solid var(--textColor);
+
 }
-.css-1orzuox-MuiTableCell-root{
+.ranking-container table th{
+    color: var(--textColor)!important;
+}
+
+.ranking-container table td{
+    color: var(--textColor)!important;
+}
+
+/* .css-1xwxv7r-MuiTable-root{
+    background-color: var(--colorDarkForm)!important;
+} */
+/* .css-1orzuox-MuiTableCell-root{
     color: var(--textColor)!important;
 }
 .css-to33az-MuiTableCell-root{
@@ -643,14 +655,39 @@ input[type="file"] {
 .css-1dc80h3-MuiTableCell-root{
     color: var(--textColor)!important;
 
-}
+} */
 .avatar-colocacao{
     display: flex!important;
     flex-direction: row!important;
     align-items: center!important;
     gap: 10px!important;
 }
-.css-3ssuu9-MuiTableCell-root{
+
+.podium-container > div > div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 10px;
+    padding: 10px;
+
+}
+.teste{
+    background-color: var(--colorDark)!important;
+    color: var(--textColor)!important;
+}
+.input-date{
+
+}
+.input-date label{
+    color: var(--textColor)!important;
+}
+.input-date fieldset{
+    border-color: var(--textColor)!important;
+}
+.input-date input {
+    color: var(--textColor)!important;
+}
+/* .css-3ssuu9-MuiTableCell-root{
     color: var(--textColor)!important;
 }
 .css-1mzfs9c-MuiPaper-root-MuiCard-root{
@@ -686,7 +723,7 @@ input[type="file"] {
     border-radius: 10px;
     padding: 10px;
 
-}
+} */
 
 .first-place{
     box-shadow: 1px 1px 22px -4px #FFD700;
@@ -936,7 +973,7 @@ input[type="file"] {
     color: var(--textColor);
 }
 
-.css-19qnlrw-MuiFormLabel-root-MuiInputLabel-root{
+/* .css-19qnlrw-MuiFormLabel-root-MuiInputLabel-root{
     color: var(--textColor)!important;
 }
 .css-155wbr6-MuiButtonBase-root-MuiIconButton-root{
@@ -945,8 +982,26 @@ input[type="file"] {
 .css-74d805-MuiButtonBase-root-MuiButton-root{
     background-color: var(--colorPrimary)!important;
     color: var(--textColor)!important;
+} */
+.form-row div{
+    color: var(--textColor)!important; 
 }
-
+.form-row input{
+    color: var(--textColor)!important; 
+}
+.form-row label{
+    color: var(--textColor)!important; 
+}
+.form-row fieldset{
+    border-color: var(--textColor)!important;
+}
+.add-field-form button{
+    background-color: var(--colorPrimary)!important;
+    color: var(--textColor)!important;
+}
+.field-actions button{
+    color: var(--textColor)!important; 
+}
 /* Estilo para o botão de toggle */
 .sidebar-toggle {
     position: fixed;

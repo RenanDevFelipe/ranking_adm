@@ -212,6 +212,7 @@ export default function RankingDiario() {
                         <h1>Ranking Diario</h1>
                         <Box display="flex" alignItems="center">
                             <TextField
+                                className='input-date'
                                 label="Dia/Mês/Ano"
                                 type="date"
                                 value={searchDate}
@@ -327,7 +328,7 @@ export default function RankingDiario() {
                                         <TableRow>
                                             <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
                                                 <Collapse in={expandedRows[index]} timeout="auto" unmountOnExit>
-                                                    <Card sx={{ margin: 1 }}>
+                                                    <Card className='teste' sx={{ margin: 1 }}>
                                                         <CardContent>
                                                             <Typography variant="h6" gutterBottom>
                                                                 Desempenho por Setor

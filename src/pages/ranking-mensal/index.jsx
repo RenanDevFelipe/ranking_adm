@@ -248,6 +248,7 @@ export default function RankingMensal() {
                         <h1>Ranking Mensal</h1>
                         <Box display="flex" alignItems="center">
                             <TextField
+                                className='input-date'
                                 label="Mês/Ano"
                                 type="month"
                                 value={searchDate}
@@ -384,7 +385,7 @@ export default function RankingMensal() {
                                         <TableRow>
                                             <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
                                                 <Collapse in={expandedRows[index]} timeout="auto" unmountOnExit>
-                                                    <Card sx={{ margin: 1 }}>
+                                                    <Card className='teste' sx={{ margin: 1 }}>
                                                         <CardContent>
                                                             <Typography variant="h6" gutterBottom>
                                                                 Desempenho por Setor

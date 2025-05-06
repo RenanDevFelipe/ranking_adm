@@ -4,19 +4,22 @@ import { ChecklistGetFiltered } from '../../services/api.ts';
 
 const AvaliacaoCard = ({ avaliacao }) => {
     const [showChecklist, setShowChecklist] = useState(false);
+    const [showDetalhes, setShowDetalhes] = useState(false);
     const [checklistItems, setChecklistItems] = useState([]);
     const [loadingChecklist, setLoadingChecklist] = useState(false);
     const [formValues, setFormValues] = useState({});
     const token = localStorage.getItem('access_token');
 
+
+
     const fetchChecklist = async () => {
         if (!avaliacao.id_assunto) return;
-        
+
         setLoadingChecklist(true);
         try {
             const response = await ChecklistGetFiltered(token, avaliacao.id_assunto);
             setChecklistItems(response.checklist || []);
-            
+
             // Inicializa os valores do formulário
             const initialValues = {};
             response.checklist.forEach(item => {
@@ -30,11 +33,21 @@ const AvaliacaoCard = ({ avaliacao }) => {
         }
     };
 
+
+    const abrirPopup = (id) => {
+        const url = `https://central.ticonnecte.com.br/aplicativo/su_oss_chamado_arquivos/rel_28009.php?id=${id}`;
+        window.open(url, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
+    }
+
     const handleAvaliarClick = () => {
         if (!showChecklist) {
             fetchChecklist();
         }
         setShowChecklist(!showChecklist);
+    };
+
+    const handleDetalhesClick = () => {
+        setShowDetalhes(!showDetalhes);
     };
 
     const handleInputChange = (id, value) => {
@@ -52,19 +65,19 @@ const AvaliacaoCard = ({ avaliacao }) => {
                 avaliacao_id: avaliacao.id,
                 checklist: formValues
             });
-            
+
             // Exemplo de chamada à API:
             // await salvarAvaliacao(token, {
             //     avaliacao_id: avaliacao.id,
             //     checklist: formValues
             // });
-            
+
             // Fecha o checklist após salvar
             setShowChecklist(false);
-            
+
             // Mostra mensagem de sucesso
             alert('Avaliação salva com sucesso!');
-            
+
         } catch (error) {
             console.error("Erro ao salvar avaliação:", error);
             alert('Erro ao salvar avaliação');
@@ -75,41 +88,56 @@ const AvaliacaoCard = ({ avaliacao }) => {
         <div className={`avaliacao-card ${avaliacao.status === 'Finalizada' ? 'finalizada' : ''}`}>
             <div className="avaliacao-header">
                 <span className="avaliacao-id">OS #{avaliacao.id_atendimento}</span>
-                <span className="avaliacao-status">{avaliacao.status}</span>
+                <span title={avaliacao.avaliador} className="avaliacao-status">{avaliacao.status}</span>
             </div>
-            
+
             <div className="avaliacao-content">
                 <div className="avaliacao-info">
-                    <h3>{avaliacao.cliente}</h3>
-                    <p className="avaliacao-data">
-                        Finalização: {avaliacao.finalizacaoFormatada || avaliacao.finalizacao}
-                    </p>
-                    <p className="avaliacao-assunto">Assunto: {avaliacao.id_assunto}</p>
-                    
-                    {avaliacao.mensagem && (
-                        <div className="avaliacao-mensagem">
-                            <p>{avaliacao.mensagem}</p>
-                        </div>
-                    )}
+                    <h3>{avaliacao.id_cliente} - {avaliacao.cliente}</h3>
                 </div>
-                
+
                 <div className="avaliacao-actions">
-                    {avaliacao.status !== 'Finalizada' && (
-                        <button 
+
+
+                    <button
+                        className="avaliacao-button"
+                        onClick={handleDetalhesClick}
+                    >
+                        Detalhes
+                    </button>
+
+                        <button
                             className="avaliacao-button"
                             onClick={handleAvaliarClick}
                         >
                             {avaliacao.checklist === 'Não preenchido' ? 'Avaliar' : 'Editar Avaliação'}
                         </button>
-                    )}
-                    
-                    {avaliacao.nota_os && (
-                        <div className="avaliacao-nota">
-                            Nota: <span>{avaliacao.nota_os}</span>
-                        </div>
-                    )}
+
                 </div>
             </div>
+            {showDetalhes && (
+                <div className="checklist-container">
+                    <p className="avaliacao-data">
+                        ID: {avaliacao.id}
+                    </p>
+                    <p className="avaliacao-data">
+                        Finalização: {avaliacao.finalizacaoFormatada || avaliacao.finalizacao}
+                    </p>
+                    <p className="avaliacao-assunto">Assunto: {avaliacao.id_assunto}</p>
+                    <p>Descrição da OS:</p>
+                    {avaliacao.mensagem && (
+                        <div className="avaliacao-mensagem">
+                            <p>{avaliacao.mensagem}</p>
+                        </div>
+                    )}
+                    <button
+                        className="avaliacao-button"
+                        onClick={() => abrirPopup(avaliacao.id_arquivo)}
+                    >
+                        Ver fotos
+                    </button>
+                </div>
+            )}
 
             {/* Seção do Checklist - aparece quando showChecklist é true */}
             {showChecklist && (
@@ -140,19 +168,19 @@ const AvaliacaoCard = ({ avaliacao }) => {
                                     <label>
                                         {item.label}
                                     </label>
-                                    
+
                                 </div>
                             ))}
                             <div className="checklist-actions">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     className="cancel-button"
                                     onClick={() => setShowChecklist(false)}
                                 >
                                     Cancelar
                                 </button>
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     className="submit-button"
                                 >
                                     Salvar Avaliação
