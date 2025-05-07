@@ -167,6 +167,7 @@ export const getAvaliacoes = async (
         data_fechamento
       },
       {
+        timeout: 30000,
         headers: {
           Authorization: `Bearer ${token}`
         }

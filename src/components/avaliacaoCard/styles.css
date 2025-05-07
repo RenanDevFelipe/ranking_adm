@@ -317,3 +317,28 @@
 .dark-mode .checklist-loading {
     color: #aaa;
 }
+.potencia{
+    margin-bottom: 10px;
+}
+.potencia p {
+    border: 2px solid;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-right: 10px;
+  }
+  
+  .rx.good, .tx.good {
+    border-color: #4CAF50; /* Verde */
+    color: #4CAF50;
+  }
+  
+  .rx.warning, .tx.warning {
+    border-color: #FFC107; /* Amarelo */
+    color: #FFC107;
+  }
+  
+  .rx.bad, .tx.bad {
+    border-color: #F44336; /* Vermelho */
+    color: #F44336;
+  }

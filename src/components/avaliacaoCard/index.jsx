@@ -106,12 +106,12 @@ const AvaliacaoCard = ({ avaliacao }) => {
                         Detalhes
                     </button>
 
-                        <button
-                            className="avaliacao-button"
-                            onClick={handleAvaliarClick}
-                        >
-                            {avaliacao.checklist === 'Não preenchido' ? 'Avaliar' : 'Editar Avaliação'}
-                        </button>
+                    <button
+                        className="avaliacao-button"
+                        onClick={handleAvaliarClick}
+                    >
+                        {avaliacao.checklist === 'Não preenchido' ? 'Avaliar' : 'Editar Avaliação'}
+                    </button>
 
                 </div>
             </div>
@@ -130,6 +130,37 @@ const AvaliacaoCard = ({ avaliacao }) => {
                             <p>{avaliacao.mensagem}</p>
                         </div>
                     )}
+
+                    {/* Mostrar apenas se pelo menos um dos valores de fibra existir */}
+                    {(avaliacao.potencia.fibra?.rx != null || avaliacao.potencia.fibra?.tx != null) && (
+                        <div className='potencia'>
+                            {/* Mostrar RX apenas se existir */}
+                            {avaliacao.potencia.fibra?.rx != null && (
+                                <p className={`rx ${avaliacao.potencia.fibra.rx >= -25 ? 'good' :
+                                        avaliacao.potencia.fibra.rx >= -27 ? 'warning' : 'bad'
+                                    }`}>
+                                    RX: {avaliacao.potencia.fibra.rx} dBm
+                                </p>
+                            )}
+
+                            {/* Mostrar TX apenas se existir */}
+                            {avaliacao.potencia.fibra?.tx != null && (
+                                <p className={`tx ${avaliacao.potencia.fibra.tx >= -25 ? 'good' :
+                                        avaliacao.potencia.fibra.tx >= -27 ? 'warning' : 'bad'
+                                    }`}>
+                                    TX: {avaliacao.potencia.fibra.tx} dBm
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Mostrar CCQ apenas se existir */}
+                    {avaliacao.potencia.radio?.ccq != null && (
+                        <div className='potencia'>
+                            <p>CCQ: {avaliacao.potencia.radio.ccq}</p>
+                        </div>
+                    )}
+
                     <button
                         className="avaliacao-button"
                         onClick={() => abrirPopup(avaliacao.id_arquivo)}
