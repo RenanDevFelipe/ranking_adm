@@ -387,3 +387,15 @@
     padding: 10px;
     border-radius: 10px;
   }
+
+  .observacao-troca {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.observacao-troca input {
+    width: 81%;
+    padding: 10px;
+    border-radius: 10px;
+}

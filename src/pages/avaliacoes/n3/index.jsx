@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Sidebar from "../../components/sidebar";
-import "../styles.css";
-import AvaliacaoCard from '../../components/avaliacaoCard';
-import { getAvaliacoes } from '../../services/api.ts';
-import { useTheme } from '../../context/ThemeContext';
+import Sidebar from "../../../components/sidebar/index.jsx";
+import "../../styles.css";
+import AvaliacaoCard from '../../../components/avaliacaoCard/index.jsx';
+import { getAvaliacoes } from '../../../services/api.ts';
+import { useTheme } from '../../../context/ThemeContext.js';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 
 export default function Avaliar() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [avaliacoes, setAvaliacoes] = useState([]);
+    const [retorno,setRetorno] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [dataSelecionada, setDataSelecionada] = useState('');
@@ -43,8 +44,9 @@ export default function Avaliar() {
                 setLoading(true);
                 const token = localStorage.getItem('access_token');
                 const response = await getAvaliacoes(token, id, dataSelecionada);
+                setRetorno(response || {});
+                setAvaliacoes(response.registros || []);
 
-                setAvaliacoes(response || []);
             } catch (err) {
                 console.error("Erro ao buscar avaliações:", err);
                 setError(err.message || 'Erro ao carregar avaliações');
@@ -102,13 +104,14 @@ export default function Avaliar() {
         );
     }
 
+
     return (
         <div className={`app-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
             <Sidebar isVisible={isSidebarVisible} />
             <div className="main-content-avaliar">
                 <div className="container-conteudo">
                     <div className="avaliacao-header">
-                        <h2>Avaliações do Colaborador</h2>
+                        <h2>Avaliações do Colaborador {retorno.nome_tecnico}</h2>
                         <div className="date-filter">
                             <button
                                 className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
@@ -149,6 +152,7 @@ export default function Avaliar() {
                                         ...avaliacao,
                                         finalizacaoFormatada: formatarData(avaliacao.finalizacao)
                                     }}
+                                    retorno={retorno}
                                 />
                             ))
                         ) : (

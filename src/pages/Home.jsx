@@ -157,7 +157,7 @@ export default function Home() {
                                         name={colab.nome_colaborador}
                                         role={getNomeSetor(colab.setor_colaborador)}
                                         action="Avaliar"
-                                        onClick={() => navigate(`/avaliar/${colab.id_ixc}`)}
+                                        onClick={() => navigate(`/avaliar/N3/${colab.id_ixc}`)}
                                     />
                                 ))
                             ) : searchTerm ? (

@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import './styles.css';
-import { ChecklistGetFiltered } from '../../services/api.ts';
+import { ChecklistGetFiltered, addAvaliacao } from '../../services/api.ts';
 
-const AvaliacaoCard = ({ avaliacao }) => {
+
+const AvaliacaoCard = ({ avaliacao, retorno }) => {
     const [showChecklist, setShowChecklist] = useState(false);
     const [showDetalhes, setShowDetalhes] = useState(false);
     const [checklistItems, setChecklistItems] = useState([]);
     const [loadingChecklist, setLoadingChecklist] = useState(false);
     const [formValues, setFormValues] = useState({});
+    const [trocaSelecionada, setTrocaSelecionada] = useState("");
+    const [observacaoTroca, setObservacaoTroca] = useState("");
     const token = localStorage.getItem('access_token');
+    const usuario = localStorage.getItem('user_name');
+    const setor = localStorage.getItem('user_setor');
 
-    console.log(avaliacao.potencia.radio.sinal)
 
     const fetchChecklist = async () => {
         if (!avaliacao.id_assunto) return;
@@ -63,18 +67,18 @@ const AvaliacaoCard = ({ avaliacao }) => {
             // Filtra apenas os itens que são checkboxes
             const checkboxItems = checklistItems.filter(item => item.type === 'checkbox');
             const totalCheckboxes = checkboxItems.length;
-            
+
             // Conta quantos checkboxes estão marcados
             const checkedCount = checkboxItems.reduce((count, item) => {
                 return count + (formValues[item.id] ? 1 : 0);
             }, 0);
-            
-            // Calcula a nota (média de checkboxes marcados) em porcentagem
-            const nota = totalCheckboxes > 0 
-                ? (checkedCount * 10) / totalCheckboxes 
+
+            // calculo de nota 
+            const nota = totalCheckboxes > 0
+                ? parseFloat(((checkedCount * 10) / totalCheckboxes).toFixed(2))
                 : 0;
-    
-            // Calcula a soma total dos pontos (considerando checkboxes como 10 pontos)
+
+            // Calcula a soma total dos pontos
             const totalScore = checklistItems.reduce((sum, item) => {
                 const value = formValues[item.id];
                 if (item.type === 'checkbox') {
@@ -83,7 +87,7 @@ const AvaliacaoCard = ({ avaliacao }) => {
                 const numericValue = parseFloat(value) || 0;
                 return sum + numericValue;
             }, 0);
-    
+
             // Formata o texto para clipboard
             const checklistText = checklistItems.map(item => {
                 const value = formValues[item.id];
@@ -92,9 +96,9 @@ const AvaliacaoCard = ({ avaliacao }) => {
                 }
                 return `${item.label}: ${value !== undefined ? value : 'Não preenchido'}`;
             }).join('\n\n');
-    
-            const fullText = `${checklistText}\n\nNota: ${nota}%\nOBS: ${document.querySelector('.checklist-observacao input').value || 'Nenhuma'}`;
-    
+
+            const fullText = `${checklistText}\n\nOBS: ${document.querySelector('.checklist-observacao input').value || 'Nenhuma'}`;
+
             // Copia para área de transferência
             await navigator.clipboard.writeText(fullText).catch(err => {
                 // Fallback para navegadores mais antigos
@@ -105,33 +109,54 @@ const AvaliacaoCard = ({ avaliacao }) => {
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
             });
-    
-            // Dados para enviar para a API
-            const payload = {
-                avaliacao_id: avaliacao.id,
-                checklist: formValues,
-                total_score: totalScore,
-                nota: nota,  // Adiciona a nota como porcentagem
-                checked_count: checkedCount,  // Número de checkboxes marcados
-                total_checkboxes: totalCheckboxes,  // Total de checkboxes
-                observacoes: document.querySelector('.checklist-observacao input').value,
-                troca: document.querySelector('.checklist-observacao select').value
-            };
-    
-            console.log('Dados para enviar:', payload);
-    
-            // Exemplo de chamada à API:
-            // await salvarAvaliacao(token, payload);
-    
+
+            const currentDate = new Date().toISOString().split('T')[0];
+
+            // Cria o FormData
+            const formData = new FormData();
+
+            // Adiciona todos os campos ao FormData
+            formData.append('id_os', avaliacao.id);
+            formData.append('desc_os', avaliacao.mensagem);
+            formData.append('pontuacao_os', totalScore.toString());
+            formData.append('nota_os', nota.toString());
+            formData.append('data_finalizacao_os', avaliacao.finalizacao);
+            formData.append('data_finalizacao', currentDate);
+            formData.append('id_tecnico', retorno.id_tecnico);
+            formData.append('id_setor', setor);
+            formData.append('avaliador', usuario);
+            formData.append('check_list', fullText);
+            formData.append('id_assunto', avaliacao.id_assunto);
+
+            // Adiciona os valores do checklist como JSON
+            formData.append('checklist_values', JSON.stringify(formValues));
+
+            if (trocaSelecionada === "159" && observacaoTroca) {
+                formData.append('observacao_troca', observacaoTroca);
+            }
+
+            // Adiciona observações e troca se existirem
+            const observacao = document.querySelector('.checklist-observacao input').value;
+            const troca = document.querySelector('.checklist-observacao select').value;
+            if (observacao) formData.append('observacoes', observacao);
+            if (troca) formData.append('troca', troca);
+
+            console.log('Dados para enviar:', Object.fromEntries(formData.entries()));
+
+            // Chamada à API com FormData
+            await addAvaliacao(token, formData);
+
             setShowChecklist(false);
             alert(`Avaliação salva com sucesso!\nNota: ${nota}%`);
-    
+
         } catch (error) {
             console.error("Erro ao salvar avaliação:", error);
-            alert('Erro ao salvar avaliação');
+            alert('Erro ao salvar avaliação: ' + error.message);
         }
     };
 
+    console.log(retorno);
+    console.log(avaliacao);
     return (
         <div className={`avaliacao-card ${avaliacao.status === 'Finalizada' ? 'finalizada' : ''}`}>
             <div className="avaliacao-header">
@@ -217,19 +242,17 @@ const AvaliacaoCard = ({ avaliacao }) => {
                     {/* Mostrar CCQ apenas se existir */}
                     {(avaliacao.potencia.radio?.ccq != null || avaliacao.potencia.radio?.sinal != null) && (
                         <div className='potencia'>
-                            <p className={`ccq ${
-                                avaliacao.potencia.radio?.ccq != null ? (
-                                    avaliacao.potencia.radio.ccq >= 90 ? 'good' :
-                                        avaliacao.potencia.radio.ccq >= 80 ? 'warning' : 'bad'
-                                ) : ''}
+                            <p className={`ccq ${avaliacao.potencia.radio?.ccq != null ? (
+                                avaliacao.potencia.radio.ccq >= 90 ? 'good' :
+                                    avaliacao.potencia.radio.ccq >= 80 ? 'warning' : 'bad'
+                            ) : ''}
                             `}>
                                 CCQ: {avaliacao.potencia.radio?.ccq}
                             </p>
-                            <p className={`sinal ${
-                                avaliacao.potencia.radio?.sinal != null ? (
-                                    avaliacao.potencia.radio.sinal >= -60 ? 'good' :
-                                        avaliacao.potencia.radio.sinal >= -70 ? 'warning' : 'bad'
-                                ) : ''}
+                            <p className={`sinal ${avaliacao.potencia.radio?.sinal != null ? (
+                                avaliacao.potencia.radio.sinal >= -60 ? 'good' :
+                                    avaliacao.potencia.radio.sinal >= -70 ? 'warning' : 'bad'
+                            ) : ''}
                             `}>
                                 SINAL: {avaliacao.potencia.radio?.sinal}
                             </p>
@@ -280,12 +303,27 @@ const AvaliacaoCard = ({ avaliacao }) => {
                             ))}
 
                             <div className='checklist-observacao'>
-                                <input type="text" placeholder='Observações' />
-                                <select name="" id="">
+                                <input type="text" placeholder='Observações gerais' />
+                                <select
+                                    value={trocaSelecionada}
+                                    onChange={(e) => setTrocaSelecionada(e.target.value)}
+                                >
                                     <option value="">Selecione uma opção</option>
-                                    <option value="">Sem troca</option>
-                                    <option value="">Com troca</option>
+                                    <option value="91">Sem troca</option>
+                                    <option value="159">Com troca</option>
                                 </select>
+
+                                {/* Mostra o campo de observação de troca apenas quando "Com troca" está selecionado */}
+                                {trocaSelecionada === "159" && (
+                                    <div className="observacao-troca" style={{ marginTop: '10px' }}>
+                                        <input
+                                            type="text"
+                                            placeholder='Observações sobre a troca'
+                                            value={observacaoTroca}
+                                            onChange={(e) => setObservacaoTroca(e.target.value)}
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             <div className="checklist-actions">

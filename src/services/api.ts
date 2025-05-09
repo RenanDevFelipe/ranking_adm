@@ -174,11 +174,11 @@ export const getAvaliacoes = async (
       }
     );
 
-    if (!response.data.registros || !Array.isArray(response.data.registros)) {
+    if (!response.data) {
       throw new Error('Formato de dados inválido na resposta da API');
     }
 
-    return response.data.registros;
+    return response.data;
   } catch (error: any) {
     console.error('Erro ao buscar Avaliações:', error);
     throw new Error(error.response?.data?.message || 'Erro ao carregar Avaliações');
@@ -695,3 +695,31 @@ export const ChecklistGetFiltered = async (token: string, id: number) => {
     throw new Error(error.response?.data?.message || 'Erro ao buscar assunto');
   }
 }
+
+
+export const addAvaliacao = async (token: string, formData: FormData) => {
+  try {
+      const response = await api.post(
+          "Avaliacao/N3",
+          formData,
+          {
+              headers: {
+                  'Content-Type': 'multipart/form-data',
+                  Authorization: `Bearer ${token}`,
+              },
+          }
+      );
+      return response.data;
+  } catch (error: any) {
+      console.error('Erro ao adicionar avaliação:', error);
+
+      const errorMessage =
+          error?.response?.data?.message ||
+          error?.message ||
+          'Erro ao adicionar avaliação';
+
+      throw new Error(errorMessage);
+  }
+};
+
+
