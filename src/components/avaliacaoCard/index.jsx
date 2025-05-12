@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import './styles.css';
 import { ChecklistGetFiltered, addAvaliacao } from '../../services/api.ts';
-
+import { FaSpinner } from 'react-icons/fa';
+import Swal from 'sweetalert2';
 
 const AvaliacaoCard = ({ avaliacao, retorno }) => {
     const [showChecklist, setShowChecklist] = useState(false);
     const [showDetalhes, setShowDetalhes] = useState(false);
     const [checklistItems, setChecklistItems] = useState([]);
     const [loadingChecklist, setLoadingChecklist] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [formValues, setFormValues] = useState({});
     const [trocaSelecionada, setTrocaSelecionada] = useState("");
     const [observacaoTroca, setObservacaoTroca] = useState("");
     const token = localStorage.getItem('access_token');
     const usuario = localStorage.getItem('user_name');
+    const id_ixc = localStorage.getItem('user_id');
     const setor = localStorage.getItem('user_setor');
 
 
@@ -42,6 +45,120 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
         const url = `https://central.ticonnecte.com.br/aplicativo/su_oss_chamado_arquivos/rel_28009.php?id=${id}`;
         window.open(url, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
     }
+    const acessoRemotoIp = async (ip) => {
+        const portas = [80, 8080, 8888];
+        let portaFuncionando = null;
+        
+        // Mostra loading enquanto testa as portas
+        Swal.fire({
+          title: 'Testando conexão...',
+          html: 'Verificando portas disponíveis',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+      
+        // Testa cada porta sequencialmente
+        for (const porta of portas) {
+          try {
+            const teste = await testarPorta(ip, porta);
+            if (teste) {
+              portaFuncionando = porta;
+              break;
+            }
+          } catch (e) {
+            console.log(`Porta ${porta} falhou`, e);
+          }
+        }
+      
+        // Fecha o loading
+        Swal.close();
+      
+        if (portaFuncionando) {
+          // Se encontrou porta aberta, abre automaticamente
+          abrirPorta(ip, portaFuncionando);
+        } else {
+          // Se nenhuma porta funcionou, mostra opções manuais
+          mostrarOpcoesManuais(ip, portas);
+        }
+      };
+      
+      // Função para testar uma porta específica
+      const testarPorta = (ip, porta) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = `http://${ip}:${porta}/favicon.ico?t=${Date.now()}`;
+          
+          // Timeout de 2 segundos por porta
+          setTimeout(() => resolve(false), 2000);
+        });
+      };
+      
+      // Função para abrir a porta funcionando
+      const abrirPorta = (ip, porta) => {
+        const link = document.createElement('a');
+        link.href = `http://${ip}:${porta}`;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
+      
+      // Função para mostrar opções quando nenhuma porta funciona
+      const mostrarOpcoesManuais = (ip, portas) => {
+        const botoes = portas.map(porta => (
+          `<button class="swal2-porta-button" 
+                  onclick="document.body.appendChild(Object.assign(document.createElement('a'), {
+                    href: 'http://${ip}:${porta}',
+                    target: '_blank'
+                  })).click()">
+            Tentar porta ${porta}
+          </button>`
+        )).join('');
+      
+        Swal.fire({
+          title: 'Não foi possível conectar automaticamente',
+          html: `Tente manualmente:<br><br>
+                ${botoes}<br><br>
+                Ou copie o IP:<br>
+                <input type="text" id="ip-copy" value="${ip}" readonly>
+                <button onclick="navigator.clipboard.writeText('${ip}')">
+                  Copiar
+                </button>`,
+          icon: 'warning',
+          showConfirmButton: false,
+          showCloseButton: true
+        });
+      };
+      
+      // Adiciona estilo aos botões de porta (opcional)
+      const style = document.createElement('style');
+      style.textContent = `
+        .swal2-porta-button {
+          margin: 5px;
+          padding: 8px 15px;
+          background: #3085d6;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        .swal2-porta-button:hover {
+          background: #286090;
+        }
+        #ip-copy {
+          padding: 8px;
+          margin-top: 10px;
+          width: 100%;
+        }
+      `;
+      document.head.appendChild(style);
+      
 
     const handleAvaliarClick = () => {
         if (!showChecklist) {
@@ -63,6 +180,7 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
         try {
             // Filtra apenas os itens que são checkboxes
             const checkboxItems = checklistItems.filter(item => item.type === 'checkbox');
@@ -117,6 +235,7 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
 
             // Adiciona todos os campos ao FormData
             formData.append('id_os', avaliacao.id);
+            formData.append('id_ixc', id_ixc);
             formData.append('desc_os', avaliacao.mensagem);
             formData.append('pontuacao_os', totalScore.toString());
             formData.append('nota_os', nota.toString());
@@ -127,18 +246,18 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
             formData.append('avaliador', usuario);
             formData.append('check_list', fullText);
             formData.append('id_assunto', avaliacao.id_assunto);
+            formData.append('observacao_troca', 'Sem troca');
+            formData.append('id_atendimento', avaliacao.id_atendimento);
 
             // Adiciona os valores do checklist como JSON
             formData.append('checklist_values', JSON.stringify(formValues));
 
-            if (trocaSelecionada === "159" && observacaoTroca) {
+            if (trocaSelecionada === "152" && observacaoTroca) {
                 formData.append('observacao_troca', observacaoTroca);
             }
 
             // Adiciona observações e troca se existirem
-            const observacao = document.querySelector('.checklist-observacao input').value;
             const troca = document.querySelector('.checklist-observacao select').value;
-            if (observacao) formData.append('observacoes', observacao);
             if (troca) formData.append('troca', troca);
 
             console.log('Dados para enviar:', Object.fromEntries(formData.entries()));
@@ -147,11 +266,28 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
             await addAvaliacao(token, formData);
 
             setShowChecklist(false);
-            alert(`Avaliação salva com sucesso!\nNota: ${nota}%`);
+            // Sucesso com SweetAlert
+            await Swal.fire({
+                title: 'Sucesso!',
+                text: `Avaliação salva com sucesso!`,
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+
+            // Recarrega a página após o sucesso
+            window.location.reload();
 
         } catch (error) {
             console.error("Erro ao salvar avaliação:", error);
-            alert('Erro ao salvar avaliação: ' + error.message);
+            // Erro com SweetAlert
+            await Swal.fire({
+                title: 'Erro!',
+                text: 'Erro ao salvar avaliação: ' + error.message,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -260,12 +396,29 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
                     )}
 
 
-                    <button
-                        className="avaliacao-button"
-                        onClick={() => abrirPopup(avaliacao.id_arquivo)}
-                    >
-                        Ver fotos
-                    </button>
+                    <div className='buttons'>
+                        <button
+                            className="avaliacao-button"
+                            onClick={() => abrirPopup(avaliacao.id_arquivo)}
+                        >
+                            Ver fotos
+                        </button>
+
+                        <button
+                            className="avaliacao-button"
+                            onClick={(e) => acessoRemotoIp(avaliacao.ip_login)}
+                        >
+                            Acessar
+                        </button>
+                        {(avaliacao.potencia.radio.ip !== null) && (
+                            <button
+                                className="avaliacao-button"
+                                onClick={() => acessoRemotoIp(avaliacao.potencia.radio.ip)}
+                            >
+                                Acessar antena
+                            </button>
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -310,11 +463,11 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
                                 >
                                     <option value="">Selecione uma opção</option>
                                     <option value="91">Sem troca</option>
-                                    <option value="159">Com troca</option>
+                                    <option value="152">Com troca</option>
                                 </select>
 
                                 {/* Mostra o campo de observação de troca apenas quando "Com troca" está selecionado */}
-                                {trocaSelecionada === "159" && (
+                                {trocaSelecionada === "152" && (
                                     <div className="observacao-troca" style={{ marginTop: '10px' }}>
                                         <input
                                             type="text"
@@ -337,8 +490,15 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
                                 <button
                                     type="submit"
                                     className="submit-button"
+                                    disabled={isSubmitting || loadingChecklist}
                                 >
-                                    Salvar Avaliação
+                                    {isSubmitting ? (
+                                        <>
+                                            <FaSpinner className="spinner-icon" /> Salvando...
+                                        </>
+                                    ) : (
+                                        'Salvar Avaliação'
+                                    )}
                                 </button>
                             </div>
                         </form>

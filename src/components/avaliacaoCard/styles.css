@@ -399,3 +399,12 @@
     padding: 10px;
     border-radius: 10px;
 }
+.buttons{
+    display: flex;
+    gap: 10px;
+}
+
+.spinner-icon {
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
