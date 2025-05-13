@@ -139,7 +139,7 @@ export default function Assunto() {
     return (
         <div className={`tutorial-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
             <Sidebar isVisible={isSidebarVisible} />
-            <div className='main-content'>
+            <div className='main-content-assunto'>
                 <div className='container-conteudo'>
                     <div className="search-container">
                         <button

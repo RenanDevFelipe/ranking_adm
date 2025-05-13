@@ -48,71 +48,71 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
     const acessoRemotoIp = async (ip) => {
         const portas = [80, 8080, 8888];
         let portaFuncionando = null;
-        
+
         // Mostra loading enquanto testa as portas
         Swal.fire({
-          title: 'Testando conexão...',
-          html: 'Verificando portas disponíveis',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
+            title: 'Testando conexão...',
+            html: 'Verificando portas disponíveis',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
         });
-      
+
         // Testa cada porta sequencialmente
         for (const porta of portas) {
-          try {
-            const teste = await testarPorta(ip, porta);
-            if (teste) {
-              portaFuncionando = porta;
-              break;
+            try {
+                const teste = await testarPorta(ip, porta);
+                if (teste) {
+                    portaFuncionando = porta;
+                    break;
+                }
+            } catch (e) {
+                console.log(`Porta ${porta} falhou`, e);
             }
-          } catch (e) {
-            console.log(`Porta ${porta} falhou`, e);
-          }
         }
-      
+
         // Fecha o loading
         Swal.close();
-      
+
         if (portaFuncionando) {
-          // Se encontrou porta aberta, abre automaticamente
-          abrirPorta(ip, portaFuncionando);
+            // Se encontrou porta aberta, abre automaticamente
+            abrirPorta(ip, portaFuncionando);
         } else {
-          // Se nenhuma porta funcionou, mostra opções manuais
-          mostrarOpcoesManuais(ip, portas);
+            // Se nenhuma porta funcionou, mostra opções manuais
+            mostrarOpcoesManuais(ip, portas);
         }
-      };
-      
-      // Função para testar uma porta específica
-      const testarPorta = (ip, porta) => {
+    };
+
+    // Função para testar uma porta específica
+    const testarPorta = (ip, porta) => {
         return new Promise((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve(true);
-          img.onerror = () => resolve(false);
-          img.src = `http://${ip}:${porta}/favicon.ico?t=${Date.now()}`;
-          
-          // Timeout de 2 segundos por porta
-          setTimeout(() => resolve(false), 2000);
+            const img = new Image();
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = `http://${ip}:${porta}/favicon.ico?t=${Date.now()}`;
+
+            // Timeout de 2 segundos por porta
+            setTimeout(() => resolve(false), 2000);
         });
-      };
-      
-      // Função para abrir a porta funcionando
-      const abrirPorta = (ip, porta) => {
+    };
+
+    // Função para abrir a porta funcionando
+    const abrirPorta = (ip, porta) => {
         const link = document.createElement('a');
         link.href = `http://${ip}:${porta}`;
         link.target = '_blank';
         link.rel = 'noopener noreferrer';
-        
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-      };
-      
-      // Função para mostrar opções quando nenhuma porta funciona
-      const mostrarOpcoesManuais = (ip, portas) => {
+    };
+
+    // Função para mostrar opções quando nenhuma porta funciona
+    const mostrarOpcoesManuais = (ip, portas) => {
         const botoes = portas.map(porta => (
-          `<button class="swal2-porta-button" 
+            `<button class="swal2-porta-button" 
                   onclick="document.body.appendChild(Object.assign(document.createElement('a'), {
                     href: 'http://${ip}:${porta}',
                     target: '_blank'
@@ -120,25 +120,25 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
             Tentar porta ${porta}
           </button>`
         )).join('');
-      
+
         Swal.fire({
-          title: 'Não foi possível conectar automaticamente',
-          html: `Tente manualmente:<br><br>
+            title: 'Não foi possível conectar automaticamente',
+            html: `Tente manualmente:<br><br>
                 ${botoes}<br><br>
                 Ou copie o IP:<br>
                 <input type="text" id="ip-copy" value="${ip}" readonly>
                 <button onclick="navigator.clipboard.writeText('${ip}')">
                   Copiar
                 </button>`,
-          icon: 'warning',
-          showConfirmButton: false,
-          showCloseButton: true
+            icon: 'warning',
+            showConfirmButton: false,
+            showCloseButton: true
         });
-      };
-      
-      // Adiciona estilo aos botões de porta (opcional)
-      const style = document.createElement('style');
-      style.textContent = `
+    };
+
+    // Adiciona estilo aos botões de porta (opcional)
+    const style = document.createElement('style');
+    style.textContent = `
         .swal2-porta-button {
           margin: 5px;
           padding: 8px 15px;
@@ -157,8 +157,8 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
           width: 100%;
         }
       `;
-      document.head.appendChild(style);
-      
+    document.head.appendChild(style);
+
 
     const handleAvaliarClick = () => {
         if (!showChecklist) {
@@ -215,18 +215,41 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
                 return `${item.label}: ${value !== undefined ? value : 'Não preenchido'}`;
             }).join('\n\n');
 
-            const fullText = `${checklistText}\n\nOBS: ${document.querySelector('.checklist-observacao input').value || 'Nenhuma'}`;
+            const fullText = `${checklistText}\n\nOBS: ${document.querySelector('.checklist-observacao input')?.value || 'Nenhuma'}`;
 
-            // Copia para área de transferência
-            await navigator.clipboard.writeText(fullText).catch(err => {
-                // Fallback para navegadores mais antigos
-                const textarea = document.createElement('textarea');
-                textarea.value = fullText;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-            });
+            // Função para copiar com fallback robusto
+            const copyToClipboard = async (text) => {
+                try {
+                    // Tenta usar a API moderna primeiro
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(text);
+                        return;
+                    }
+
+                    // Fallback para método antigo
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';  // Evita scroll para o elemento
+                    document.body.appendChild(textarea);
+                    textarea.select();
+
+                    try {
+                        const successful = document.execCommand('copy');
+                        if (!successful) {
+                            throw new Error('Falha no método de fallback');
+                        }
+                    } finally {
+                        document.body.removeChild(textarea);
+                    }
+                } catch (err) {
+                    console.error('Falha ao copiar texto:', err);
+                    // Aqui você pode mostrar uma mensagem para o usuário se quiser
+                    // alert('Não foi possível copiar para a área de transferência automaticamente. Por favor, copie manualmente.');
+                }
+            };
+
+            // Chama a função de cópia
+            await copyToClipboard(fullText);
 
             const currentDate = new Date().toISOString().split('T')[0];
 
@@ -252,37 +275,56 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
             // Adiciona os valores do checklist como JSON
             formData.append('checklist_values', JSON.stringify(formValues));
 
-            if (trocaSelecionada === "152" && observacaoTroca) {
+            if ((trocaSelecionada === "152" || trocaSelecionada === "158" || trocaSelecionada === "435") && observacaoTroca) {
                 formData.append('observacao_troca', observacaoTroca);
             }
 
             // Adiciona observações e troca se existirem
-            const troca = document.querySelector('.checklist-observacao select').value;
+            const troca = document.querySelector('.checklist-observacao select')?.value;
             if (troca) formData.append('troca', troca);
 
             console.log('Dados para enviar:', Object.fromEntries(formData.entries()));
 
             // Chamada à API com FormData
-            await addAvaliacao(token, formData);
+            const response = await addAvaliacao(token, formData);
 
             setShowChecklist(false);
-            // Sucesso com SweetAlert
-            await Swal.fire({
-                title: 'Sucesso!',
-                text: `Avaliação salva com sucesso!`,
-                icon: 'success',
-                confirmButtonText: 'OK'
-            });
+
+            // Verifica se a resposta tem status e mensagem
+            if (response && response.status && response.message) {
+                await Swal.fire({
+                    title: response.type === 'success' ? 'Sucesso!' : 'Erro!',
+                    text: response.message,
+                    icon: response.status,
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                // Fallback caso a API não retorne o formato esperado
+                await Swal.fire({
+                    title: 'Sucesso!',
+                    text: 'Avaliação salva com sucesso!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            }
 
             // Recarrega a página após o sucesso
-            window.location.reload();
+            if (response.type === 'success') {
+                window.location.reload();
+            }
 
         } catch (error) {
             console.error("Erro ao salvar avaliação:", error);
-            // Erro com SweetAlert
+
+            // Tenta extrair a mensagem de erro da resposta da API
+            let errorMessage = error.message;
+            if (error.response && error.response.data && error.response.data.message) {
+                errorMessage = error.response.data.message;
+            }
+
             await Swal.fire({
                 title: 'Erro!',
-                text: 'Erro ao salvar avaliação: ' + error.message,
+                text: 'Erro ao salvar avaliação: ' + errorMessage,
                 icon: 'error',
                 confirmButtonText: 'OK'
             });
@@ -293,6 +335,20 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
 
     console.log(retorno);
     console.log(avaliacao);
+
+    const getTrocaValues = () => {
+        switch (avaliacao.id_assunto) {
+            case "5":
+            case "70":
+                return { semTroca: "93", comTroca: "158" };
+            case "452":
+                return { semTroca: "432", comTroca: "435" }; // ou o valor que desejar para comTroca
+            default:
+                return { semTroca: "91", comTroca: "152" };
+        }
+    };
+
+    const trocaValues = getTrocaValues();
     return (
         <div className={`avaliacao-card ${avaliacao.status === 'Finalizada' ? 'finalizada' : ''}`}>
             <div className="avaliacao-header">
@@ -435,39 +491,49 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
                             {checklistItems.map(item => (
                                 <div key={item.id} className="checklist-item">
                                     {item.type === 'checkbox' ? (
-                                        <input
-                                            type="checkbox"
-                                            checked={formValues[item.id] || false}
-                                            onChange={(e) => handleInputChange(item.id, e.target.checked)}
-                                        />
+                                        <>
+                                            <input
+                                                id={`checkbox-${item.id}`}  // Adiciona id único para o input
+                                                type="checkbox"
+                                                checked={formValues[item.id] || false}
+                                                onChange={(e) => handleInputChange(item.id, e.target.checked)}
+                                            />
+                                            <label htmlFor={`checkbox-${item.id}`}>  {/* Associa o label ao input */}
+                                                {item.label}
+                                            </label>
+                                        </>
                                     ) : (
-                                        <input
-                                            type={item.type}
-                                            value={formValues[item.id] || ''}
-                                            onChange={(e) => handleInputChange(item.id, e.target.value)}
-                                            max={item.max_score}
-                                        />
+                                        <>
+                                            <input
+                                                id={`input-${item.id}`}  // Id para inputs não-checkbox (opcional)
+                                                type={item.type}
+                                                value={formValues[item.id] || ''}
+                                                onChange={(e) => handleInputChange(item.id, e.target.value)}
+                                                max={item.max_score}
+                                            />
+                                            <label htmlFor={`input-${item.id}`}>  {/* Para consistência */}
+                                                {item.label}
+                                            </label>
+                                        </>
                                     )}
-                                    <label>
-                                        {item.label}
-                                    </label>
-
                                 </div>
                             ))}
 
                             <div className='checklist-observacao'>
                                 <input type="text" placeholder='Observações gerais' />
-                                <select
-                                    value={trocaSelecionada}
-                                    onChange={(e) => setTrocaSelecionada(e.target.value)}
-                                >
-                                    <option value="">Selecione uma opção</option>
-                                    <option value="91">Sem troca</option>
-                                    <option value="152">Com troca</option>
-                                </select>
+                                {avaliacao.id_assunto !== "10" && (
+                                    <select
+                                        value={trocaSelecionada}
+                                        onChange={(e) => setTrocaSelecionada(e.target.value)}
+                                    >
+                                        <option value="">Selecione uma opção</option>
+                                        <option value={trocaValues.semTroca}>Sem troca</option>
+                                        <option value={trocaValues.comTroca}>Com troca</option>
+                                    </select>
+                                )}
 
                                 {/* Mostra o campo de observação de troca apenas quando "Com troca" está selecionado */}
-                                {trocaSelecionada === "152" && (
+                                {(trocaSelecionada === "152" || trocaSelecionada === "158" || trocaSelecionada === "452") && (
                                     <div className="observacao-troca" style={{ marginTop: '10px' }}>
                                         <input
                                             type="text"

@@ -345,7 +345,6 @@ body {
 .tutorials-grid {
     border-radius: 10px;
     display: flex;
-    justify-content: center;
     flex-wrap: wrap;
     gap: 50px;
     padding-top: 10px;
@@ -873,6 +872,12 @@ input[type="file"] {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 15px;
 }
+.field-edit-form input{
+    color: var(--textColor);
+}
+.field-edit-form label{
+    color: var(--textColor);
+}
 
 .field-card {
     background: var(--field-bg);
@@ -1050,6 +1055,7 @@ input[type="file"] {
 
 /* Ajuste para o conteúdo principal quando o sidebar está escondido */
 .main-content {
+    width: 100%;
     transition: margin-left 0.3s ease;
     margin-left: 20%; 
 }
@@ -1068,7 +1074,6 @@ input[type="file"] {
     margin-left: 20%; 
 }
 .main-content-tutorial{
-    width: 100%;
     transition: margin-left 0.3s ease;
     margin-left: 20%; 
 }
@@ -1084,6 +1089,10 @@ input[type="file"] {
 }
 .main-content-colaborador{
     width: 100%;
+    transition: margin-left 0.3s ease;
+    margin-left: 20%; 
+}
+.main-content-assunto{
     transition: margin-left 0.3s ease;
     margin-left: 20%; 
 }

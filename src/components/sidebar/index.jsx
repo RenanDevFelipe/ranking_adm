@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import Logo from '../../utils/img/eliel.jpg';
 import { 
     Assessment as AvaliarIcon,
-    Assignment as OsIcon,
     Leaderboard as RankingSetorIcon,
     MenuBook as TutoriaisIcon,
     Settings as ConfiguracoesIcon,

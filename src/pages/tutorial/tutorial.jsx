@@ -181,7 +181,7 @@ export default function AddTutorial() {
     return (
         <div className="app-container">
             <Sidebar isVisible={isSidebarVisible} />
-            <div className="main-content-tutorial">
+            <div className="main-content">
                 <div className="sidebar-footer">
                     <button
                         className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
