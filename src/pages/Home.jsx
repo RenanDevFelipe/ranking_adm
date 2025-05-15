@@ -21,6 +21,22 @@ export default function Home() {
     const [searchTerm, setSearchTerm] = useState('');
     const { darkMode } = useTheme();
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+    const getRouteByUserSetor = () => {
+        const userSetor = parseInt(localStorage.getItem('user_setor')); // Converte para número
+
+        switch (userSetor) {
+            case 5:
+                return 'N3';
+            case 9:
+                return 'N2';
+            case 6:
+                return 'estoque';
+            case 7:
+                return 'RH';
+            default:
+                return 'N3'; // Rota padrão caso não encontre o setor
+        }
+    };
 
     const toggleSidebar = () => {
         setIsSidebarVisible(!isSidebarVisible);
@@ -137,7 +153,7 @@ export default function Home() {
                             className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
                             onClick={toggleSidebar}
                         >
-                            {isSidebarVisible ? <DehazeIcon/> : '►'}
+                            {isSidebarVisible ? <DehazeIcon /> : '►'}
                         </button>
                         <input
                             placeholder='Pesquise pelo nome do técnico'
@@ -157,7 +173,7 @@ export default function Home() {
                                         name={colab.nome_colaborador}
                                         role={getNomeSetor(colab.setor_colaborador)}
                                         action="Avaliar"
-                                        onClick={() => navigate(`/avaliar/N3/${colab.id_ixc}`)}
+                                        onClick={() => navigate(`/avaliar/${getRouteByUserSetor()}/${colab.id_ixc}?bd=${colab.id_colaborador}`)}
                                     />
                                 ))
                             ) : searchTerm ? (

@@ -15,6 +15,7 @@ import AddAssunto from './pages/assunto/assunto.jsx';
 import Assunto from './pages/assunto/index.jsx';
 import Checklist from './pages/checklist/checklist.jsx'
 import AvaliarN3 from './pages/avaliacoes/n3/index.jsx';
+import AvaliarN2 from './pages/avaliacoes/n2/index.jsx';
 import { ThemeProvider } from './context/ThemeContext.js';
 
 
@@ -82,6 +83,11 @@ export default function App() {
                 <Route path="/avaliar/N3/:id" element={
                     <PrivateRoute>
                         <AvaliarN3 />
+                    </PrivateRoute>
+                } />
+                <Route path="/avaliar/N2/:id" element={
+                    <PrivateRoute>
+                        <AvaliarN2 />
                     </PrivateRoute>
                 } />
 

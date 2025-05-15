@@ -722,4 +722,29 @@ export const addAvaliacao = async (token: string, formData: FormData) => {
   }
 };
 
+export const addAvaliacaoN2 = async (token: string, formData: FormData) => {
+  try {
+      const response = await api.post(
+          "Avaliacao/N2",
+          formData,
+          {
+              headers: {
+                  'Content-Type': 'multipart/form-data',
+                  Authorization: `Bearer ${token}`,
+              },
+          }
+      );
+      return response.data;
+  } catch (error: any) {
+      console.error('Erro ao adicionar avaliação:', error);
+
+      const errorMessage =
+          error?.response?.data?.message ||
+          error?.message ||
+          'Erro ao adicionar avaliação';
+
+      throw new Error(errorMessage);
+  }
+};
+
 
