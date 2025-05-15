@@ -293,7 +293,7 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
             // Verifica se a resposta tem status e mensagem
             if (response && response.status && response.message) {
                 await Swal.fire({
-                    title: response.type === 'success' ? 'Sucesso!' : 'Erro!',
+                    title: (response.type || response.status) === 'success' ? 'Sucesso!' : 'Erro!',
                     text: response.message,
                     icon: response.status,
                     confirmButtonText: 'OK'
@@ -309,7 +309,7 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
             }
 
             // Recarrega a página após o sucesso
-            if (response.type === 'success') {
+            if (response.type || response.status === 'success') {
                 window.location.reload();
             }
 
