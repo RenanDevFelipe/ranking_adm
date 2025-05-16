@@ -555,7 +555,7 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="submit-button"
+                                    className="submit-button-tutorial"
                                     disabled={isSubmitting || loadingChecklist}
                                 >
                                     {isSubmitting ? (

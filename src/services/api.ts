@@ -748,3 +748,24 @@ export const addAvaliacaoN2 = async (token: string, formData: FormData) => {
 };
 
 
+export const getHistorico = async (token: string, id: number,data: string) => {
+  try {
+    const response = await api.post(
+      `Historico/N2`,
+      { 
+        id_colaborador: id,
+        data_requisicao: data
+       },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao buscar historico:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao buscar historico');
+  }
+}

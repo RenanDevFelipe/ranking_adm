@@ -291,16 +291,19 @@
 .checklist-actions .cancel-button {
     background-color: #f5f5f5;
     border: 1px solid #ccc;
+    color: var(--textColor);
 }
 
 .checklist-actions .cancel-button:hover {
     background-color: #e0e0e0;
+    color: var(--colorDark);
 }
 
 .dark-mode .checklist-actions .cancel-button {
     background-color: #333;
     border-color: #555;
-    color: #fff;
+    
+
 }
 
 .dark-mode .checklist-actions .cancel-button:hover {

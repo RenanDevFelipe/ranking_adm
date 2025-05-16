@@ -72,11 +72,6 @@ const Sidebar = ({ isVisible }) => {
                             <span className="section-title clickable">Avaliar</span>
                         </div>
                         
-                        <div className="menu-item" onClick={navegacao("/ranking-setor")}>
-                            <RankingSetorIcon className="menu-icon" />
-                            <span className="section-title clickable">Ranking por Setor</span>
-                        </div>
-                        
                         <div 
                             className="menu-item" 
                             onClick={toggleRankingSubmenu}
@@ -175,7 +170,7 @@ const Sidebar = ({ isVisible }) => {
                     
                     <li className="perfil">
                         <div className="profile-info">
-                            <img width={50} src={Logo} alt="User profile" />
+                            {/* <img width={50} src={Logo} alt="User profile" /> */}
                             <span>{user}</span>
                         </div>
                         

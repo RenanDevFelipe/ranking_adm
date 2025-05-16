@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from "../../../components/sidebar/index.jsx";
 import "../../styles.css";
-import { getColaboradorById,addAvaliacaoN2 } from '../../../services/api.ts'; // Adicione esta importação
+import { getColaboradorById, addAvaliacaoN2 } from '../../../services/api.ts'; // Adicione esta importação
 import { useTheme } from '../../../context/ThemeContext.js';
-import DehazeIcon from '@mui/icons-material/Dehaze';
+import Swal from 'sweetalert2';
 
 export default function Avaliar() {
     const { id } = useParams();
@@ -17,6 +17,7 @@ export default function Avaliar() {
     const [dataSelecionada, setDataSelecionada] = useState('');
     const [colaborador, setColaborador] = useState(null); // Estado para armazenar dados do colaborador
     const { darkMode } = useTheme();
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
     const [formValues, setFormValues] = useState({
         finalizacao_os_add: 0,
@@ -75,35 +76,69 @@ export default function Avaliar() {
         });
     };
 
-const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    try {
-        const token = localStorage.getItem('access_token');
-        const user_name = localStorage.getItem('user_name');
-        
-        const formData = {
-            ...formValues,
-            data: dataSelecionada,
-            id_colaborador: bd,
-            nome_tecnico: colaborador?.nome_colaborador || '',
-            nome_avaliador: user_name || '',
-        };
+    const handleMovimentacoesClick = () => {
+        navigate(`/movimentacoes/${id}?bd=${bd}&data=${dataSelecionada}`);
+    };
 
-        // Chamada à API corretamente formatada
-        const response = await addAvaliacaoN2(token,formData);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
 
-        if (response.status === "success") {
-            alert('Avaliação enviada com sucesso!');
-            navigate(`/avaliar/N2/${id}?bd=${bd}`);
-        } else {
-            throw new Error('Falha ao enviar avaliação');
+        try {
+            const token = localStorage.getItem('access_token');
+            const user_name = localStorage.getItem('user_name');
+
+            // Cria um objeto com apenas os campos marcados (valor 1)
+            const filteredValues = Object.fromEntries(
+                Object.entries(formValues).filter(([key, value]) =>
+                    (key.endsWith('_add') || key.endsWith('_sub')) ? value === 1 : true
+                )
+            );
+
+            const formData = {
+                ...filteredValues, // Usa apenas os valores filtrados
+                data_requisicao: dataSelecionada,
+                id_colaborador: bd,
+                nome_tecnico: colaborador?.nome_colaborador || '',
+                nome_avaliador: user_name || '',
+            };
+
+            // Chamada à API corretamente formatada
+            const response = await addAvaliacaoN2(token, formData);
+
+            if (response && response.status && response.message) {
+                await Swal.fire({
+                    title: (response.type || response.status) === 'success' ? 'Sucesso!' : 'Erro!',
+                    text: response.message,
+                    icon: response.status,
+                    confirmButtonText: 'OK'
+                });
+
+            }
+
+
+            if (response.type || response.status === 'success') {
+                window.location.reload();
+            }
+
+        } catch (error) {
+            console.error('Erro ao enviar avaliação:', error);
+            setError('Erro ao enviar avaliação. Tente novamente.');
+            let errorMessage = error.message;
+            if (error.response && error.response.data && error.response.data.message) {
+                errorMessage = error.response.data.message;
+            }
+
+            await Swal.fire({
+                title: 'Erro!',
+                text: 'Erro ao salvar avaliação: ' + errorMessage,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        } finally {
+            setIsSubmitting(false); // Desativa o loading independente do resultado
         }
-    } catch (error) {
-        console.error('Erro ao enviar avaliação:', error);
-        setError('Erro ao enviar avaliação. Tente novamente.');
-    }
-};
+    };
 
     if (loading) {
         return (
@@ -130,15 +165,25 @@ const handleSubmit = async (e) => {
                 <div className="container-conteudo">
                     <h2>Avaliação do Colaborador {colaborador?.nome_colaborador}</h2>
                     <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>Data da Avaliação:</label>
-                            <input
-                                type="date"
-                                value={dataSelecionada}
-                                onChange={(e) => setDataSelecionada(e.target.value)}
-                                className="form-control"
-                                required
-                            />
+                        <div className="form-group-n2">
+                            <div className='data'>
+                                <label>Data da Avaliação:</label>
+                                <input
+                                    type="date"
+                                    value={dataSelecionada}
+                                    onChange={(e) => setDataSelecionada(e.target.value)}
+                                    className="form-control"
+                                    required
+                                />
+                            </div>
+                            <div className='movimentacao'>
+                                <button
+                                    type="button"
+                                    onClick={handleMovimentacoesClick}
+                                >
+                                    Movimentações
+                                </button>
+                            </div>
                         </div>
 
                         <div className='form-box'>
@@ -243,8 +288,19 @@ const handleSubmit = async (e) => {
                             </div>
                         </div>
 
-                        <button type="submit" className="submit-button">
-                            Enviar Avaliação
+                        <button
+                            type="submit"
+                            className="submit-button"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <span className="spinner-button"></span>
+                                    Enviando...
+                                </>
+                            ) : (
+                                "Enviar Avaliação"
+                            )}
                         </button>
                     </form>
                 </div>

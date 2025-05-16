@@ -11,7 +11,7 @@ export default function Avaliar() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [avaliacoes, setAvaliacoes] = useState([]);
-    const [retorno,setRetorno] = useState({});
+    const [retorno, setRetorno] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [dataSelecionada, setDataSelecionada] = useState('');
@@ -82,6 +82,7 @@ export default function Avaliar() {
         return (
             <div className="loading-container">
                 <div className="spinner"></div>
+                {/* <img src="https://ticonnecte.com.br/wp-content/uploads/2025/05/tec.gif" width={150} alt="" srcset="" /> */}
                 <p>Carregando ordens de serviço...</p>
             </div>
         );
