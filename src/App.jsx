@@ -16,7 +16,9 @@ import Assunto from './pages/assunto/index.jsx';
 import Checklist from './pages/checklist/checklist.jsx'
 import AvaliarN3 from './pages/avaliacoes/n3/index.jsx';
 import AvaliarN2 from './pages/avaliacoes/n2/index.jsx';
+import AvaliarEstoque from './pages/avaliacoes/estoque/index.jsx';
 import Movimentacoes from './pages/avaliacoes/n2/movimentacoes.jsx';
+import MovimentacoesEstoque from './pages/avaliacoes/estoque/movimentacoes.jsx';
 import { ThemeProvider } from './context/ThemeContext.js';
 
 
@@ -95,8 +97,19 @@ export default function App() {
                     <PrivateRoute>
                         <Movimentacoes />
                     </PrivateRoute>
-                } />
 
+                } />
+                <Route path="/avaliar/estoque/:id" element={
+                    <PrivateRoute>
+                        <AvaliarEstoque />
+                    </PrivateRoute>
+                } />
+                <Route path="/estoque/movimentacoes/:id" element={
+                    <PrivateRoute>
+                        <MovimentacoesEstoque />
+                    </PrivateRoute>
+
+                } />
             </Routes>
         </ThemeProvider>
     );

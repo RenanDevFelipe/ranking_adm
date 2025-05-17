@@ -747,6 +747,30 @@ export const addAvaliacaoN2 = async (token: string, formData: FormData) => {
   }
 };
 
+export const addAvaliacaoEstoque = async (token: string, formData: FormData) => {
+  try {
+      const response = await api.post(
+          "Avaliacao/Estoque",
+          formData,
+          {
+              headers: {
+                  'Content-Type': 'multipart/form-data',
+                  Authorization: `Bearer ${token}`,
+              },
+          }
+      );
+      return response.data;
+  } catch (error: any) {
+      console.error('Erro ao adicionar avaliação:', error);
+
+      const errorMessage =
+          error?.response?.data?.message ||
+          error?.message ||
+          'Erro ao adicionar avaliação';
+
+      throw new Error(errorMessage);
+  }
+};
 
 export const getHistorico = async (token: string, id: number,data: string) => {
   try {

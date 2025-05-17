@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from "../../../components/sidebar/index.jsx";
 import "../../styles.css";
-import { getColaboradorById, addAvaliacaoN2 } from '../../../services/api.ts'; // Adicione esta importação
+import { getColaboradorById, addAvaliacaoEstoque } from '../../../services/api.ts';
 import { useTheme } from '../../../context/ThemeContext.js';
 import Swal from 'sweetalert2';
 import DehazeIcon from '@mui/icons-material/Dehaze';
@@ -11,24 +11,28 @@ export default function Avaliar() {
     const { id } = useParams();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
-    const bd = queryParams.get('bd'); // Isso vai capturar "19" corretamente
+    const bd = queryParams.get('bd');
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [dataSelecionada, setDataSelecionada] = useState('');
-    const [colaborador, setColaborador] = useState(null); // Estado para armazenar dados do colaborador
+    const [colaborador, setColaborador] = useState(null);
     const { darkMode } = useTheme();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
     const [formValues, setFormValues] = useState({
-        finalizacao_os_add: 0,
-        finalizacao_os_sub: 0,
-        lavagem_carro_add: 0,
-        lavagem_carro_sub: 0,
-        organizacao_material_add: 0,
-        organizacao_material_sub: 0,
-        fardamento_add: 0,
-        fardamento_sub: 0,
+        pedido_add: 0,
+        pedido_sub: 0,
+        prazo_add: 0,
+        prazo_sub: 0,
+        etiqueta_add: 0,
+        etiqueta_sub: 0,
+        baixa_mat_add: 0,
+        baixa_mat_sub: 0,
+        troca_equip_add: 0,
+        troca_equip_sub: 0,
+        transferencia_add: 0,
+        transferencia_sub: 0,
         observacao: ""
     });
 
@@ -36,7 +40,6 @@ export default function Avaliar() {
         setIsSidebarVisible(!isSidebarVisible);
     };
 
-    // Busca dados do colaborador com useCallback
     const fetchColaborador = useCallback(async () => {
         try {
             const token = localStorage.getItem('access_token');
@@ -49,12 +52,10 @@ export default function Avaliar() {
         }
     }, [bd]);
 
-    // Efeito para buscar dados do colaborador
     useEffect(() => {
         fetchColaborador();
-    }, [id, fetchColaborador]); // Adicionei fetchColaborador como dependência
+    }, [id, fetchColaborador]);
 
-    // Define a data inicial (hoje)
     useEffect(() => {
         const currentDate = new Date();
         const day = currentDate.getDate().toString().padStart(2, '0');
@@ -79,7 +80,7 @@ export default function Avaliar() {
     };
 
     const handleMovimentacoesClick = () => {
-        navigate(`/movimentacoes/${id}?bd=${bd}&data=${dataSelecionada}`);
+        navigate(`/estoque/movimentacoes/${id}?bd=${bd}&data=${dataSelecionada}`);
     };
 
     const handleSubmit = async (e) => {
@@ -90,7 +91,6 @@ export default function Avaliar() {
             const token = localStorage.getItem('access_token');
             const user_name = localStorage.getItem('user_name');
 
-            // Cria um objeto com apenas os campos marcados (valor 1)
             const filteredValues = Object.fromEntries(
                 Object.entries(formValues).filter(([key, value]) =>
                     (key.endsWith('_add') || key.endsWith('_sub')) ? value === 1 : true
@@ -98,15 +98,14 @@ export default function Avaliar() {
             );
 
             const formData = {
-                ...filteredValues, // Usa apenas os valores filtrados
+                ...filteredValues,
                 data_requisicao: dataSelecionada,
                 id_colaborador: bd,
                 nome_tecnico: colaborador?.nome_colaborador || '',
                 nome_avaliador: user_name || '',
             };
 
-            // Chamada à API corretamente formatada
-            const response = await addAvaliacaoN2(token, formData);
+            const response = await addAvaliacaoEstoque(token, formData);
 
             if (response && response.status && response.message) {
                 await Swal.fire({
@@ -115,9 +114,7 @@ export default function Avaliar() {
                     icon: response.status,
                     confirmButtonText: 'OK'
                 });
-
             }
-
 
             if (response.type || response.status === 'success') {
                 window.location.reload();
@@ -138,7 +135,7 @@ export default function Avaliar() {
                 confirmButtonText: 'OK'
             });
         } finally {
-            setIsSubmitting(false); // Desativa o loading independente do resultado
+            setIsSubmitting(false);
         }
     };
 
@@ -196,103 +193,157 @@ export default function Avaliar() {
 
                         <div className='form-box'>
                             <div className="form-section">
-                                <h3>Finalização de OS</h3>
+                                <h3>Pedido</h3>
                                 <div className="checkbox-group">
                                     <label>
                                         <input
                                             type="checkbox"
-                                            name="finalizacao_os_add"
-                                            checked={formValues.finalizacao_os_add === 1}
+                                            name="pedido_add"
+                                            checked={formValues.pedido_add === 1}
                                             onChange={handleInputChange}
                                         />
-                                        Adicionar 10 pontos
+                                        Adicionar pontos
                                     </label>
                                     <label>
                                         <input
                                             type="checkbox"
-                                            name="finalizacao_os_sub"
-                                            checked={formValues.finalizacao_os_sub === 1}
+                                            name="pedido_sub"
+                                            checked={formValues.pedido_sub === 1}
                                             onChange={handleInputChange}
                                         />
-                                        Retirar 10 pontos
+                                        Retirar pontos
                                     </label>
                                 </div>
                             </div>
 
                             <div className="form-section">
-                                <h3>Lavagem de Carro</h3>
+                                <h3>Prazo</h3>
                                 <div className="checkbox-group">
                                     <label>
                                         <input
                                             type="checkbox"
-                                            name="lavagem_carro_add"
-                                            checked={formValues.lavagem_carro_add === 1}
+                                            name="prazo_add"
+                                            checked={formValues.prazo_add === 1}
                                             onChange={handleInputChange}
                                         />
-                                        Adicionar 10 pontos
+                                        Adicionar pontos
                                     </label>
                                     <label>
                                         <input
                                             type="checkbox"
-                                            name="lavagem_carro_sub"
-                                            checked={formValues.lavagem_carro_sub === 1}
+                                            name="prazo_sub"
+                                            checked={formValues.prazo_sub === 1}
                                             onChange={handleInputChange}
                                         />
-                                        Retirar 10 pontos
+                                        Retirar pontos
                                     </label>
                                 </div>
                             </div>
 
                             <div className="form-section">
-                                <h3>Organização de Material</h3>
+                                <h3>Etiqueta</h3>
                                 <div className="checkbox-group">
                                     <label>
                                         <input
                                             type="checkbox"
-                                            name="organizacao_material_add"
-                                            checked={formValues.organizacao_material_add === 1}
+                                            name="etiqueta_add"
+                                            checked={formValues.etiqueta_add === 1}
                                             onChange={handleInputChange}
                                         />
-                                        Adicionar 10 pontos
+                                        Adicionar pontos
                                     </label>
                                     <label>
                                         <input
                                             type="checkbox"
-                                            name="organizacao_material_sub"
-                                            checked={formValues.organizacao_material_sub === 1}
+                                            name="etiqueta_sub"
+                                            checked={formValues.etiqueta_sub === 1}
                                             onChange={handleInputChange}
                                         />
-                                        Retirar 10 pontos
+                                        Retirar pontos
                                     </label>
                                 </div>
                             </div>
 
                             <div className="form-section">
-                                <h3>Fardamento</h3>
+                                <h3>Baixa de Material</h3>
                                 <div className="checkbox-group">
                                     <label>
                                         <input
                                             type="checkbox"
-                                            name="fardamento_add"
-                                            checked={formValues.fardamento_add === 1}
+                                            name="baixa_mat_add"
+                                            checked={formValues.baixa_mat_add === 1}
                                             onChange={handleInputChange}
                                         />
-                                        Adicionar 10 pontos
+                                        Adicionar pontos
                                     </label>
                                     <label>
                                         <input
                                             type="checkbox"
-                                            name="fardamento_sub"
-                                            checked={formValues.fardamento_sub === 1}
+                                            name="baixa_mat_sub"
+                                            checked={formValues.baixa_mat_sub === 1}
                                             onChange={handleInputChange}
                                         />
-                                        Retirar 10 pontos
+                                        Retirar pontos
                                     </label>
                                 </div>
                             </div>
+
+                            <div className="form-section">
+                                <h3>Troca de Equipamento</h3>
+                                <div className="checkbox-group">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            name="troca_equip_add"
+                                            checked={formValues.troca_equip_add === 1}
+                                            onChange={handleInputChange}
+                                        />
+                                        Adicionar pontos
+                                    </label>
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            name="troca_equip_sub"
+                                            checked={formValues.troca_equip_sub === 1}
+                                            onChange={handleInputChange}
+                                        />
+                                        Retirar pontos
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div className="form-section">
+                                <h3>Transferência</h3>
+                                <div className="checkbox-group">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            name="transferencia_add"
+                                            checked={formValues.transferencia_add === 1}
+                                            onChange={handleInputChange}
+                                        />
+                                        Adicionar pontos
+                                    </label>
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            name="transferencia_sub"
+                                            checked={formValues.transferencia_sub === 1}
+                                            onChange={handleInputChange}
+                                        />
+                                        Retirar pontos
+                                    </label>
+                                </div>
+                            </div>
+
                             <div className='obs'>
                                 <label htmlFor="obs">Observação:</label>
-                                <textarea value={formValues.observacao} name="observacao" id="obs" onChange={handleInputChange}></textarea>
+                                <textarea 
+                                    value={formValues.observacao} 
+                                    name="observacao" 
+                                    id="obs" 
+                                    onChange={handleInputChange}
+                                ></textarea>
                             </div>
                         </div>
 
