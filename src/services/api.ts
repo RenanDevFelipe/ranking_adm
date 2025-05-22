@@ -22,6 +22,16 @@ interface Colaborador {
   setor_colaborador: number;
 }
 
+interface Usuarios {
+  id_user: number;
+  nome_user: string;
+  id_ixc_user: number;
+  email_user: string;
+  senha_user: string;
+  role: number;
+  setor_user: number;
+}
+
 export const login = async (email: string, password: string): Promise<LoginResponse> => {
   try {
     const response = await api.post('Account/login', { email, password });
@@ -99,6 +109,164 @@ export const getColaboradores = async (token: string): Promise<Colaborador[]> =>
   }
 };
 
+
+export const getUsuarios = async (token: string): Promise<Usuarios[]> => {
+  try {
+    const response = await api.get(
+      'User/listAll',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (!response.data.registros || !Array.isArray(response.data.registros)) {
+      throw new Error('Formato de dados inválido na resposta da API');
+    }
+
+    return response.data.registros;
+  } catch (error: any) {
+    console.error('Erro ao buscar usuarios:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao carregar usuarios');
+  }
+};
+
+export const addUsuario = async (token: string, formData: FormData) => {
+  try {
+    const response = await api.post("User/Post", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    
+    // Verifica se a resposta indica sucesso
+    if (response.data.status === 'error') {
+      throw new Error(response.data.message || 'Erro ao adicionar usuário');
+    }
+    
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao adicionar usuario:', error);
+
+    // Tratamento detalhado do erro
+    let errorMessage = 'Erro ao adicionar usuário';
+    
+    if (error.response) {
+      // Erro vindo do servidor
+      errorMessage = error.response.data?.message || 
+                    error.response.data?.error ||
+                    `Erro ${error.response.status}: ${error.response.statusText}`;
+    } else if (error.request) {
+      // A requisição foi feita mas não houve resposta
+      errorMessage = 'Sem resposta do servidor';
+    } else {
+      // Outros erros
+      errorMessage = error.message || error;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
+export const deleteUsuario = async (token: string, id: number) => {
+  try {
+    const response = await api.delete(
+      `User/Delete`,
+      {
+        data: { id },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    // Verifica se a resposta indica sucesso
+    if (response.data.status === 'error') {
+      throw {
+        response: {
+          data: response.data
+        },
+        message: response.data.message || 'Erro ao deletar usuário'
+      };
+    }
+
+    return {
+      success: true,
+      data: response.data,
+      message: response.data.message || 'Usuário deletado com sucesso'
+    };
+  } catch (error: any) {
+    console.error('Erro ao deletar usuario:', error);
+    
+    // Tratamento detalhado do erro
+    let errorMessage = 'Erro ao deletar usuário';
+    let errorDetails = null;
+    
+    if (error.response) {
+      // Erro vindo do servidor
+      errorMessage = error.response.data?.message || errorMessage;
+      errorDetails = error.response.data?.details || error.response.data;
+    } else if (error.request) {
+      // A requisição foi feita mas não houve resposta
+      errorMessage = 'Sem resposta do servidor';
+    } else {
+      // Outros erros
+      errorMessage = error.message || error;
+    }
+
+    throw {
+      success: false,
+      message: errorMessage,
+      details: errorDetails,
+      status: error.response?.status,
+      code: error.response?.data?.code
+    };
+  }
+}
+
+export const getUsuarioById = async (token: string, id: number) => {
+  try {
+    const response = await api.post(
+      `User/getOne`,
+      { id },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+
+    );
+    return response.data.registros;
+  } catch (error: any) {
+    console.error('Erro ao buscar usuario:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao buscar usuario');
+  }
+}
+
+export const updateUsuario = async (token: string, formData: FormData) => {
+
+  try {
+    const response = await api.post("User/Post", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(error);
+
+    // Verificação mais segura do erro
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao adicionar usuario';
+
+    throw new Error(errorMessage);
+  }
+}
 
 
 // interface RankingItem {

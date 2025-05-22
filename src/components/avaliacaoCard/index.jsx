@@ -308,9 +308,11 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
                 });
             }
 
-            // Recarrega a página após o sucesso
+            // Chama a função de sucesso do componente pai em vez de recarregar
             if (response.type || response.status === 'success') {
-                window.location.reload();
+                if (retorno.onAvaliacaoSuccess) {
+                    retorno.onAvaliacaoSuccess();
+                }
             }
 
         } catch (error) {
@@ -343,6 +345,8 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
                 return { semTroca: "93", comTroca: "158" };
             case "452":
                 return { semTroca: "432", comTroca: "435" }; // ou o valor que desejar para comTroca
+            case "357":
+                return { semTroca: "255", comTroca: '258' };
             default:
                 return { semTroca: "91", comTroca: "152" };
         }

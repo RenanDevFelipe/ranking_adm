@@ -14,22 +14,18 @@ export default function Avaliar() {
     const [retorno, setRetorno] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [dataSelecionada, setDataSelecionada] = useState('');
     const { darkMode } = useTheme();
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+    // Recupera a data do localStorage ou usa a data atual
+    const [dataSelecionada, setDataSelecionada] = useState(() => {
+        const savedDate = localStorage.getItem('avaliacaoDataSelecionada');
+        return savedDate || new Date().toISOString().split('T')[0];
+    });
 
     const toggleSidebar = () => {
         setIsSidebarVisible(!isSidebarVisible);
     };
-
-    // Define a data inicial (hoje)
-    useEffect(() => {
-        const currentDate = new Date();
-        const day = currentDate.getDate().toString().padStart(2, '0');
-        const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        const year = currentDate.getFullYear();
-        setDataSelecionada(`${year}-${month}-${day}`);
-    }, []);
 
     useEffect(() => {
         const token = localStorage.getItem('access_token');
@@ -61,7 +57,23 @@ export default function Avaliar() {
     }, [id, dataSelecionada]);
 
     const handleDataChange = (e) => {
-        setDataSelecionada(e.target.value);
+        const newDate = e.target.value;
+        setDataSelecionada(newDate);
+        // Armazena a data selecionada no localStorage
+        localStorage.setItem('avaliacaoDataSelecionada', newDate);
+    };
+
+    // Função para recarregar as avaliações mantendo a data
+    const handleAvaliacaoSuccess = () => {
+        const token = localStorage.getItem('access_token');
+        getAvaliacoes(token, id, dataSelecionada)
+            .then(response => {
+                setRetorno(response || {});
+                setAvaliacoes(response.registros || []);
+            })
+            .catch(err => {
+                console.error("Erro ao recarregar avaliações:", err);
+            });
     };
 
     // Função para formatar a data no estilo pt-BR
@@ -82,7 +94,6 @@ export default function Avaliar() {
         return (
             <div className="loading-container">
                 <div className="spinner"></div>
-                {/* <img src="https://ticonnecte.com.br/wp-content/uploads/2025/05/tec.gif" width={150} alt="" srcset="" /> */}
                 <p>Carregando ordens de serviço...</p>
             </div>
         );
@@ -105,7 +116,6 @@ export default function Avaliar() {
         );
     }
 
-
     return (
         <div className={`app-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
             <Sidebar isVisible={isSidebarVisible} />
@@ -126,7 +136,7 @@ export default function Avaliar() {
                                 id="dataFechamento"
                                 value={dataSelecionada}
                                 onChange={handleDataChange}
-                                max={new Date().toISOString().split('T')[0]} // Limita até hoje
+                                max={new Date().toISOString().split('T')[0]}
                             />
                         </div>
                     </div>
@@ -153,7 +163,10 @@ export default function Avaliar() {
                                         ...avaliacao,
                                         finalizacaoFormatada: formatarData(avaliacao.finalizacao)
                                     }}
-                                    retorno={retorno}
+                                    retorno={{
+                                        ...retorno,
+                                        onAvaliacaoSuccess: handleAvaliacaoSuccess
+                                    }}
                                 />
                             ))
                         ) : (

@@ -403,6 +403,7 @@ body {
 }
 .container-actions svg{
     cursor: pointer;
+    color: var(--textColor);
 }
 
 .tutorial-link {
@@ -577,6 +578,8 @@ body {
     background-color: #e55600;
     transform: translateY(-2px);
 }
+
+
 
 /* Estilos para o modo light */
 .light-mode .form-container {
@@ -1354,4 +1357,87 @@ h3 {
     text-align: center;
     padding: 20px;
     color: var(--textColor);
+}
+
+
+/* Adicione ao seu arquivo styles.css */
+
+.error-message {
+    color: #ff4444;
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+.success-message {
+    color: #00C851;
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+.spinner-icon {
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Estilo para campos inválidos */
+.form-group input:invalid, select:invalid {
+    border-color: #ff4444;
+}
+
+/* Estilo para campos válidos */
+.form-group input:valid, select:valid {
+    border-color: #00C851;
+}
+
+/* Efeito de pulsação */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+}
+
+.pulse {
+    animation: pulse 1s;
+    border-color: #ff4444;
+}
+
+/* Estilo para o campo de senha com botão de visualização */
+.password-container {
+    position: relative;
+}
+
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-wrapper input {
+    width: 100%;
+    padding-right: 40px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    padding: 5px;
+}
+
+.toggle-password:hover {
+    color: #333;
+}
+
+.info-message {
+    color: var(--textColor);
+    font-size: 0.8rem;
+    margin-top: 5px;
 }

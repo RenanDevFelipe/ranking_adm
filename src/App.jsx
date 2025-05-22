@@ -8,11 +8,15 @@ import Tutorial from './pages/tutorial/';
 import AddTutorial from './pages/tutorial/tutorial.jsx';
 import Colaborador from './pages/colaborador/index.jsx';
 import AddColaborador from './pages/colaborador/colaborador.jsx';
+import AddUsuario from './pages/user/usuario.jsx';
 import RankingMensal from './pages/ranking-mensal/index.jsx'
 import RankingDiario from './pages/ranking-diario/index.jsx'
 import Checklists from './pages/checklist/index.jsx';
 import AddAssunto from './pages/assunto/assunto.jsx';
 import Assunto from './pages/assunto/index.jsx';
+import Usuarios from './pages/user/index.jsx';
+import Setores from './pages/setor/index.jsx';
+import AddSetor from './pages/setor/setor.jsx';
 import Checklist from './pages/checklist/checklist.jsx'
 import AvaliarN3 from './pages/avaliacoes/n3/index.jsx';
 import AvaliarN2 from './pages/avaliacoes/n2/index.jsx';
@@ -119,6 +123,26 @@ export default function App() {
                 <Route path="/rh/movimentacoes/:id" element={
                     <PrivateRoute>
                         <MovimentacoesRH />
+                    </PrivateRoute>
+                } />
+                <Route path="/usuarios" element={
+                    <PrivateRoute>
+                        <Usuarios />
+                    </PrivateRoute>
+                } />
+                <Route path="/usuario/:id" element={
+                    <PrivateRoute>
+                        <AddUsuario />
+                    </PrivateRoute>
+                } />
+                <Route path="/setores" element={
+                    <PrivateRoute>
+                        <Setores />
+                    </PrivateRoute>
+                } />
+                <Route path="/setor/:id" element={
+                    <PrivateRoute>
+                        <AddSetor />
                     </PrivateRoute>
                 } />
             </Routes>

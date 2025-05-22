@@ -33,7 +33,7 @@ const Sidebar = ({ isVisible }) => {
     // Funções para verificar permissões
     const canSeeConfig = () => userRole === 1; // Apenas role 1 vê configurações
     const canSeeChecklist = () => ![6, 7].includes(userSetor); // Setores 6,7,9 não veem checklist
-    const canSeeTutorials = () => ![6, 7, 9].includes(userSetor); // Setores 6,7,9 não veem tutoriais
+    const canSeeTutorials = () => ![6, 7].includes(userSetor); // Setores 6,7,9 não veem tutoriais
 
     const toggleRankingSubmenu = () => {
         setShowRankingSubmenu(!showRankingSubmenu);
@@ -149,7 +149,7 @@ const Sidebar = ({ isVisible }) => {
                                 
                                 {showSettingSubmenu && (
                                     <ul className="submenu">
-                                        <li>
+                                        <li onClick={navegacao("/usuarios")}>
                                             <UsuarioIcon className="submenu-icon" />
                                             Usuário
                                         </li>
