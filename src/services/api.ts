@@ -772,10 +772,79 @@ export const addAvaliacaoEstoque = async (token: string, formData: FormData) => 
   }
 };
 
+export const addAvaliacaoRH = async (token: string, formData: FormData) => {
+  try {
+      const response = await api.post(
+          "Avaliacao/Rh",
+          formData,
+          {
+              headers: {
+                  'Content-Type': 'multipart/form-data',
+                  Authorization: `Bearer ${token}`,
+              },
+          }
+      );
+      return response.data;
+  } catch (error: any) {
+      console.error('Erro ao adicionar avaliação:', error);
+
+      const errorMessage =
+          error?.response?.data?.message ||
+          error?.message ||
+          'Erro ao adicionar avaliação';
+
+      throw new Error(errorMessage);
+  }
+};
+
 export const getHistorico = async (token: string, id: number,data: string) => {
   try {
     const response = await api.post(
       `Historico/N2`,
+      { 
+        id_colaborador: id,
+        data_requisicao: data
+       },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao buscar historico:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao buscar historico');
+  }
+}
+
+export const getHistoricoEstoque = async (token: string, id: number,data: string) => {
+  try {
+    const response = await api.post(
+      `Historico/Estoque`,
+      { 
+        id_colaborador: id,
+        data_requisicao: data
+       },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao buscar historico:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao buscar historico');
+  }
+}
+
+export const getHistoricoRH = async (token: string, id: number,data: string) => {
+  try {
+    const response = await api.post(
+      `Historico/Rh`,
       { 
         id_colaborador: id,
         data_requisicao: data

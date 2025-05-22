@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from "../../../components/sidebar/index.jsx";
 import "../../styles.css";
-import { getColaboradorById, getHistorico } from '../../../services/api.ts';
+import { getColaboradorById, getHistoricoRH } from '../../../services/api.ts';
 import { useTheme } from '../../../context/ThemeContext.js';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 
@@ -33,7 +33,8 @@ export default function Movimentacoes() {
             'Pontos Atuais',
             'Observação',
             'Avaliador',
-            'Data'
+            'Data Infração',
+            'Data avaliação'
         ];
 
         const rows = historico.registros.map(item => {
@@ -44,6 +45,7 @@ export default function Movimentacoes() {
                 item.pontuacao_atual,
                 item.observacao || '-',
                 item.nome_avaliador,
+                item.data_infracao,
                 item.data_avaliacao
             ];
         });
@@ -79,7 +81,7 @@ export default function Movimentacoes() {
             const token = localStorage.getItem('access_token');
             const [colaboradorData, historicoData] = await Promise.all([
                 getColaboradorById(token, bd),
-                getHistorico(token, bd, initialData)
+                getHistoricoRH(token, bd, initialData)
             ]);
 
             setColaborador(colaboradorData);
@@ -93,8 +95,8 @@ export default function Movimentacoes() {
 
     const handleDateChange = (e) => {
         const newDate = e.target.value;
-        // Navega para a mesma rota com a nova data
-        navigate(`/movimentacoes/${id}?bd=${bd}&data=${newDate}`);
+        // Navega para a mesma rota mas com a nova data
+        navigate(`/rh/movimentacoes/${id}?bd=${bd}&data=${newDate}`);
     };
 
     useEffect(() => {
@@ -102,15 +104,9 @@ export default function Movimentacoes() {
         if (!token) {
             navigate('/');
         } else {
-            // Se não houver data inicial, usa a data atual
-            if (!initialData) {
-                const currentDate = new Date().toISOString().split('T')[0];
-                navigate(`/movimentacoes/${id}?bd=${bd}&data=${currentDate}`, { replace: true });
-            } else {
-                fetchData();
-            }
+            fetchData();
         }
-    }, [id, bd, initialData, fetchData, navigate]);
+    }, [fetchData, navigate]);
 
     if (loading) {
         return (
@@ -173,8 +169,8 @@ export default function Movimentacoes() {
                                         <th>Pontos atuais</th>
                                         <th>Observação</th>
                                         <th>Avaliador</th>
-                                        <th>Data infração</th>
-                                        <th>Data avaliação</th>
+                                        <th>Data Infração</th>
+                                        <th>Data Avaliação</th>
                                     </tr>
                                 </thead>
                                 <tbody>

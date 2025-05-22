@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from "../../../components/sidebar/index.jsx";
 import "../../styles.css";
-import { getColaboradorById, getHistorico } from '../../../services/api.ts';
+import { getColaboradorById, getHistoricoEstoque } from '../../../services/api.ts';
 import { useTheme } from '../../../context/ThemeContext.js';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 
@@ -16,7 +16,6 @@ export default function Movimentacoes() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [historico, setHistorico] = useState([]);
-    const [dataSelecionada, setDataSelecionada] = useState('');
     const [colaborador, setColaborador] = useState(null);
     const { darkMode } = useTheme();
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
@@ -28,17 +27,15 @@ export default function Movimentacoes() {
     const exportToCSV = () => {
         if (!historico.registros || historico.registros.length === 0) return;
 
-        // Cabeçalhos do CSV
         const headers = [
             'Diferença',
             'Pontos Anteriores',
             'Pontos Atuais',
             'Observação',
             'Avaliador',
-            'Data'
+            'Data Infração'
         ];
 
-        // Dados formatados
         const rows = historico.registros.map(item => {
             const diferenca = item.pontuacao_atual - item.pontuacao_anterior;
             return [
@@ -47,18 +44,14 @@ export default function Movimentacoes() {
                 item.pontuacao_atual,
                 item.observacao || '-',
                 item.nome_avaliador,
-                item.data_avaliacao
+                item.data_infracao
             ];
         });
 
-        // Adiciona BOM para UTF-8
         const BOM = "\uFEFF";
-        
-        // Conteúdo do CSV
         let csvContent = BOM + headers.join(';') + '\n'
             + rows.map(row => 
                 row.map(field => {
-                    // Se o campo contiver quebras de linha, vírgulas ou ponto-e-vírgula, coloca entre aspas
                     if (typeof field === 'string' && (field.includes('\n') || field.includes(';') || field.includes(','))) {
                         return `"${field.replace(/"/g, '""')}"`;
                     }
@@ -66,33 +59,27 @@ export default function Movimentacoes() {
                 }).join(';')
             ).join('\n');
 
-        // Criar blob com o tipo correto
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
-        
-        // Criar link de download
         const link = document.createElement('a');
         link.setAttribute('href', url);
         link.setAttribute(
             'download', 
-            `movimentacoes_${colaborador?.nome_colaborador || 'colaborador'}_${dataSelecionada || 'data'}.csv`
+            `movimentacoes_${colaborador?.nome_colaborador || 'colaborador'}_${initialData || 'data'}.csv`
         );
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
-        // Liberar memória
         setTimeout(() => URL.revokeObjectURL(url), 100);
     };
 
-    // Função para buscar os dados com useCallback para evitar recriações desnecessárias
-    const fetchData = useCallback(async (date) => {
+    const fetchData = useCallback(async () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('access_token');
             const [colaboradorData, historicoData] = await Promise.all([
                 getColaboradorById(token, bd),
-                getHistorico(token, bd, date || dataSelecionada)
+                getHistoricoEstoque(token, bd, initialData)
             ]);
 
             setColaborador(colaboradorData);
@@ -102,39 +89,22 @@ export default function Movimentacoes() {
             setError(err.message);
             setLoading(false);
         }
-    }, [bd, dataSelecionada]);
+    }, [bd, initialData]);
 
-    // Atualiza a URL quando a data muda
     const handleDateChange = (e) => {
         const newDate = e.target.value;
-        setDataSelecionada(newDate);
-        navigate(`/movimentacoes/${id}?bd=${bd}&data=${newDate}`, { replace: true });
+        // Navega para a mesma rota mas com a nova data
+        navigate(`/estoque/movimentacoes/${id}?bd=${bd}&data=${newDate}`);
     };
-
-    // Busca dados do colaborador e histórico
-    useEffect(() => {
-        // Define a data inicial
-        const currentDate = new Date();
-        const formattedDate = currentDate.toISOString().split('T')[0];
-        const dateToUse = initialData || formattedDate;
-        setDataSelecionada(dateToUse);
-        
-        fetchData(dateToUse);
-    }, [id, bd, initialData, fetchData]);
-
-    // Atualiza os dados quando a data muda
-    useEffect(() => {
-        if (dataSelecionada && dataSelecionada !== initialData) {
-            fetchData();
-        }
-    }, [dataSelecionada, initialData, fetchData]);
 
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (!token) {
             navigate('/');
+        } else {
+            fetchData();
         }
-    }, [navigate]);
+    }, [fetchData, navigate]);
 
     if (loading) {
         return (
@@ -173,7 +143,7 @@ export default function Movimentacoes() {
                         <input
                             type="date"
                             id="dataFiltro"
-                            value={dataSelecionada}
+                            value={initialData}
                             onChange={handleDateChange}
                             className="date-input"
                         />
@@ -197,7 +167,8 @@ export default function Movimentacoes() {
                                         <th>Pontos atuais</th>
                                         <th>Observação</th>
                                         <th>Avaliador</th>
-                                        <th>Data</th>
+                                        <th>Data Infração</th>
+                                        <th>Data Avaliação</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -218,6 +189,7 @@ export default function Movimentacoes() {
                                             <td>{item.pontuacao_atual}</td>
                                             <td>{item.observacao || '-'}</td>
                                             <td>{item.nome_avaliador}</td>
+                                            <td>{item.data_infracao}</td>
                                             <td>{item.data_avaliacao}</td>
                                         </tr>
                                     ))}
