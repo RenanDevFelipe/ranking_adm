@@ -4,7 +4,7 @@ import { ChecklistGetFiltered, addAvaliacao } from '../../services/api.ts';
 import { FaSpinner } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 
-const AvaliacaoCard = ({ avaliacao, retorno }) => {
+const AvaliacaoCard = ({ avaliacao, retorno, isLoading }) => {
     const [showChecklist, setShowChecklist] = useState(false);
     const [showDetalhes, setShowDetalhes] = useState(false);
     const [checklistItems, setChecklistItems] = useState([]);
@@ -311,6 +311,8 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
             // Chama a função de sucesso do componente pai em vez de recarregar
             if (response.type || response.status === 'success') {
                 if (retorno.onAvaliacaoSuccess) {
+                    retorno.onAvaliacaoSuccess(avaliacao.id);
+                    // Ou simplesmente chame a função sem parâmetros se já estiver configurada no pai
                     retorno.onAvaliacaoSuccess();
                 }
             }
@@ -335,8 +337,6 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
         }
     };
 
-    console.log(retorno);
-    console.log(avaliacao);
 
     const getTrocaValues = () => {
         switch (avaliacao.id_assunto) {
@@ -355,6 +355,11 @@ const AvaliacaoCard = ({ avaliacao, retorno }) => {
     const trocaValues = getTrocaValues();
     return (
         <div className={`avaliacao-card ${avaliacao.status === 'Finalizada' ? 'finalizada' : ''}`}>
+            {isLoading && (
+                <div className="avaliacao-card-loading">
+                    <FaSpinner className="spinner-icon" />
+                </div>
+            )}
             <div className="avaliacao-header">
                 <span className="avaliacao-id">OS #{avaliacao.id_atendimento}</span>
                 <span title={avaliacao.avaliador} className="avaliacao-status">{avaliacao.status}</span>

@@ -13,6 +13,8 @@ export default function Avaliar() {
     const [avaliacoes, setAvaliacoes] = useState([]);
     const [retorno, setRetorno] = useState({});
     const [loading, setLoading] = useState(true);
+    const [loadingCard, setLoadingCard] = useState(false);
+    const [loadingCardId, setLoadingCardId] = useState(null);
     const [error, setError] = useState(null);
     const { darkMode } = useTheme();
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
@@ -64,8 +66,10 @@ export default function Avaliar() {
     };
 
     // Função para recarregar as avaliações mantendo a data
-    const handleAvaliacaoSuccess = () => {
+    const handleAvaliacaoSuccess = (cardId) => {
+        setLoadingCardId(cardId); // Ativa o loading apenas para este card
         const token = localStorage.getItem('access_token');
+
         getAvaliacoes(token, id, dataSelecionada)
             .then(response => {
                 setRetorno(response || {});
@@ -73,6 +77,10 @@ export default function Avaliar() {
             })
             .catch(err => {
                 console.error("Erro ao recarregar avaliações:", err);
+            })
+            .finally(() => {
+                setLoadingCardId(null); // Desativa o loading quando completo
+                localStorage.removeItem('avaliacaoDataSelecionada');
             });
     };
 
@@ -165,8 +173,9 @@ export default function Avaliar() {
                                     }}
                                     retorno={{
                                         ...retorno,
-                                        onAvaliacaoSuccess: handleAvaliacaoSuccess
+                                        onAvaliacaoSuccess: () => handleAvaliacaoSuccess(avaliacao.id)
                                     }}
+                                    isLoading={loadingCardId === avaliacao.id}
                                 />
                             ))
                         ) : (

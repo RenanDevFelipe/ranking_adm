@@ -1385,12 +1385,12 @@ h3 {
 }
 
 /* Estilo para campos inválidos */
-.form-group input:invalid, select:invalid {
+.form-group input:invalid, .form-group select:invalid {
     border-color: #ff4444;
 }
 
 /* Estilo para campos válidos */
-.form-group input:valid, select:valid {
+.form-group input:valid, .form-group select:valid {
     border-color: #00C851;
 }
 
@@ -1423,9 +1423,9 @@ h3 {
 }
 
 .toggle-password {
-    position: absolute;
+    /* position: absolute;
     right: 10px;
-    background: none;
+    background: none; */
     border: none;
     cursor: pointer;
     color: #666;
