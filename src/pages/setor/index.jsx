@@ -1,21 +1,17 @@
 import { useState, useEffect } from 'react';
-import Sidebar from '../../components/sidebar/index.jsx';
-import "../styles.css";
-import Card from '../../components/card';
-import { getUsuarios, getSetores, deleteUsuario } from '../../services/api.ts';
+import { getSetores, deleteSetor } from '../../services/api.ts';
 import { logout } from '../../utils/auth.js';
+import Sidebar from "../../components/sidebar/index.jsx";
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus } from 'react-icons/fa';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 
-export default function Colaborador() {
-    const [colaboradores, setColaboradores] = useState([]);
+export default function Setores() {
     const [setores, setSetores] = useState([]);
-    const [loading, setLoading] = useState({
-        colaboradores: true,
-        setores: true
-    });
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [darkMode] = useState(() => {
@@ -33,7 +29,9 @@ export default function Colaborador() {
     useEffect(() => {
         if (darkMode) {
             document.body.classList.remove('light-mode');
+            document.body.classList.add('dark-mode');
         } else {
+            document.body.classList.remove('dark-mode');
             document.body.classList.add('light-mode');
         }
         localStorage.setItem('darkMode', JSON.stringify(darkMode));
@@ -45,14 +43,10 @@ export default function Colaborador() {
 
         const fetchData = async () => {
             try {
-                const [colabsData, setoresData] = await Promise.all([
-                    getUsuarios(token),
-                    getSetores(token)
-                ]);
-
+                const setoresData = await getSetores(token);
                 if (isMounted) {
-                    setColaboradores(colabsData);
                     setSetores(setoresData);
+                    setLoading(false);
                 }
             } catch (err) {
                 if (isMounted) {
@@ -60,17 +54,11 @@ export default function Colaborador() {
                         setError('Sessão expirada. Redirecionando para login...');
                         logout();
                     } else {
-                        setError(err.message || 'Erro ao carregar dados');
+                        setError(err.message || 'Erro ao carregar setores');
                     }
+                    setLoading(false);
                 }
-                console.error("Erro ao buscar dados:", err);
-            } finally {
-                if (isMounted) {
-                    setLoading({
-                        colaboradores: false,
-                        setores: false
-                    });
-                }
+                console.error("Erro ao buscar setores:", err);
             }
         };
 
@@ -81,21 +69,18 @@ export default function Colaborador() {
         };
     }, []);
 
-    const getNomeSetor = (idSetor) => {
-        const setor = setores.find(s => s.id_setor === idSetor);
-        return setor ? setor.nome_setor : 'Setor não especificado';
-    };
+    const filteredSetores = setores.filter(setor =>
+        setor.nome_setor.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const handleEdit = (id) => {
-        navigate(`/Usuario/${id}`);
+        navigate(`/Setor/${id}`);
     };
-
-    console.log(colaboradores);
 
     const handleDelete = async (id, nome) => {
         const result = await Swal.fire({
             title: 'Tem certeza?',
-            text: `Você está prestes a excluir o usuario ${nome}. Esta ação não pode ser desfeita!`,
+            text: `Você está prestes a excluir o assunto ${nome}. Esta ação não pode ser desfeita!`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#FF6200',
@@ -107,64 +92,56 @@ export default function Colaborador() {
         if (result.isConfirmed) {
             try {
                 const token = localStorage.getItem('access_token');
-                await deleteUsuario(token, id);
+                await deleteSetor(token, id);
 
                 // Atualiza a lista de colaboradores após exclusão
-                setColaboradores(colaboradores.filter(colab => colab.id_user !== id));
+                setSetores(setores.filter(setor => setor.id_setor !== id));
 
                 Swal.fire(
                     'Excluído!',
-                    'O Usuario foi excluído com sucesso.',
+                    'O Assunto foi excluído com sucesso.',
                     'success'
                 );
             } catch (err) {
-                console.error("Erro ao excluir usuario:", err);
+                console.error("Erro ao excluir tutorial:", err);
                 Swal.fire(
                     'Erro!',
-                    'Ocorreu um erro ao tentar excluir o usuario.',
+                    err,
                     'error'
                 );
             }
         }
     };
 
-    const filteredColaboradores = colaboradores.filter(colab =>
-        colab.nome_user.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const isLoading = loading.colaboradores || loading.setores;
-
-    if (isLoading) {
+    if (loading) {
         return (
-                <div className="loading-container">
-                    <div className="spinner"></div>
-                    <p>Carregando Dados...</p>
-                </div>
+            <div className="loading-container">
+                <div className="spinner"></div>
+                <p>Carregando assuntos...</p>
+            </div>
         );
     }
 
     if (error) {
         return (
-            <div className="app-container">
-                <div className="error-container">
-                    <div className="error-message">{error}</div>
-                    <button
-                        className="retry-button"
-                        onClick={() => window.location.reload()}
-                    >
-                        Tentar novamente
-                    </button>
-                </div>
+            <div className="error-container">
+                <div className="error-message">{error}</div>
+                <button
+                    className="retry-button"
+                    onClick={() => window.location.reload()}
+                >
+                    Tentar novamente
+                </button>
             </div>
         );
     }
 
     return (
-        <div className="app-container">
+        <div className={`tutorial-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
             <Sidebar isVisible={isSidebarVisible} />
-            <div className="main-content">
-                <div className="sidebar-footer">
-                    <div className='search-box'>
+            <div className='main-content-assunto'>
+                <div className='container-conteudo'>
+                    <div className="search-container">
                         <button
                             className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
                             onClick={toggleSidebar}
@@ -172,56 +149,46 @@ export default function Colaborador() {
                             {isSidebarVisible ? <DehazeIcon /> : '►'}
                         </button>
                         <input
-                            placeholder='Pesquise pelo nome do técnico'
-                            className="search"
                             type="text"
+                            placeholder="Pesquisar assuntos..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
+                            className="search-input"
                         />
+                        {/* <button 
+                        onClick={() => setDarkMode(!darkMode)} 
+                        className="theme-toggle"
+                    >
+                        {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                    </button> */}
                     </div>
-                    <div className='container-user'>
-                        <div className="user-info">
-                            {filteredColaboradores.length > 0 ? (
-                                filteredColaboradores.map((colab) => (
-                                    <div key={colab.id_user} className="colaborador-card">
-                                        <Card
-                                            logo={'https://ticonnecte.com.br/ranking_api/api/uploads/default.png'}
-                                            name={colab.nome_user}
-                                            role={getNomeSetor(colab.setor_user)}
-                                        />
-                                        <div className="action-buttons">
-                                            <button
-                                                className="edit-button"
-                                                onClick={() => handleEdit(colab.id_user)}
-                                            >
-                                                <FaEdit /> Editar
-                                            </button>
-                                            <button
-                                                className="delete-button"
-                                                onClick={() => handleDelete(colab.id_user, colab.nome_user)}
-                                            >
-                                                <FaTrash /> Excluir
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : searchTerm ? (
-                                <p className="no-results">Nenhum colaborador encontrado para "{searchTerm}"</p>
-                            ) : (
-                                <p className="no-results">Nenhum colaborador disponível</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
 
-                {/* Botão flutuante para adicionar novo colaborador */}
-                <button
-                    className="add-button"
-                    onClick={() => navigate('/usuario/0')}
-                >
-                    <FaPlus />
-                </button>
+                    {filteredSetores.length > 0 ? (
+                        <div className="tutorials-grid">
+                            {filteredSetores.map((setor) => (
+                                <div key={setor.id_setor} className="tutorial-card">
+                                    <h3 className="tutorial-title">{setor.nome_setor}</h3>
+                                    <div className='container-actions'>
+                                        <EditIcon onClick={() => handleEdit(setor.id_setor)} />
+                                        <DeleteIcon onClick={() => handleDelete(setor.id_setor, setor.nome_setor)} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : searchTerm ? (
+                        <p className="no-results">Nenhum assunto encontrado para "{searchTerm}"</p>
+                    ) : (
+                        <p className="no-results">Nenhum assunto disponível</p>
+                    )}
+                </div>
             </div>
+            {/* Botão flutuante para adicionar novo colaborador */}
+            <button
+                className="add-button"
+                onClick={() => navigate('/setor/0')}
+            >
+                <FaPlus />
+            </button>
         </div>
     );
 }

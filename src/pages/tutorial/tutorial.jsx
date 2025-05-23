@@ -100,18 +100,59 @@ export default function AddTutorial() {
         fetchInitialData();
     }, [id]);
 
+    const [urlErrors, setUrlErrors] = useState({
+        url_view: false,
+        url_download: false
+    });
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
+
+        // Validação em tempo real apenas para URLs
+        if (name === 'url_view' || name === 'url_download') {
+            const isValid = value ? validateGoogleDriveUrl(value) : false;
+            setUrlErrors(prev => ({
+                ...prev,
+                [name]: !isValid
+            }));
+        }
+    };
+
+    const validateGoogleDriveUrl = (url) => {
+        if (!url) return false; // Retorna false se estiver vazio
+
+        // Padrões aceitos para visualização
+        const viewPatterns = [
+            /^https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)(\/view|\/preview)?(\?[\w=&]*)?$/,
+            /^https:\/\/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)$/
+        ];
+
+        // Padrões aceitos para download
+        const downloadPatterns = [
+            /^https:\/\/(drive\.google\.com\/u\/\d+\/uc\?id=|drive\.usercontent\.google\.com\/u\/\d+\/uc\?id=|drive\.google\.com\/uc\?id=)([a-zA-Z0-9_-]+)&export=download$/
+        ];
+
+        // Verifica se corresponde a algum padrão
+        return [...viewPatterns, ...downloadPatterns].some(regex => regex.test(url));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('access_token');
 
+        // Verifica erros antes de enviar
+        if (urlErrors.url_view || urlErrors.url_download) {
+            Swal.fire(
+                'Erro!',
+                'Por favor, corrija os erros nos campos de URL antes de enviar.',
+                'error'
+            );
+            return;
+        }
         try {
             // Cria um FormData para enviar os dados
             const formDataToSend = new FormData();
@@ -224,8 +265,16 @@ export default function AddTutorial() {
                                     name="url_view"
                                     value={formData.url_view}
                                     onChange={handleInputChange}
+                                    className={urlErrors.url_view ? 'input-error' : ''}
                                     required
                                 />
+                                {urlErrors.url_view && formData.url_view && (
+                                    <p className="error-message">
+                                        Link inválido. Formatos aceitos:
+                                        <br />- https://drive.google.com/file/d/ID_DO_ARQUIVO/view
+                                        <br />- https://drive.google.com/open?id=ID_DO_ARQUIVO
+                                    </p>
+                                )}
                             </div>
 
                             <div className="form-group">
@@ -236,13 +285,21 @@ export default function AddTutorial() {
                                     name="url_download"
                                     value={formData.url_download}
                                     onChange={handleInputChange}
+                                    className={urlErrors.url_download ? 'input-error' : ''}
                                     required
                                 />
+                                {urlErrors.url_download && formData.url_download && (
+                                    <p className="error-message">
+                                        Link inválido. Formato aceito:
+                                        <br />- https://drive.google.com/uc?id=ID_DO_ARQUIVO&export=download
+                                        <br />- https://drive.usercontent.google.com/... (links similares)
+                                    </p>
+                                )}
                             </div>
 
                             <div className="form-group">
                                 <input
-                                    type="text"
+                                    type="hidden"
                                     id="criador"
                                     name="criador"
                                     value={formData.criado_por}
@@ -256,8 +313,8 @@ export default function AddTutorial() {
                                     <InputLabel id="icon-select-label">Ícone</InputLabel>
                                     <Select
                                         labelId="icon-select-label"
-                                        id="icon_name"
-                                        name="icon_name"
+                                        id="name_icon"
+                                        name="name_icon"
                                         value={formData.name_icon}
                                         onChange={handleInputChange}
                                         label="Ícone"

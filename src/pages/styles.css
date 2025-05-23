@@ -522,6 +522,17 @@ body {
     font-weight: 500;
 }
 
+.form-group fieldset{
+    border-color: var(--textColor);
+}
+.form-group #name_icon{
+    color: var(--textColor);
+    display: flex;
+}
+.form-group #name_icon svg{
+    color: var(--textColor);
+}
+
 .form-group input,
 .form-group select {
     width: 100%;
@@ -1368,6 +1379,11 @@ h3 {
     margin-top: 5px;
 }
 
+.input-error {
+  border: 1px solid #ff4444!important;
+  background-color: #ffeeee;
+}
+
 .success-message {
     color: #00C851;
     font-size: 0.8rem;
@@ -1426,6 +1442,16 @@ h3 {
     /* position: absolute;
     right: 10px;
     background: none; */
+    border: none;
+    cursor: pointer;
+    color: #666;
+    padding: 5px;
+}
+
+.toggle-password-user {
+    position: absolute;
+    right: 10px;
+    background: none;
     border: none;
     cursor: pointer;
     color: #666;

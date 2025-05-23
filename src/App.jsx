@@ -145,6 +145,7 @@ export default function App() {
                         <AddSetor />
                     </PrivateRoute>
                 } />
+                
             </Routes>
         </ThemeProvider>
     );

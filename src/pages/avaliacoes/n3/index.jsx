@@ -13,7 +13,6 @@ export default function Avaliar() {
     const [avaliacoes, setAvaliacoes] = useState([]);
     const [retorno, setRetorno] = useState({});
     const [loading, setLoading] = useState(true);
-    const [loadingCard, setLoadingCard] = useState(false);
     const [loadingCardId, setLoadingCardId] = useState(null);
     const [error, setError] = useState(null);
     const { darkMode } = useTheme();

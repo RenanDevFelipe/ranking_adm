@@ -153,7 +153,7 @@ const Sidebar = ({ isVisible }) => {
                                             <UsuarioIcon className="submenu-icon" />
                                             Usuário
                                         </li>
-                                        <li>
+                                        <li onClick={navegacao("/setores")}>
                                             <SetorIcon className="submenu-icon" />
                                             Setor
                                         </li>

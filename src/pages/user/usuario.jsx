@@ -423,7 +423,7 @@ export default function AddUsuario() {
                                     />
                                     <button
                                         type="button"
-                                        className="toggle-password"
+                                        className="toggle-password-user"
                                         onClick={() => setShowPassword(!showPassword)}
                                     >
                                         {showPassword ? <FaEyeSlash /> : <FaEye />}

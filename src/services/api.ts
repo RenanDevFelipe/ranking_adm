@@ -184,12 +184,9 @@ export const deleteUsuario = async (token: string, id: number) => {
 
     // Verifica se a resposta indica sucesso
     if (response.data.status === 'error') {
-      throw {
-        response: {
-          data: response.data
-        },
-        message: response.data.message || 'Erro ao deletar usuário'
-      };
+      const error = new Error(response.data.message || 'Erro ao deletar usuário');
+      (error as any).response = { data: response.data };
+      throw error;
     }
 
     return {
@@ -216,13 +213,12 @@ export const deleteUsuario = async (token: string, id: number) => {
       errorMessage = error.message || error;
     }
 
-    throw {
-      success: false,
-      message: errorMessage,
-      details: errorDetails,
-      status: error.response?.status,
-      code: error.response?.data?.code
-    };
+    const err = new Error(errorMessage);
+    (err as any).success = false;
+    (err as any).details = errorDetails;
+    (err as any).status = error.response?.status;
+    (err as any).code = error.response?.data?.code;
+    throw err;
   }
 }
 
@@ -310,6 +306,93 @@ export const getSetores = async (token: string): Promise<Setores[]> => {
     throw new Error(error.response?.data?.message || 'Erro ao carregar colaboradores');
   }
 };
+
+export const getSetorById = async (token: string, id_setor: number) => {
+  try {
+    const response = await api.post(
+      `Departamento/getOne`,
+      { id_setor },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao buscar setor:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao buscar setor');
+  }
+}
+
+export const addSetor = async (token: string, formData: FormData) => {
+  try {
+    const response = await api.post("Departamento/Post", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao adicionar setor:', error);
+
+    // Verificação mais segura do erro
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao adicionar setor';
+
+    throw new Error(errorMessage);
+  }
+};
+
+export const updateSetor = async (token: string, formData: FormData) => {
+
+  try {
+    const response = await api.post("Departamento/Post", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data.registro;
+  } catch (error: any) {
+    console.error(error);
+
+    // Verificação mais segura do erro
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao atualizar setor';
+
+    throw new Error(errorMessage);
+  }
+}
+
+export const deleteSetor = async (token: string, id_setor: number) => {
+  try {
+    const response = await api.delete(
+      `Departamento/Delete`,
+      
+      {
+        data: { id_setor },   
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+      
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao deletar setor:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao deletar setor');
+  }
+}
+
+
 
 interface Avaliacoes {
   id: string;
