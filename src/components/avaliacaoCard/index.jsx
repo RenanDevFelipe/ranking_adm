@@ -4,6 +4,7 @@ import { ChecklistGetFiltered, addAvaliacao } from '../../services/api.ts';
 import { FaSpinner } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 
+
 const AvaliacaoCard = ({ avaliacao, retorno, isLoading }) => {
     const [showChecklist, setShowChecklist] = useState(false);
     const [showDetalhes, setShowDetalhes] = useState(false);
@@ -17,7 +18,6 @@ const AvaliacaoCard = ({ avaliacao, retorno, isLoading }) => {
     const usuario = localStorage.getItem('user_name');
     const id_ixc = localStorage.getItem('user_id');
     const setor = localStorage.getItem('user_setor');
-
 
     const fetchChecklist = async () => {
         if (!avaliacao.id_assunto) return;
@@ -460,6 +460,14 @@ const AvaliacaoCard = ({ avaliacao, retorno, isLoading }) => {
                         </div>
                     )}
 
+                    {(avaliacao.plano_cliente != null || avaliacao.potencia.fibra.id_caixa_ftth != null) && (
+                        <div className='ftth'>
+                            <p className='plano'>O plano do cliente é: {avaliacao.plano_cliente.velocidade}</p>
+                            <p className='porcentagem'>60% da velocidade do plano ({avaliacao.plano_cliente.velocidade}) é : {parseInt(avaliacao.plano_cliente.velocidade.match(/\d+/)[0]) * 0.6}MB</p>
+                            <p className='id_cto'>A CTO do cliente é : {avaliacao.potencia.fibra.id_caixa_ftth} <br /> Porta : {avaliacao.potencia.fibra.porta_ftth}</p>
+                        </div>
+                    )}
+
 
                     <div className='buttons'>
                         <button
@@ -530,16 +538,20 @@ const AvaliacaoCard = ({ avaliacao, retorno, isLoading }) => {
 
                             <div className='checklist-observacao'>
                                 <input type="text" placeholder='Observações gerais' />
-                                {avaliacao.id_assunto !== "10" && (
-                                    <select
-                                        value={trocaSelecionada}
-                                        onChange={(e) => setTrocaSelecionada(e.target.value)}
-                                    >
-                                        <option value="">Selecione uma opção</option>
-                                        <option value={trocaValues.semTroca}>Sem troca</option>
-                                        <option value={trocaValues.comTroca}>Com troca</option>
-                                    </select>
-                                )}
+                                {avaliacao.id_assunto !== "10" &&
+                                    avaliacao.id_assunto !== "308" &&
+                                    avaliacao.id_assunto !== "314" &&
+                                    avaliacao.id_assunto !== "425" &&
+                                    avaliacao.id_assunto !== "328" && (
+                                        <select
+                                            value={trocaSelecionada}
+                                            onChange={(e) => setTrocaSelecionada(e.target.value)}
+                                        >
+                                            <option value="">Selecione uma opção</option>
+                                            <option value={trocaValues.semTroca}>Sem troca</option>
+                                            <option value={trocaValues.comTroca}>Com troca</option>
+                                        </select>
+                                    )}
 
                                 {/* Mostra o campo de observação de troca apenas quando "Com troca" está selecionado */}
                                 {(trocaSelecionada === "152" || trocaSelecionada === "158" || trocaSelecionada === "452") && (

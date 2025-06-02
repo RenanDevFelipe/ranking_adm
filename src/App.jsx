@@ -140,11 +140,13 @@ export default function App() {
                         <Setores />
                     </PrivateRoute>
                 } />
+
                 <Route path="/setor/:id" element={
                     <PrivateRoute>
                         <AddSetor />
                     </PrivateRoute>
                 } />
+
                 
             </Routes>
         </ThemeProvider>

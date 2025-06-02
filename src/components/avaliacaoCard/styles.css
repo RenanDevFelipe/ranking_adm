@@ -395,6 +395,7 @@
     border-radius: 4px;
 }
 
+
   .checklist-observacao{
     width: 100%;
     display: flex;
@@ -433,4 +434,29 @@
 .spinner-icon {
     animation: spin 1s linear infinite;
     margin-right: 8px;
+}
+
+.ftth {
+    margin-bottom: 10px;
+}
+
+.ftth p {
+    border: 2px solid #fff; /* Borda branca */
+    color: #fff; /* Texto branco */
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.ftth .plano,
+.ftth .porcentagem,
+.ftth .id_cto {
+    border: 2px solid #fff;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-right: 10px;
 }
