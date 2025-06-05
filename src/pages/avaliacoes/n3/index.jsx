@@ -43,7 +43,7 @@ export default function Avaliar() {
                 const response = await getAvaliacoes(token, id, dataSelecionada);
                 setRetorno(response || {});
                 setAvaliacoes(response.registros || []);
-
+                localStorage.removeItem('avaliacaoDataSelecionada');
             } catch (err) {
                 console.error("Erro ao buscar avaliações:", err);
                 setError(err.message || 'Erro ao carregar avaliações');

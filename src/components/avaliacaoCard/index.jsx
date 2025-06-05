@@ -460,13 +460,28 @@ const AvaliacaoCard = ({ avaliacao, retorno, isLoading }) => {
                         </div>
                     )}
 
-                    {(avaliacao.plano_cliente != null || avaliacao.potencia.fibra.id_caixa_ftth != null) && (
+                    {/* Seção do Plano (sempre mostra se existir, exceto porcentagem sem número) */}
+                    {(avaliacao.plano_cliente != null && avaliacao.plano_cliente.velocidade != null) && (
                         <div className='ftth'>
                             <p className='plano'>O plano do cliente é: {avaliacao.plano_cliente.velocidade}</p>
-                            <p className='porcentagem'>60% da velocidade do plano ({avaliacao.plano_cliente.velocidade}) é : {parseInt(avaliacao.plano_cliente.velocidade.match(/\d+/)[0]) * 0.6}MB</p>
-                            <p className='id_cto'>A CTO do cliente é : {avaliacao.potencia.fibra.id_caixa_ftth} <br /> Porta : {avaliacao.potencia.fibra.porta_ftth}</p>
+                            {avaliacao.plano_cliente.velocidade.match(/\d+/) && (
+                                <p className='porcentagem'>
+                                    60% da velocidade do plano ({avaliacao.plano_cliente.velocidade}) é: {parseInt(avaliacao.plano_cliente.velocidade.match(/\d+/)[0]) * 0.6}MB
+                                </p>
+                            )}
                         </div>
                     )}
+
+                    {/* Seção CTO/Porta (mostra apenas se existir fibra E NÃO existir rádio) */}
+                    {!(avaliacao.potencia.radio?.ccq != null || avaliacao.potencia.radio?.sinal != null) &&
+                        avaliacao.potencia.fibra.id_caixa_ftth != null && (
+                            <div className='ftth'>
+                                <p className='id_cto'>
+                                    A CTO do cliente é: {avaliacao.potencia.fibra.id_caixa_ftth} <br />
+                                    Porta: {avaliacao.potencia.fibra.porta_ftth}
+                                </p>
+                            </div>
+                        )}
 
 
                     <div className='buttons'>
