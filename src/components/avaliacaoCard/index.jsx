@@ -562,7 +562,7 @@ const AvaliacaoCard = ({ avaliacao, retorno, isLoading }) => {
                                             value={trocaSelecionada}
                                             onChange={(e) => setTrocaSelecionada(e.target.value)}
                                         >
-                                            <option value="">Selecione uma opção</option>
+                                            <option value={trocaValues.semTroca}>Selecione uma opção</option>
                                             <option value={trocaValues.semTroca}>Sem troca</option>
                                             <option value={trocaValues.comTroca}>Com troca</option>
                                         </select>

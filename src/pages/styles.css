@@ -360,6 +360,7 @@ body {
 
 .tutorial-card {
     width: 280px;
+    height: min-content;
     background-color: var(--colorDarkForm);
     border-radius: 8px;
     padding: 20px;
