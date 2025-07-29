@@ -26,6 +26,7 @@ import Movimentacoes from './pages/avaliacoes/n2/movimentacoes.jsx';
 import MovimentacoesEstoque from './pages/avaliacoes/estoque/movimentacoes.jsx';
 import MovimentacoesRH from './pages/avaliacoes/rh/movimentacoes.jsx';
 import { ThemeProvider } from './context/ThemeContext.js';
+import Connectbi from './pages/connectbii/index.tsx';
 
 
 
@@ -147,6 +148,11 @@ export default function App() {
                     </PrivateRoute>
                 } />
 
+                <Route path="/connectbi" element={
+                    <PrivateRoute>
+                        <Connectbi />
+                    </PrivateRoute>
+                } />
                 
             </Routes>
         </ThemeProvider>

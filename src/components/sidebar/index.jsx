@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import './style.css';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
     Assessment as AvaliarIcon,
+    Dashboard as DashboardIcon,
     Leaderboard as RankingSetorIcon,
     MenuBook as TutoriaisIcon,
     Settings as ConfiguracoesIcon,
@@ -15,7 +16,7 @@ import {
     Brightness4 as DarkModeIcon,
     Brightness7 as LightModeIcon,
     ExitToApp as LogoutIcon
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { useTheme } from '../../context/ThemeContext';
 
 const Sidebar = ({ isVisible }) => {
@@ -62,7 +63,7 @@ const Sidebar = ({ isVisible }) => {
             <div className="sidebar-header">
                 <h2>Ranking TI</h2>
             </div>
-            
+
             <nav className="sidebar-menu">
                 <ul>
                     <li className="menu-section">
@@ -70,9 +71,9 @@ const Sidebar = ({ isVisible }) => {
                             <AvaliarIcon className="menu-icon" />
                             <span className="section-title clickable">Avaliar</span>
                         </div>
-                        
-                        <div 
-                            className="menu-item" 
+
+                        <div
+                            className="menu-item"
                             onClick={toggleRankingSubmenu}
                         >
                             <RankingSetorIcon className="menu-icon" />
@@ -81,7 +82,7 @@ const Sidebar = ({ isVisible }) => {
                                 ▼
                             </span>
                         </div>
-                        
+
                         {showRankingSubmenu && (
                             <ul className="submenu">
                                 <li onClick={navegacao("/ranking-diario")}>
@@ -101,8 +102,8 @@ const Sidebar = ({ isVisible }) => {
 
                         {canSeeChecklist() && (
                             <>
-                                <div 
-                                    className="menu-item" 
+                                <div
+                                    className="menu-item"
                                     onClick={toggleChecklistSubmenu}
                                 >
                                     <RankingDiarioIcon className="menu-icon" />
@@ -111,7 +112,7 @@ const Sidebar = ({ isVisible }) => {
                                         ▼
                                     </span>
                                 </div>
-                                
+
                                 {showChecklistSubmenu && (
                                     <ul className="submenu">
                                         <li onClick={navegacao("/checklists")}>
@@ -126,7 +127,7 @@ const Sidebar = ({ isVisible }) => {
                                 )}
                             </>
                         )}
-                        
+
                         {canSeeTutorials() && (
                             <div className="menu-item" onClick={navegacao("/tutoriais")}>
                                 <TutoriaisIcon className="menu-icon" />
@@ -136,8 +137,8 @@ const Sidebar = ({ isVisible }) => {
 
                         {canSeeConfig() && (
                             <>
-                                <div 
-                                    className="menu-item" 
+                                <div
+                                    className="menu-item"
                                     onClick={toggleSettingSubmenu}
                                 >
                                     <ConfiguracoesIcon className="menu-icon" />
@@ -146,7 +147,7 @@ const Sidebar = ({ isVisible }) => {
                                         ▼
                                     </span>
                                 </div>
-                                
+
                                 {showSettingSubmenu && (
                                     <ul className="submenu">
                                         <li onClick={navegacao("/usuarios")}>
@@ -163,26 +164,31 @@ const Sidebar = ({ isVisible }) => {
                                         </li>
                                     </ul>
                                 )}
+
+                                <div className="menu-item" onClick={navegacao("/connectbi")}>
+                                    <DashboardIcon className="menu-icon" />
+                                    <span className="section-title clickable">ConnectBi</span>
+                                </div>
                             </>
                         )}
                     </li>
-                    
+
                     <li className="perfil">
                         <div className="profile-info">
                             {/* <img width={50} src={Logo} alt="User profile" /> */}
                             <span>{user}</span>
                         </div>
-                        
+
                         <div className="profile-actions">
-                            <button 
+                            <button
                                 className="theme-toggle"
                                 onClick={toggleDarkMode}
                                 title={darkMode ? 'Modo claro' : 'Modo escuro'}
                             >
-                                {darkMode ? <DarkModeIcon /> : <LightModeIcon /> }
+                                {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
                             </button>
-                            
-                            <button 
+
+                            <button
                                 className="logout-button"
                                 onClick={handleLogout}
                                 title="Sair"
