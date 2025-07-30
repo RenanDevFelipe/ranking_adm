@@ -1113,3 +1113,25 @@ export const getHistoricoRH = async (token: string, id: number,data: string) => 
     throw new Error(error.response?.data?.message || 'Erro ao buscar historico');
   }
 }
+
+export const getSODepartament = async (token: string,id: number) => {
+  try {
+    const response = await api.post(
+      `IXCSoft/ListSoDepartament`,
+      { 
+        id_setor: id,
+       },
+      {
+        timeout: 100000,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+
+    );
+    return response.data;
+  } catch (error) {
+     console.error('Erro ao buscar ordens de serviço:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao buscar ordens de serviço');
+  }
+}
