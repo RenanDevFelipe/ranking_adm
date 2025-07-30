@@ -158,10 +158,10 @@ const Connectbi = () => {
 
         // Carregar dados de OS para cada setor
         const osData: Record<string, OSData> = {};
-        
+
         for (const sector of sectorsData) {
           try {
-            const data = await getSODepartament(token,Number(sector.id_setor));
+            const data = await getSODepartament(token, Number(sector.id_setor));
             osData[sector.id_setor] = data;
           } catch (err) {
             console.error(`Erro ao carregar dados para setor ${sector.id_setor}:`, err);
@@ -191,7 +191,7 @@ const Connectbi = () => {
   const prepareSectorChartData = (): ChartData => {
     const labels: string[] = [];
     const data: number[] = [];
-    
+
     for (const [sectorId, osData] of Object.entries(sectorOSData)) {
       const sector = sectors.find(s => s.id_setor === sectorId);
       if (sector && osData.total > 0) {
@@ -199,7 +199,7 @@ const Connectbi = () => {
         data.push(osData.total);
       }
     }
-    
+
     const backgroundColors = [
       '#3B82F6', '#10B981', '#F59E0B', '#6366F1', '#9CA3AF',
       '#EC4899', '#8B5CF6', '#14B8A6', '#F97316', '#64748B',
@@ -207,7 +207,7 @@ const Connectbi = () => {
       '#EC4899', '#8B5CF6', '#14B8A6', '#F97316', '#64748B',
       '#3B82F6', '#10B981', '#F59E0B', '#6366F1', '#9CA3AF'
     ];
-    
+
     return {
       labels,
       datasets: [{
@@ -227,7 +227,7 @@ const Connectbi = () => {
     let totalDeslocamento = 0;
     let totalExecucao = 0;
     let totalReagendamento = 0;
-    
+
     for (const osData of Object.values(sectorOSData)) {
       totalAbertas += osData.registros.aberta?.total || 0;
       totalAnalise += osData.registros.analise?.total || 0;
@@ -238,12 +238,12 @@ const Connectbi = () => {
       totalExecucao += osData.registros.execucao?.total || 0;
       totalReagendamento += osData.registros.reagendamento?.total || 0;
     }
-    
+
     return {
-      labels: ['Abertas', 'Em Analise', 'Encaminhadas', 'Assumidas','Agendadas','Em Deslocamento', 'Em Execução','Reagendamento'],
+      labels: ['Abertas', 'Em Analise', 'Encaminhadas', 'Assumidas', 'Agendadas', 'Em Deslocamento', 'Em Execução', 'Reagendamento'],
       datasets: [{
-        data: [totalAbertas, totalAnalise, totalEncaminhada, totalAssumida,totalAgendada,totalDeslocamento,totalExecucao,totalReagendamento],
-        backgroundColor: ['#3B82F6', '#F59E0B', '#10B981', '#EF4444','#3B82F6','#3B82F6','#3B82F6','#3B82F6'],
+        data: [totalAbertas, totalAnalise, totalEncaminhada, totalAssumida, totalAgendada, totalDeslocamento, totalExecucao, totalReagendamento],
+        backgroundColor: ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#3B82F6', '#3B82F6', '#3B82F6', '#3B82F6'],
         borderWidth: 1,
       }]
     };
@@ -252,17 +252,14 @@ const Connectbi = () => {
   // Helper functions
   const getStatusClass = (status: string) => {
     switch (status) {
-      case 'Concluída': return 'status-completed';
-      case 'Em Andamento': return 'status-in-progress';
-      case 'Atrasada': return 'status-late';
-      case 'A': return 'status-open';
-      case 'AN': return 'status-analysis';
-      case 'EN': return 'status-forwarded';
-      case 'AS': return 'status-assumed';
-      case 'AG': return 'status-scheduled';
-      case 'DS': return 'status-displacement';
-      case 'EX': return 'status-execution';
-      case 'RAG': return 'status-rescheduling';
+      case 'A': return 'Aberto';
+      case 'AN': return 'Análise';
+      case 'EN': return 'Encaminhado';
+      case 'AS': return 'Assumido';
+      case 'AG': return 'Agendado';
+      case 'DS': return 'Deslocamento';
+      case 'EX': return 'Execução';
+      case 'RAG': return 'Reagendamento';
       default: return 'status-default';
     }
   };
@@ -284,10 +281,10 @@ const Connectbi = () => {
   // Transformar os dados da API no formato esperado pela tabela
   const ordersData = useMemo(() => {
     const orders: Order[] = [];
-    
+
     for (const [sectorId, osData] of Object.entries(sectorOSData)) {
       const sector = sectors.find(s => s.id_setor === sectorId);
-      
+
       if (sector) {
         // Adicionar ordens abertas
         if (osData.registros.aberta?.services_ordem) {
@@ -302,7 +299,7 @@ const Connectbi = () => {
             });
           });
         }
-        
+
         // Adicionar ordens em andamento (se existirem)
         // if (osData.registros.em_andamento?.services_ordem) {
         //   osData.registros.em_andamento.services_ordem.forEach((os: any) => {
@@ -318,7 +315,7 @@ const Connectbi = () => {
         // }
       }
     }
-    
+
     return orders;
   }, [sectorOSData, sectors]);
 
@@ -347,7 +344,7 @@ const Connectbi = () => {
   const OverviewCards = () => {
     const sectorData = prepareSectorChartData();
     const statusData = prepareStatusChartData();
-    
+
     const totalOrdens = sectorData.datasets[0].data.reduce((a, b) => a + b, 0);
     const emAnalise = statusData.datasets[0].data[1];
     const encaminhada = statusData.datasets[0].data[2];
@@ -358,61 +355,61 @@ const Connectbi = () => {
     const reagendamento = statusData.datasets[0].data[7];
 
     const cards = [
-      { 
-        title: 'Total de Ordens', 
-        value: totalOrdens.toLocaleString(), 
-        icon: '📋', 
-        trend: 'up', 
-        trendValue: '12% desde o último mês' 
+      {
+        title: 'Total de Ordens',
+        value: totalOrdens.toLocaleString(),
+        icon: '📋',
+        trend: 'up',
+        trendValue: '12% desde o último mês'
       },
-      { 
-        title: 'Em Analise', 
-        value: emAnalise.toLocaleString(), 
-        icon: '🔄', 
-        trend: 'down', 
-        trendValue: '5% desde o último mês' 
+      {
+        title: 'Em Analise',
+        value: emAnalise.toLocaleString(),
+        icon: '🔄',
+        trend: 'down',
+        trendValue: '5% desde o último mês'
       },
-      { 
-        title: 'Encaminhadas', 
-        value: encaminhada.toLocaleString(), 
-        icon: '​🚀​', 
-        trend: 'up', 
-        trendValue: '18% desde o último mês' 
+      {
+        title: 'Encaminhadas',
+        value: encaminhada.toLocaleString(),
+        icon: '​🚀​',
+        trend: 'up',
+        trendValue: '18% desde o último mês'
       },
-      { 
-        title: 'Assumidas', 
-        value: assumida.toLocaleString(), 
-        icon: '​🤲​', 
-        trend: 'up', 
-        trendValue: '3% desde o último mês' 
+      {
+        title: 'Assumidas',
+        value: assumida.toLocaleString(),
+        icon: '​🤲​',
+        trend: 'up',
+        trendValue: '3% desde o último mês'
       },
-      { 
-        title: 'Agendadas', 
-        value: agendada.toLocaleString(), 
-        icon: '​​⌚​', 
-        trend: 'up', 
-        trendValue: '3% desde o último mês' 
+      {
+        title: 'Agendadas',
+        value: agendada.toLocaleString(),
+        icon: '​​⌚​',
+        trend: 'up',
+        trendValue: '3% desde o último mês'
       },
-      { 
-        title: 'Em Deslocamento', 
-        value: deslocamento.toLocaleString(), 
-        icon: '​​🚗​', 
-        trend: 'up', 
-        trendValue: '3% desde o último mês' 
+      {
+        title: 'Em Deslocamento',
+        value: deslocamento.toLocaleString(),
+        icon: '​​🚗​',
+        trend: 'up',
+        trendValue: '3% desde o último mês'
       },
-      { 
-        title: 'Em Execucao', 
-        value: execucao.toLocaleString(), 
-        icon: '​​🛠️​', 
-        trend: 'up', 
-        trendValue: '3% desde o último mês' 
+      {
+        title: 'Em Execucao',
+        value: execucao.toLocaleString(),
+        icon: '​​🛠️​',
+        trend: 'up',
+        trendValue: '3% desde o último mês'
       },
-      { 
-        title: 'Em Reagendamento', 
-        value: reagendamento.toLocaleString(), 
-        icon: '​​⌛​', 
-        trend: 'up', 
-        trendValue: '3% desde o último mês' 
+      {
+        title: 'Em Reagendamento',
+        value: reagendamento.toLocaleString(),
+        icon: '​​⌛​',
+        trend: 'up',
+        trendValue: '3% desde o último mês'
       }
     ];
 
@@ -583,75 +580,79 @@ const Connectbi = () => {
   };
 
   const OrdersTable = () => (
-    <div className="orders-table-container">
-      <div className="table-header">
-        <h3>Ordens de Serviço Recentes</h3>
-        <div className="table-actions">
-          <button className="btn-primary">
-            <span>+</span> Nova Ordem
-          </button>
-          <button className="btn-secondary">
-            <span>🔍</span> Filtrar
-          </button>
-        </div>
-      </div>
-
+    <div>
       {loading ? (
         <div className="loading-overlay">Carregando dados...</div>
       ) : error ? (
         <div className="error-message">{error}</div>
       ) : (
         <>
-          <table className="orders-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Setor</th>
-                <th>Descrição</th>
-                <th>Técnico</th>
-                <th>Status</th>
-                <th>Data</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.map(order => (
-                <tr key={order.id}>
-                  <td>{order.id}</td>
-                  <td>{order.sector}</td>
-                  <td>{order.description}</td>
-                  <td>{order.tech}</td>
-                  <td>
-                    <span className={`status-badge ${getStatusClass(order.status)}`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td>{order.date}</td>
-                  <td>
-                    <button
-                      className="view-btn"
-                      onClick={() => handleOrderClick(order.id)}
-                    >
-                      Ver
-                    </button>
-                    <button className="more-btn">⋯</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="orders-table-container">
+            <div className="table-header">
+              <h3>Ordens de Serviço Recentes</h3>
+              <div className="table-actions">
+                <button className="btn-primary">
+                  <span>+</span> Nova Ordem
+                </button>
+                <button className="btn-secondary">
+                  <span>🔍</span> Filtrar
+                </button>
+              </div>
+            </div>
 
-          <div className="pagination">
-            <div className="pagination-info">
-              Mostrando <span>1</span> a <span>{filteredOrders.length}</span> de <span>{ordersData.length}</span> ordens
+
+            <table className="orders-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Setor</th>
+                  <th>Descrição</th>
+                  <th>Técnico</th>
+                  <th>Status</th>
+                  <th>Data</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredOrders.map(order => (
+                  <tr key={order.id}>
+                    <td>{order.id}</td>
+                    <td>{order.sector}</td>
+                    <td>{order.description}</td>
+                    <td>{order.tech}</td>
+                    <td>
+                      <span className={`status-badge ${getStatusClass(order.status)}`}>
+                        {getStatusClass(order.status)}
+                      </span>
+                    </td>
+                    <td>{order.date}</td>
+                    <td>
+                      <button
+                        className="view-btn"
+                        onClick={() => handleOrderClick(order.id)}
+                      >
+                        Ver
+                      </button>
+                      <button className="more-btn">⋯</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="pagination">
+              <div className="pagination-info">
+                Mostrando <span>1</span> a <span>{filteredOrders.length}</span> de <span>{ordersData.length}</span> ordens
+              </div>
+              <div className="pagination-controls">
+                <button>‹</button>
+                <button className="active">1</button>
+                <button>2</button>
+                <button>3</button>
+                <button>›</button>
+              </div>
             </div>
-            <div className="pagination-controls">
-              <button>‹</button>
-              <button className="active">1</button>
-              <button>2</button>
-              <button>3</button>
-              <button>›</button>
-            </div>
+
           </div>
         </>
       )}

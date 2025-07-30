@@ -83,7 +83,10 @@ body:has(.sidebar.hidden) .dashboard-main {
     gap: 1.5rem;
     margin-bottom: 1.5rem;
 }
-
+.loading-overlay{
+    text-align: center;
+    color: var(--textColor);
+}
 .card {
     position: relative;
     background-color: var(--colorDarkForm);
@@ -200,7 +203,7 @@ body:has(.sidebar.hidden) .dashboard-main {
 
 /* Orders table */
 .orders-table-container {
-    background-color: white;
+    background-color: var(--colorDarkForm);
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow: hidden;
@@ -217,7 +220,7 @@ body:has(.sidebar.hidden) .dashboard-main {
 .table-header h3 {
     margin: 0;
     font-size: 1rem;
-    color: #1f2937;
+    color: var(--textColor);
 }
 
 .table-actions {
@@ -228,8 +231,8 @@ body:has(.sidebar.hidden) .dashboard-main {
 .btn-primary {
     padding: 0.5rem 1rem;
     border-radius: 4px;
-    background-color: #3b82f6;
-    color: white;
+    background-color: var(--colorPrimary);
+    color: var(--textColor);
     border: none;
     cursor: pointer;
     font-size: 0.875rem;
@@ -246,7 +249,7 @@ body:has(.sidebar.hidden) .dashboard-main {
 .btn-secondary {
     padding: 0.5rem 1rem;
     border-radius: 4px;
-    background-color: white;
+    background-color: var(--textColor);
     color: #4b5563;
     border: 1px solid #d1d5db;
     cursor: pointer;
@@ -267,24 +270,29 @@ body:has(.sidebar.hidden) .dashboard-main {
 }
 
 .orders-table th {
-    background-color: #f9fafb;
+    background-color: var(--colorDarkForm);
     text-align: left;
     padding: 0.75rem 1rem;
     font-size: 0.75rem;
     font-weight: 500;
     text-transform: uppercase;
-    color: #6b7280;
+    color: var(--textColor);
 }
 
 .orders-table td {
     padding: 1rem;
     border-bottom: 1px solid #e5e7eb;
     font-size: 0.875rem;
-    color: #4b5563;
+    color: var(--textColor);
 }
 
 .orders-table tr:hover {
     background-color: #f9fafb;
+    cursor: pointer;
+    
+}
+.orders-table tr:hover td {
+    color: var(--colorPrimary);
 }
 
 .status-badge {
