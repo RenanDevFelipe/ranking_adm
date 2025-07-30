@@ -1,6 +1,4 @@
 
-
-/* Dashboard layout */
 .dashboard {
     display: flex;
     flex-direction: column;
@@ -519,6 +517,126 @@ body:has(.sidebar.hidden) .dashboard-main {
     justify-content: flex-end;
     gap: 0.5rem;
     margin-top: 1.5rem;
+}
+
+.sector-select-container {
+  margin: 0 20px;
+  min-width: 200px;
+}
+
+.sector-select {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: var(--colorDarkForm);
+  color: var(--textColor);
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* Global Loading Overlay */
+.global-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  margin-left: 20%;
+  transition: opacity 0.3s ease;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  background-color: var(--colorDarkForm);
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.3s ease;
+}
+
+.loading-content p {
+  color: var(--textColor);
+  font-size: 1.2rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Spinner colors */
+.MuiCircularProgress-root {
+  color: var(--colorPrimary) !important;
+}
+
+/* Ajuste para quando a sidebar estiver escondida */
+body:has(.sidebar.hidden) .global-loading-overlay {
+  margin-left: 0;
+}
+
+/* Error message styling */
+.error-message {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
+.dark-mode .error-message {
+  background-color: #7f1d1d;
+  color: #fecaca;
+}
+
+/* Remove os loadings individuais */
+.overview-cards .loading-overlay,
+.charts-section .loading-overlay,
+.orders-table-container .loading-overlay {
+  display: none !important;
+}
+
+.table-controls{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.search-container{
+    align-items: center;
+    margin: 0;
+}
+.filter-container{
+    display: flex;
+    align-items: center;
+}
+.filter-container select{
+    padding: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .global-loading-overlay {
+    margin-left: 0;
+  }
+  
+  .loading-content {
+    padding: 20px;
+    width: 90%;
+    text-align: center;
+  }
 }
 
 /* Responsive adjustments */

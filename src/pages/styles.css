@@ -353,7 +353,7 @@ body {
     border-radius: 10px;
     display: flex;
     flex-wrap: wrap;
-    gap: 50px;
+    gap: 30px;
     padding-top: 10px;
 }
 
@@ -1112,6 +1112,9 @@ input[type="file"] {
 .main-content-assunto{
     transition: margin-left 0.3s ease;
     margin-left: 20%; 
+}
+.sidebar.hidden +  .main-content-assunto  , .sidebar-footer {
+    margin-left: 0;
 }
 .sidebar.hidden +  .main-content  , .sidebar-footer {
     margin-left: 0;
