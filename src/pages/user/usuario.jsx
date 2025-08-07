@@ -495,6 +495,7 @@ export default function AddUsuario() {
                                     <option value="">Selecione um nível</option>
                                     <option value="1">Administrador</option>
                                     <option value="2">Colaborador</option>
+                                    <option value="3">ConnectBi</option>
                                 </select>
                                 {fieldErrors.role && (
                                     <div className="error-message">{fieldErrors.role}</div>

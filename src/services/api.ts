@@ -6,7 +6,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  timeout: 10000 // 10 segundos
+  timeout: 100000 // 10 segundos
 });
 
 interface LoginResponse {
@@ -140,24 +140,24 @@ export const addUsuario = async (token: string, formData: FormData) => {
         Authorization: token ? `Bearer ${token}` : '',
       },
     });
-    
+
     // Verifica se a resposta indica sucesso
     if (response.data.status === 'error') {
       throw new Error(response.data.message || 'Erro ao adicionar usuário');
     }
-    
+
     return response.data;
   } catch (error: any) {
     console.error('Erro ao adicionar usuario:', error);
 
     // Tratamento detalhado do erro
     let errorMessage = 'Erro ao adicionar usuário';
-    
+
     if (error.response) {
       // Erro vindo do servidor
-      errorMessage = error.response.data?.message || 
-                    error.response.data?.error ||
-                    `Erro ${error.response.status}: ${error.response.statusText}`;
+      errorMessage = error.response.data?.message ||
+        error.response.data?.error ||
+        `Erro ${error.response.status}: ${error.response.statusText}`;
     } else if (error.request) {
       // A requisição foi feita mas não houve resposta
       errorMessage = 'Sem resposta do servidor';
@@ -196,11 +196,11 @@ export const deleteUsuario = async (token: string, id: number) => {
     };
   } catch (error: any) {
     console.error('Erro ao deletar usuario:', error);
-    
+
     // Tratamento detalhado do erro
     let errorMessage = 'Erro ao deletar usuário';
     let errorDetails = null;
-    
+
     if (error.response) {
       // Erro vindo do servidor
       errorMessage = error.response.data?.message || errorMessage;
@@ -375,14 +375,14 @@ export const deleteSetor = async (token: string, id_setor: number) => {
   try {
     const response = await api.delete(
       `Departamento/Delete`,
-      
+
       {
-        data: { id_setor },   
+        data: { id_setor },
         headers: {
           Authorization: `Bearer ${token}`
         }
       }
-      
+
     );
 
     return response.data;
@@ -418,7 +418,7 @@ export const getAvaliacoes = async (
         data_fechamento
       },
       {
-        timeout: 50000,
+        timeout: 100000,
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -576,7 +576,7 @@ export const getTutoriais = async (token: string): Promise<tutorial[]> => {
   }
 };
 
-export const addTutorial = async (token: string , formData: FormData) =>{
+export const addTutorial = async (token: string, formData: FormData) => {
   try {
     const response = await api.post("Tutorial/Post", formData, {
       headers: {
@@ -601,14 +601,14 @@ export const deleteTutorial = async (token: string, id: number) => {
   try {
     const response = await api.delete(
       `Tutorial/Delete`,
-      
+
       {
-        data: { id },   
+        data: { id },
         headers: {
           Authorization: `Bearer ${token}`
         }
       }
-      
+
     );
 
     return response.data;
@@ -626,14 +626,14 @@ export const deleteColaborador = async (token: string, id: number) => {
   try {
     const response = await api.delete(
       `Colaborador/Delete`,
-      
+
       {
-        data: { id },   
+        data: { id },
         headers: {
           Authorization: `Bearer ${token}`
         }
       }
-      
+
     );
 
     return response.data;
@@ -843,14 +843,14 @@ export const deleteAssunto = async (token: string, id: number) => {
   try {
     const response = await api.delete(
       `Assunto/Delete`,
-      
+
       {
-        data: { id },   
+        data: { id },
         headers: {
           Authorization: `Bearer ${token}`
         }
       }
-      
+
     );
 
     return response.data;
@@ -910,14 +910,14 @@ export const deleteChecklist = async (token: string, id: number) => {
   try {
     const response = await api.delete(
       `Checklist/Delete`,
-      
+
       {
-        data: { id },   
+        data: { id },
         headers: {
           Authorization: `Bearer ${token}`
         }
       }
-      
+
     );
 
     return response.data;
@@ -950,112 +950,112 @@ export const ChecklistGetFiltered = async (token: string, id: number) => {
 
 export const addAvaliacao = async (token: string, formData: FormData) => {
   try {
-      const response = await api.post(
-          "Avaliacao/N3",
-          formData,
-          {
-              headers: {
-                  'Content-Type': 'multipart/form-data',
-                  Authorization: `Bearer ${token}`,
-              },
-          }
-      );
-      return response.data;
+    const response = await api.post(
+      "Avaliacao/N3",
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
   } catch (error: any) {
-      console.error('Erro ao adicionar avaliação:', error);
+    console.error('Erro ao adicionar avaliação:', error);
 
-      const errorMessage =
-          error?.response?.data?.message ||
-          error?.message ||
-          'Erro ao adicionar avaliação';
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao adicionar avaliação';
 
-      throw new Error(errorMessage);
+    throw new Error(errorMessage);
   }
 };
 
 export const addAvaliacaoN2 = async (token: string, formData: FormData) => {
   try {
-      const response = await api.post(
-          "Avaliacao/N2",
-          formData,
-          {
-              headers: {
-                  'Content-Type': 'multipart/form-data',
-                  Authorization: `Bearer ${token}`,
-              },
-          }
-      );
-      return response.data;
+    const response = await api.post(
+      "Avaliacao/N2",
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
   } catch (error: any) {
-      console.error('Erro ao adicionar avaliação:', error);
+    console.error('Erro ao adicionar avaliação:', error);
 
-      const errorMessage =
-          error?.response?.data?.message ||
-          error?.message ||
-          'Erro ao adicionar avaliação';
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao adicionar avaliação';
 
-      throw new Error(errorMessage);
+    throw new Error(errorMessage);
   }
 };
 
 export const addAvaliacaoEstoque = async (token: string, formData: FormData) => {
   try {
-      const response = await api.post(
-          "Avaliacao/Estoque",
-          formData,
-          {
-              headers: {
-                  'Content-Type': 'multipart/form-data',
-                  Authorization: `Bearer ${token}`,
-              },
-          }
-      );
-      return response.data;
+    const response = await api.post(
+      "Avaliacao/Estoque",
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
   } catch (error: any) {
-      console.error('Erro ao adicionar avaliação:', error);
+    console.error('Erro ao adicionar avaliação:', error);
 
-      const errorMessage =
-          error?.response?.data?.message ||
-          error?.message ||
-          'Erro ao adicionar avaliação';
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao adicionar avaliação';
 
-      throw new Error(errorMessage);
+    throw new Error(errorMessage);
   }
 };
 
 export const addAvaliacaoRH = async (token: string, formData: FormData) => {
   try {
-      const response = await api.post(
-          "Avaliacao/Rh",
-          formData,
-          {
-              headers: {
-                  'Content-Type': 'multipart/form-data',
-                  Authorization: `Bearer ${token}`,
-              },
-          }
-      );
-      return response.data;
+    const response = await api.post(
+      "Avaliacao/Rh",
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
   } catch (error: any) {
-      console.error('Erro ao adicionar avaliação:', error);
+    console.error('Erro ao adicionar avaliação:', error);
 
-      const errorMessage =
-          error?.response?.data?.message ||
-          error?.message ||
-          'Erro ao adicionar avaliação';
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Erro ao adicionar avaliação';
 
-      throw new Error(errorMessage);
+    throw new Error(errorMessage);
   }
 };
 
-export const getHistorico = async (token: string, id: number,data: string) => {
+export const getHistorico = async (token: string, id: number, data: string) => {
   try {
     const response = await api.post(
       `Historico/N2`,
-      { 
+      {
         id_colaborador: id,
         data_requisicao: data
-       },
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -1070,14 +1070,14 @@ export const getHistorico = async (token: string, id: number,data: string) => {
   }
 }
 
-export const getHistoricoEstoque = async (token: string, id: number,data: string) => {
+export const getHistoricoEstoque = async (token: string, id: number, data: string) => {
   try {
     const response = await api.post(
       `Historico/Estoque`,
-      { 
+      {
         id_colaborador: id,
         data_requisicao: data
-       },
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -1092,14 +1092,14 @@ export const getHistoricoEstoque = async (token: string, id: number,data: string
   }
 }
 
-export const getHistoricoRH = async (token: string, id: number,data: string) => {
+export const getHistoricoRH = async (token: string, id: number, data: string) => {
   try {
     const response = await api.post(
       `Historico/Rh`,
-      { 
+      {
         id_colaborador: id,
         data_requisicao: data
-       },
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -1114,13 +1114,13 @@ export const getHistoricoRH = async (token: string, id: number,data: string) => 
   }
 }
 
-export const getSODepartament = async (token: string,id: number) => {
+export const getSODepartament = async (token: string, id: number) => {
   try {
     const response = await api.post(
       `IXCSoft/ListSoDepartament`,
-      { 
+      {
         id_setor: id,
-       },
+      },
       {
         timeout: 100000,
         headers: {
@@ -1131,7 +1131,24 @@ export const getSODepartament = async (token: string,id: number) => {
     );
     return response.data;
   } catch (error) {
-     console.error('Erro ao buscar ordens de serviço:', error);
+    console.error('Erro ao buscar ordens de serviço:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao buscar ordens de serviço');
+  }
+}
+
+export const getSOTotal = async (token: string) => {
+  try {
+    const response = await api.get(
+      'IXCSoft/ListSo',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao buscar ordens de serviço:', error);
     throw new Error(error.response?.data?.message || 'Erro ao buscar ordens de serviço');
   }
 }

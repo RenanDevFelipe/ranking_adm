@@ -111,9 +111,15 @@ export default function Home() {
         return setor ? setor.nome_setor : 'Setor não especificado';
     };
 
-    const filteredColaboradores = colaboradores.filter(colab =>
-        colab.nome_colaborador.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  function removeAcentos(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+const filteredColaboradores = colaboradores.filter(colab =>
+    removeAcentos(colab.nome_colaborador.toLowerCase())
+        .includes(removeAcentos(searchTerm.toLowerCase()))
+);
+
 
     const isLoading = loading.colaboradores || loading.setores;
 

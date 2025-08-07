@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getSODepartament } from '../../services/api.ts';
+import { getSODepartament, getSOTotal } from '../../services/api.ts';
 import { Pie, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import './style.css';
 import Sidebar from '../../components/sidebar';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 import CircularProgress from '@mui/material/CircularProgress';
-import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 
 // Register Chart.js components
@@ -28,6 +27,7 @@ interface Order {
   date: string;
   assunto?: string;
   dateObj?: Date;
+  priority: string;
 }
 
 interface ChartData {
@@ -84,9 +84,24 @@ interface OSData {
   };
 }
 
+interface TotalOSData {
+  total: number;
+  registros: Record<string, {
+    total: number;
+    status: Record<string, {
+      total: number;
+      assuntos: Record<string, {
+        total: number;
+        services_ordem: any[];
+      }>;
+    }>;
+  }>;
+}
+
 const Connectbi = () => {
   const [sectors, setSectors] = useState<SectorData[]>([]);
   const [sectorOSData, setSectorOSData] = useState<Record<string, OSData>>({});
+  const [totalOSData, setTotalOSData] = useState<TotalOSData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -98,9 +113,11 @@ const Connectbi = () => {
   });
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [selectedSector, setSelectedSector] = useState<string>('11');
-  const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof Order; direction: 'ascending' | 'descending' } | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [isBackgroundUpdating, setIsBackgroundUpdating] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarVisible(!isSidebarVisible);
@@ -117,6 +134,97 @@ const Connectbi = () => {
     }
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
   }, [darkMode]);
+
+  // Função para transformar os dados de getSOTotal no formato esperado
+  const transformTotalOSData = (data: TotalOSData): Record<string, OSData> => {
+    const transformedData: Record<string, OSData> = {};
+    
+    for (const [sectorId, sectorData] of Object.entries(data.registros)) {
+      const sectorOS: OSData = {
+        total: sectorData.total,
+        id_assunto_count: {},
+        registros: {
+          aberta: {
+            total: 0,
+            services_ordem: []
+          }
+        }
+      };
+
+      // Processar cada status no setor
+      for (const [status, statusData] of Object.entries(sectorData.status)) {
+        const statusKey = getStatusKey(status);
+        if (!statusKey) continue;
+
+        sectorOS.registros[statusKey] = {
+          total: statusData.total,
+          services_ordem: []
+        };
+
+        // Processar cada assunto no status
+        for (const [assunto, assuntoData] of Object.entries(statusData.assuntos)) {
+          // Adicionar ao id_assunto_count
+          sectorOS.id_assunto_count[assunto] = (sectorOS.id_assunto_count[assunto] || 0) + assuntoData.total;
+          
+          // Adicionar às services_ordem do status correspondente
+          sectorOS.registros[statusKey]!.services_ordem = [
+            ...(sectorOS.registros[statusKey]?.services_ordem || []),
+            ...assuntoData.services_ordem.map((os: any) => ({
+              ...os,
+              assunto: assunto
+            }))
+          ];
+        }
+      }
+
+      transformedData[sectorId] = sectorOS;
+    }
+
+    return transformedData;
+  };
+
+  // Mapeia o status da API para as chaves usadas no componente
+  const getStatusKey = (status: string): keyof OSData['registros'] | null => {
+    switch (status) {
+      case 'A': return 'aberta';
+      case 'AN': return 'analise';
+      case 'EN': return 'encaminhada';
+      case 'AS': return 'assumida';
+      case 'AG': return 'agendada';
+      case 'DS': return 'deslocamento';
+      case 'EX': return 'execucao';
+      case 'RAG': return 'reagendamento';
+      default: return null;
+    }
+  };
+
+  // Função para atualização em segundo plano
+  const backgroundUpdateData = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+
+    try {
+      setIsBackgroundUpdating(true);
+
+      if (selectedSector === 'all') {
+        // Usar getSOTotal para todos os setores
+        const data = await getSOTotal(token);
+        setTotalOSData(data);
+        const transformedData = transformTotalOSData(data);
+        setSectorOSData(transformedData);
+      } else {
+        // Usar getSODepartament para um setor específico
+        const data = await getSODepartament(token, Number(selectedSector));
+        setSectorOSData({
+          [selectedSector]: data
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar dados:", error);
+    } finally {
+      setIsBackgroundUpdating(false);
+    }
+  };
 
   // Carrega os dados dos setores e OS
   useEffect(() => {
@@ -161,55 +269,22 @@ const Connectbi = () => {
         ];
 
         setSectors(sectorsData);
-
-        if (selectedSector === 'all') {
-          const osData: Record<string, OSData> = {};
-
-          for (const sector of sectorsData) {
-            try {
-              const data = await getSODepartament(token, Number(sector.id_setor));
-              osData[sector.id_setor] = data;
-            } catch (err) {
-              console.error(`Erro ao carregar dados para setor ${sector.id_setor}:`, err);
-              osData[sector.id_setor] = {
-                total: 0,
-                id_assunto_count: {},
-                registros: {
-                  aberta: { total: 0, services_ordem: [] }
-                }
-              };
-            }
-          }
-          setSectorOSData(osData);
-        } else {
-          try {
-            const data = await getSODepartament(token, Number(selectedSector));
-            setSectorOSData({
-              [selectedSector]: data
-            });
-          } catch (err) {
-            console.error(`Erro ao carregar dados para setor ${selectedSector}:`, err);
-            setSectorOSData({
-              [selectedSector]: {
-                total: 0,
-                id_assunto_count: {},
-                registros: {
-                  aberta: { total: 0, services_ordem: [] }
-                }
-              }
-            });
-          }
-        }
-
-        setLoading(false);
+        await backgroundUpdateData();
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
         setError("Erro ao carregar dados. Tente novamente mais tarde.");
+      } finally {
         setLoading(false);
       }
     };
 
     loadData();
+
+    // Configurar intervalo de atualização (5 minutos)
+    const intervalId = setInterval(backgroundUpdateData, 1 * 60 * 1000);
+
+    // Limpar intervalo ao desmontar o componente
+    return () => clearInterval(intervalId);
   }, [selectedSector]);
 
   // Componente de Loading
@@ -239,6 +314,37 @@ const Connectbi = () => {
 
     const labels = Object.keys(currentSectorData.id_assunto_count);
     const data = Object.values(currentSectorData.id_assunto_count);
+
+    const backgroundColors = [
+      '#3B82F6', '#10B981', '#F59E0B', '#6366F1', '#9CA3AF',
+      '#EC4899', '#8B5CF6', '#14B8A6', '#F97316', '#64748B',
+      '#3B82F6', '#10B981', '#F59E0B', '#6366F1', '#9CA3AF'
+    ];
+
+    return {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: backgroundColors.slice(0, labels.length),
+        borderWidth: 1
+      }]
+    };
+  };
+
+  // Preparar dados para os gráficos por setor (quando selecionado "Todos os Setores")
+  const prepareSectorChartData = (): ChartData => {
+    const sectorCounts: Record<string, number> = {};
+
+    // Contar o total de ordens por setor
+    for (const [sectorId, osData] of Object.entries(sectorOSData)) {
+      const sector = sectors.find(s => s.id_setor === sectorId);
+      if (sector && osData?.total) {
+        sectorCounts[sector.descricao] = osData.total;
+      }
+    }
+
+    const labels = Object.keys(sectorCounts);
+    const data = Object.values(sectorCounts);
 
     const backgroundColors = [
       '#3B82F6', '#10B981', '#F59E0B', '#6366F1', '#9CA3AF',
@@ -306,13 +412,13 @@ const Connectbi = () => {
   const getStatusClass = (status: string) => {
     switch (status) {
       case 'A': return 'status-open';
-      case 'AN': return 'status-in-progress';
-      case 'EN': return 'status-in-progress';
-      case 'AS': return 'status-in-progress';
+      case 'AN': return 'status-in-analysis';
+      case 'EN': return 'status-in-forwarded';
+      case 'AS': return 'status-in-assumed';
       case 'AG': return 'status-scheduled';
-      case 'DS': return 'status-in-progress';
-      case 'EX': return 'status-in-progress';
-      case 'RAG': return 'status-late';
+      case 'DS': return 'status-in-displacement';
+      case 'EX': return 'status-in-execution';
+      case 'RAG': return 'status-rescheduling';
       default: return 'status-default';
     }
   };
@@ -328,6 +434,16 @@ const Connectbi = () => {
       case 'EX': return 'Em Execução';
       case 'RAG': return 'Reagendada';
       default: return status;
+    }
+  };
+
+  const getPriority = (priority: string) => {
+    switch (priority) {
+      case 'B': return 'Baixa';
+      case 'N': return 'Normal';
+      case 'A': return 'Alta';
+      case 'C': return 'Crítica';
+      default: return priority;
     }
   };
 
@@ -358,14 +474,15 @@ const Connectbi = () => {
           osData.registros.aberta.services_ordem.forEach((os: any) => {
             const dateObj = os.data_abertura ? new Date(os.data_abertura) : new Date();
             orders.push({
-              id: os.protocolo || os.id || 'N/A',
+              id: os.id || 'N/A',
               sector: sector.descricao,
               description: os.mensagem || 'Sem descrição',
-              tech: os.id_tecnico ? `Técnico ${os.id_tecnico}` : 'Não atribuído',
+              tech: os.id_tecnico ? `${os.id_tecnico}` : 'Não atribuído',
               status: os.status || 'A',
               date: dateObj.toLocaleDateString(),
               dateObj,
-              assunto: os.id_assunto || 'Sem assunto'
+              assunto: os.assunto || 'Sem assunto',
+              priority: getPriority(os.prioridade) || 'Alta'
             });
           });
         }
@@ -379,14 +496,15 @@ const Connectbi = () => {
             statusData.services_ordem.forEach((os: any) => {
               const dateObj = os.data_abertura ? new Date(os.data_abertura) : new Date();
               orders.push({
-                id: os.protocolo || os.id || 'N/A',
+                id: os.id || 'N/A',
                 sector: sector.descricao,
                 description: os.mensagem || 'Sem descrição',
-                tech: os.id_tecnico ? `Técnico ${os.id_tecnico}` : 'Não atribuído',
+                tech: os.id_tecnico ? `${os.id_tecnico}` : 'Não atribuído',
                 status: os.status || statusType.toUpperCase().substring(0, 2),
                 date: dateObj.toLocaleDateString(),
                 dateObj,
-                assunto: os.id_assunto_descricao || 'Sem assunto'
+                assunto: os.assunto || 'Sem assunto',
+                priority: getPriority(os.prioridade) || 'Alta'
               });
             });
           }
@@ -400,19 +518,6 @@ const Connectbi = () => {
   // Filtrar e ordenar as ordens
   const filteredOrders = useMemo(() => {
     let result = [...ordersData];
-
-    // Aplicar filtro de busca
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(order =>
-        order.id.toLowerCase().includes(term) ||
-        order.sector.toLowerCase().includes(term) ||
-        order.description.toLowerCase().includes(term) ||
-        order.tech.toLowerCase().includes(term) ||
-        (order.assunto?.toLowerCase()?.includes(term) ?? false) ||
-        getStatusLabel(order.status).toLowerCase().includes(term)
-      );
-    }
 
     // Aplicar filtro de status
     if (statusFilter !== 'all') {
@@ -452,7 +557,13 @@ const Connectbi = () => {
     }
 
     return result;
-  }, [ordersData, searchTerm, statusFilter, sortConfig]);
+  }, [ordersData, statusFilter, sortConfig]);
+
+  // Calcular índices para paginação
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
   // Components
   const Header = () => (
@@ -471,6 +582,7 @@ const Connectbi = () => {
             value={selectedSector}
             onChange={(e) => {
               setSelectedSector(e.target.value);
+              setCurrentPage(1); // Reset to first page when sector changes
               setLoading(true);
             }}
             className="sector-select"
@@ -577,9 +689,6 @@ const Connectbi = () => {
                 </div>
                 <div className="card-icon">{card.icon}</div>
               </div>
-              {/* <div className={`card-trend trend-${card.trend}`}>
-                {card.trend === 'up' ? '↑' : '↓'} {card.trendValue}
-              </div> */}
             </div>
           ))
         )}
@@ -686,16 +795,16 @@ const Connectbi = () => {
                 </div>
                 <div className="chart-wrapper">
                   {chartType === 'pie' ? (
-                    <Pie key={textColor} data={prepareSubjectChartData()} options={chartOptions} />
+                    <Pie key={textColor} data={prepareSectorChartData()} options={chartOptions} />
                   ) : (
                     <Bar
                       key={textColor}
                       data={{
-                        labels: prepareSubjectChartData().labels,
+                        labels: prepareSectorChartData().labels,
                         datasets: [{
                           label: 'Ordens por Setor',
-                          data: prepareSubjectChartData().datasets[0].data,
-                          backgroundColor: prepareSubjectChartData().datasets[0].backgroundColor
+                          data: prepareSectorChartData().datasets[0].data,
+                          backgroundColor: prepareSectorChartData().datasets[0].backgroundColor
                         }]
                       }}
                       options={statusChartOptions}
@@ -784,22 +893,14 @@ const Connectbi = () => {
           <h3>Ordens de Serviço Recentes</h3>
 
           <div className="table-controls">
-            <div className="search-container">
-              <SearchIcon className="search-icon" />
-              <input
-                type="text"
-                placeholder="Pesquisar ordens..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-
             <div className="filter-container">
               <FilterListIcon className="filter-icon" />
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setCurrentPage(1); // Reset to first page when filter changes
+                }}
                 className="status-filter"
               >
                 {statusOptions.map(option => (
@@ -842,13 +943,17 @@ const Connectbi = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.length > 0 ? (
-                  filteredOrders.map(order => (
+                {currentItems.length > 0 ? (
+                  currentItems.map(order => (
                     <tr key={order.id}>
                       <td>{order.id}</td>
                       <td>{order.sector}</td>
                       <td>{order.assunto}</td>
-                      <td className="description-cell">{order.description}</td>
+                      <td className="description-cell" title={order.description}>
+                        {order.description.length > 100
+                          ? `${order.description.substring(0, 100)}...`
+                          : order.description}
+                      </td>
                       <td>{order.tech}</td>
                       <td>
                         <span className={`status-badge ${getStatusClass(order.status)}`}>
@@ -878,12 +983,48 @@ const Connectbi = () => {
 
             <div className="pagination">
               <div className="pagination-info">
-                Mostrando <span>1</span> a <span>{filteredOrders.length}</span> de <span>{filteredOrders.length}</span> ordens
+                Mostrando <span>{indexOfFirstItem + 1}</span> a{' '}
+                <span>{Math.min(indexOfLastItem, filteredOrders.length)}</span> de{' '}
+                <span>{filteredOrders.length}</span> ordens
               </div>
               <div className="pagination-controls">
-                <button disabled>‹</button>
-                <button className="active">1</button>
-                <button disabled>›</button>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  ‹
+                </button>
+
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  // Mostrar até 5 páginas, centralizando a atual
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      className={currentPage === pageNum ? 'active' : ''}
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  ›
+                </button>
               </div>
             </div>
           </>
@@ -910,7 +1051,7 @@ const Connectbi = () => {
                   <p><strong>ID:</strong> <span>{order.id}</span></p>
                   <p><strong>Setor:</strong> <span>{order.sector}</span></p>
                   <p><strong>Assunto:</strong> <span>{order.assunto}</span></p>
-                  <p><strong>Prioridade:</strong> <span className="status-badge status-late">Alta</span></p>
+                  <p><strong>Prioridade:</strong> <span className={`status-badge status-${getPriority(order.priority)}`}>{order.priority}</span></p>
                   <p><strong>Data de Abertura:</strong> <span>{order.date}</span></p>
                 </div>
               </div>
@@ -929,20 +1070,27 @@ const Connectbi = () => {
                 <p>{order.description}</p>
               </div>
             </div>
-
-            {/* <div className="modal-actions">
-              <button className="btn-secondary">
-                <span>🖨️</span> Imprimir
-              </button>
-              <button className="btn-primary">
-                <span>✏️</span> Editar Ordem
-              </button>
-            </div> */}
           </div>
         </div>
       </div>
     );
   };
+
+  // Componente discreto para mostrar atualização em background
+  const BackgroundUpdateIndicator = () => (
+    <div style={{
+      zIndex: 10000,
+      position: 'fixed',
+      bottom: '10px',
+      right: '10px',
+      fontSize: '15px',
+      color: '#666',
+      opacity: isBackgroundUpdating ? 1 : 0,
+      transition: 'opacity 0.7s'
+    }}>
+      Atualizando dados...
+    </div>
+  );
 
   return (
     <div className="dashboard">
@@ -965,6 +1113,8 @@ const Connectbi = () => {
           onClose={() => setShowModal(false)}
         />
       )}
+
+      <BackgroundUpdateIndicator />
     </div>
   );
 };

@@ -32,9 +32,11 @@ const Sidebar = ({ isVisible }) => {
     const userSetor = parseInt(localStorage.getItem('user_setor') || '0');
 
     // Funções para verificar permissões
+    const canSeeAssess = () => userSetor != 25;// Apenas o setor 25 nao ver o avaliar 
     const canSeeConfig = () => userRole === 1; // Apenas role 1 vê configurações
-    const canSeeChecklist = () => ![6, 7].includes(userSetor); // Setores 6,7,9 não veem checklist
-    const canSeeTutorials = () => ![6, 7].includes(userSetor); // Setores 6,7,9 não veem tutoriais
+    const canSeeConnectBi = () => userRole === 3 || 1; // Apenas role 3 ve as configurações
+    const canSeeChecklist = () => ![6, 7, 25].includes(userSetor); // Setores 6,7,9 não veem checklist
+    const canSeeTutorials = () => ![6, 7, 25].includes(userSetor); // Setores 6,7,9 não veem tutoriais
 
     const toggleRankingSubmenu = () => {
         setShowRankingSubmenu(!showRankingSubmenu);
@@ -67,11 +69,14 @@ const Sidebar = ({ isVisible }) => {
             <nav className="sidebar-menu">
                 <ul>
                     <li className="menu-section">
-                        <div className="menu-item" onClick={navegacao("/home")}>
-                            <AvaliarIcon className="menu-icon" />
-                            <span className="section-title clickable">Avaliar</span>
-                        </div>
-
+                        {canSeeAssess() && (
+                            <>
+                                <div className="menu-item" onClick={navegacao("/home")}>
+                                    <AvaliarIcon className="menu-icon" />
+                                    <span className="section-title clickable">Avaliar</span>
+                                </div>
+                            </>
+                        )}
                         <div
                             className="menu-item"
                             onClick={toggleRankingSubmenu}
@@ -164,7 +169,11 @@ const Sidebar = ({ isVisible }) => {
                                         </li>
                                     </ul>
                                 )}
+                            </>
+                        )}
 
+                        {canSeeConnectBi() && (
+                            <>
                                 <div className="menu-item" onClick={navegacao("/connectbi")}>
                                     <DashboardIcon className="menu-icon" />
                                     <span className="section-title clickable">ConnectBi</span>

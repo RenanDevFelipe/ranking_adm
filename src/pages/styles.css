@@ -211,6 +211,7 @@ body {
     position: relative;
     background-color: var(--colorDark);
     color: var(--textColor);
+    margin: 0 auto;
 }
 .sidebar-footer {
     margin-left: 20%;
@@ -871,7 +872,9 @@ input[type="file"] {
 }
 
 .modal-content {
+    background-color: var(--modal-bg)!important;
     padding: 20px;
+    max-width: 98%!important;
 }
 
 .fields-container {
