@@ -7,6 +7,7 @@ import Sidebar from '../../components/sidebar';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 import CircularProgress from '@mui/material/CircularProgress';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import SearchIcon from '@mui/icons-material/Search';
 
 // Register Chart.js components
 ChartJS.register(
@@ -17,6 +18,7 @@ ChartJS.register(
   LinearScale,
   BarElement
 );
+
 
 interface Order {
   id: string;
@@ -98,6 +100,63 @@ interface TotalOSData {
   }>;
 }
 
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+const FilterInput = ({
+  placeholder,
+  value,
+  onChange,
+  delay = 600
+}: {
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+  delay?: number;
+}) => {
+  const [inputValue, setInputValue] = useState(value);
+
+  const debouncedValue = useDebounce(inputValue, delay);
+
+  useEffect(() => {
+    onChange(debouncedValue);
+  }, [debouncedValue, onChange]);
+
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  return (
+    <div className="filter-group">
+      <SearchIcon className="filter-icon" />
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={inputValue}
+        onChange={handleChange}
+      />
+    </div>
+  );
+};
+
+
 const Connectbi = () => {
   const [sectors, setSectors] = useState<SectorData[]>([]);
   const [sectorOSData, setSectorOSData] = useState<Record<string, OSData>>({});
@@ -127,6 +186,12 @@ const Connectbi = () => {
   const [showSectorModal, setShowSectorModal] = useState(false);
   const [selectedSectorModal, setSelectedSectorModal] = useState<string>('');
   const [sectorOrders, setSectorOrders] = useState<Order[]>([]);
+  const [showOverviewModal, setShowOverviewModal] = useState(false);
+  const [overviewFilter, setOverviewFilter] = useState<string>('');
+  const [overviewOrders, setOverviewOrders] = useState<Order[]>([]);
+  const [modalFilterTech, setModalFilterTech] = useState<string>('');
+  const [modalFilterSector, setModalFilterSector] = useState<string>('');
+  const [modalFilterAssunto, setModalFilterAssunto] = useState<string>('');
 
   const toggleSidebar = () => {
     setIsSidebarVisible(!isSidebarVisible);
@@ -147,7 +212,7 @@ const Connectbi = () => {
   // Função para transformar os dados de getSOTotal no formato esperado
   const transformTotalOSData = (data: TotalOSData): Record<string, OSData> => {
     const transformedData: Record<string, OSData> = {};
-    
+
     for (const [sectorId, sectorData] of Object.entries(data.registros)) {
       const sectorOS: OSData = {
         total: sectorData.total,
@@ -174,7 +239,7 @@ const Connectbi = () => {
         for (const [assunto, assuntoData] of Object.entries(statusData.assuntos)) {
           // Adicionar ao id_assunto_count
           sectorOS.id_assunto_count[assunto] = (sectorOS.id_assunto_count[assunto] || 0) + assuntoData.total;
-          
+
           // Adicionar às services_ordem do status correspondente
           sectorOS.registros[statusKey]!.services_ordem = [
             ...(sectorOS.registros[statusKey]?.services_ordem || []),
@@ -456,6 +521,184 @@ const Connectbi = () => {
     }
   };
 
+  // Função para lidar com clique nos cards do overview
+  const handleOverviewCardClick = (filterType: string) => {
+    let filteredOrders: Order[] = [];
+    let title = '';
+
+    switch (filterType) {
+      case 'total':
+        filteredOrders = [...ordersData];
+        title = 'Todas as Ordens';
+        break;
+      case 'analise':
+        filteredOrders = ordersData.filter(order => order.status === 'AN');
+        title = 'Ordens em Análise';
+        break;
+      case 'encaminhada':
+        filteredOrders = ordersData.filter(order => order.status === 'EN');
+        title = 'Ordens Encaminhadas';
+        break;
+      case 'assumida':
+        filteredOrders = ordersData.filter(order => order.status === 'AS');
+        title = 'Ordens Assumidas';
+        break;
+      case 'agendada':
+        filteredOrders = ordersData.filter(order => order.status === 'AG');
+        title = 'Ordens Agendadas';
+        break;
+      case 'deslocamento':
+        filteredOrders = ordersData.filter(order => order.status === 'DS');
+        title = 'Ordens em Deslocamento';
+        break;
+      case 'execucao':
+        filteredOrders = ordersData.filter(order => order.status === 'EX');
+        title = 'Ordens em Execução';
+        break;
+      case 'reagendamento':
+        filteredOrders = ordersData.filter(order => order.status === 'RAG');
+        title = 'Ordens em Reagendamento';
+        break;
+      default:
+        return;
+    }
+
+    setOverviewFilter(title);
+    setOverviewOrders(filteredOrders);
+    setShowOverviewModal(true);
+  };
+
+
+  // Função para filtrar ordens nos modais
+  const getFilteredModalOrders = (orders: Order[]) => {
+    return orders.filter(order => {
+      const techMatch = modalFilterTech
+        ? order.tech.toLowerCase().includes(modalFilterTech.toLowerCase())
+        : true;
+      const sectorMatch = modalFilterSector
+        ? order.sector.toLowerCase().includes(modalFilterSector.toLowerCase())
+        : true;
+      const assuntoMatch = modalFilterAssunto
+        ? (order.assunto || '').toLowerCase().includes(modalFilterAssunto.toLowerCase())
+        : true;
+
+      return techMatch && sectorMatch && assuntoMatch;
+    });
+  };
+
+  // Modal para mostrar as OS filtradas (usado para overview e outros modais)
+  const FilteredOrdersModal = ({
+    title,
+    orders,
+    onClose,
+    showSectorColumn = true,
+    showStatusColumn = true,
+    showAssuntoColumn = true
+  }: {
+    title: string;
+    orders: Order[];
+    onClose: () => void;
+    showSectorColumn?: boolean;
+    showStatusColumn?: boolean;
+    showAssuntoColumn?: boolean;
+  }) => {
+    const filteredOrders = getFilteredModalOrders(orders);
+
+    return (
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content large-modal" onClick={e => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3>{title}</h3>
+            <button onClick={onClose} className="close-btn">×</button>
+          </div>
+          <div className="modal-body">
+            <div className="modal-filters">
+              <FilterInput
+                placeholder="Filtrar por técnico"
+                value={modalFilterTech}
+                onChange={(value) => setModalFilterTech(value)}
+              />
+              {showSectorColumn && (
+                <FilterInput
+                  placeholder="Filtrar por setor"
+                  value={modalFilterSector}
+                  onChange={(value) => setModalFilterSector(value)}
+                />
+              )}
+              {showAssuntoColumn && (
+                <FilterInput
+                  placeholder="Filtrar por assunto"
+                  value={modalFilterAssunto}
+                  onChange={(value) => setModalFilterAssunto(value)}
+                />
+              )}
+            </div>
+
+            <div className="orders-container">
+              <table className="orders-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    {showSectorColumn && <th>Setor</th>}
+                    {showAssuntoColumn && <th>Assunto</th>}
+                    <th>Técnico</th>
+                    {showStatusColumn && <th>Status</th>}
+                    <th>Data</th>
+                    <th>Prioridade</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredOrders.length > 0 ? (
+                    filteredOrders.map(order => (
+                      <tr key={order.id}>
+                        <td>{order.id}</td>
+                        {showSectorColumn && <td>{order.sector}</td>}
+                        {showAssuntoColumn && <td>{order.assunto}</td>}
+                        <td>{order.tech}</td>
+                        {showStatusColumn && (
+                          <td>
+                            <span className={`status-badge ${getStatusClass(order.status)}`}>
+                              {getStatusLabel(order.status)}
+                            </span>
+                          </td>
+                        )}
+                        <td>{order.date}</td>
+                        <td>
+                          <span className={`status-badge status-${getPriority(order.priority)}`}>
+                            {order.priority}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            className="view-btn"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowModal(true);
+                              onClose();
+                            }}
+                          >
+                            Ver
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7 + (showSectorColumn ? 1 : 0) + (showAssuntoColumn ? 1 : 0) + (showStatusColumn ? 1 : 0)} className="no-results">
+                        Nenhuma ordem encontrada com os filtros aplicados
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const handleOrderClick = (orderId: string) => {
     const order = filteredOrders.find(o => o.id === orderId);
     setSelectedOrder(order || null);
@@ -467,13 +710,13 @@ const Connectbi = () => {
     if (elements.length > 0) {
       const index = elements[0].index;
       const label = chart.data.labels[index];
-      
+
       // Verifica qual gráfico foi clicado
       if (chart.canvas.id.includes('assuntos-chart')) {
         // Gráfico de assuntos
         setSelectedAssunto(label);
-        const ordersForAssunto = ordersData.filter(order => 
-          order.assunto === label && 
+        const ordersForAssunto = ordersData.filter(order =>
+          order.assunto === label &&
           (selectedSector === 'all' || order.sector === sectors.find(s => s.id_setor === selectedSector)?.descricao)
         );
         setAssuntoOrders(ordersForAssunto);
@@ -482,7 +725,7 @@ const Connectbi = () => {
         // Gráfico de status
         setSelectedStatus(label);
         const statusKey = getStatusKeyFromLabel(label);
-        const ordersForStatus = ordersData.filter(order => 
+        const ordersForStatus = ordersData.filter(order =>
           order.status === statusKey &&
           (selectedSector === 'all' || order.sector === sectors.find(s => s.id_setor === selectedSector)?.descricao)
         );
@@ -491,7 +734,7 @@ const Connectbi = () => {
       } else if (chart.canvas.id.includes('sector-chart')) {
         // Gráfico de setores (apenas quando selectedSector === 'all')
         setSelectedSectorModal(label);
-        const ordersForSector = ordersData.filter(order => 
+        const ordersForSector = ordersData.filter(order =>
           order.sector === label
         );
         setSectorOrders(ordersForSector);
@@ -538,7 +781,7 @@ const Connectbi = () => {
             orders.push({
               id: os.id || 'N/A',
               sector: sector.descricao,
-              description: os.mensagem || 'Sem descrição',
+              description: os.descricao || 'Sem descrição',
               tech: os.id_tecnico ? `${os.id_tecnico}` : 'Não atribuído',
               status: os.status || 'A',
               date: dateObj.toLocaleDateString(),
@@ -560,7 +803,7 @@ const Connectbi = () => {
               orders.push({
                 id: os.id || 'N/A',
                 sector: sector.descricao,
-                description: os.mensagem || 'Sem descrição',
+                description: os.descricao || 'Sem descrição',
                 tech: os.id_tecnico ? `${os.id_tecnico}` : 'Não atribuído',
                 status: os.status || statusType.toUpperCase().substring(0, 2),
                 date: dateObj.toLocaleDateString(),
@@ -665,7 +908,7 @@ const Connectbi = () => {
       </div>
     </header>
   );
-
+  // Atualizar o OverviewCards para incluir os cliques
   const OverviewCards = () => {
     const statusData = prepareStatusChartData();
 
@@ -683,6 +926,7 @@ const Connectbi = () => {
         title: 'Total de Ordens',
         value: totalOrdens.toLocaleString(),
         icon: '📋',
+        filterType: 'total',
         trend: 'up',
         trendValue: '12% desde o último mês'
       },
@@ -690,6 +934,7 @@ const Connectbi = () => {
         title: 'Em Analise',
         value: emAnalise.toLocaleString(),
         icon: '🔄',
+        filterType: 'analise',
         trend: 'down',
         trendValue: '5% desde o último mês'
       },
@@ -697,6 +942,7 @@ const Connectbi = () => {
         title: 'Encaminhadas',
         value: encaminhada.toLocaleString(),
         icon: '🚀',
+        filterType: 'encaminhada',
         trend: 'up',
         trendValue: '18% desde o último mês'
       },
@@ -704,6 +950,7 @@ const Connectbi = () => {
         title: 'Assumidas',
         value: assumida.toLocaleString(),
         icon: '🤲',
+        filterType: 'assumida',
         trend: 'up',
         trendValue: '3% desde o último mês'
       },
@@ -711,6 +958,7 @@ const Connectbi = () => {
         title: 'Agendadas',
         value: agendada.toLocaleString(),
         icon: '⌚',
+        filterType: 'agendada',
         trend: 'up',
         trendValue: '3% desde o último mês'
       },
@@ -718,6 +966,7 @@ const Connectbi = () => {
         title: 'Em Deslocamento',
         value: deslocamento.toLocaleString(),
         icon: '🚗',
+        filterType: 'deslocamento',
         trend: 'up',
         trendValue: '3% desde o último mês'
       },
@@ -725,6 +974,7 @@ const Connectbi = () => {
         title: 'Em Execução',
         value: execucao.toLocaleString(),
         icon: '🛠️',
+        filterType: 'execucao',
         trend: 'up',
         trendValue: '3% desde o último mês'
       },
@@ -732,6 +982,7 @@ const Connectbi = () => {
         title: 'Reagendamento',
         value: reagendamento.toLocaleString(),
         icon: '⏳',
+        filterType: 'reagendamento',
         trend: 'up',
         trendValue: '3% desde o último mês'
       }
@@ -743,7 +994,12 @@ const Connectbi = () => {
           <div className="error-message">{error}</div>
         ) : (
           cards.map((card, index) => (
-            <div key={index} className="card">
+            <div
+              key={index}
+              className="card"
+              onClick={() => handleOverviewCardClick(card.filterType)}
+              style={{ cursor: 'pointer' }}
+            >
               <div className="card-content">
                 <div>
                   <p className="card-title">{card.title}</p>
@@ -757,6 +1013,7 @@ const Connectbi = () => {
       </div>
     );
   };
+
 
   const ChartsSection = () => {
     const [textColor, setTextColor] = useState(
@@ -859,10 +1116,10 @@ const Connectbi = () => {
                 </div>
                 <div className="chart-wrapper">
                   {chartType === 'pie' ? (
-                    <Pie 
-                      key={`sector-pie-${textColor}`} 
-                      data={prepareSectorChartData()} 
-                      options={chartOptions} 
+                    <Pie
+                      key={`sector-pie-${textColor}`}
+                      data={prepareSectorChartData()}
+                      options={chartOptions}
                       id="sector-chart"
                     />
                   ) : (
@@ -903,10 +1160,10 @@ const Connectbi = () => {
                 </div>
                 <div className="chart-wrapper">
                   {chartType === 'pie' ? (
-                    <Pie 
-                      key={`assuntos-pie-${textColor}`} 
-                      data={prepareSubjectChartData()} 
-                      options={chartOptions} 
+                    <Pie
+                      key={`assuntos-pie-${textColor}`}
+                      data={prepareSubjectChartData()}
+                      options={chartOptions}
                       id="assuntos-chart"
                     />
                   ) : (
@@ -952,143 +1209,29 @@ const Connectbi = () => {
     );
   };
 
-  // Modal para mostrar as OS de um status específico
-  const StatusModal = () => {
-    return (
-      <div className="modal-overlay" onClick={() => setShowStatusModal(false)}>
-        <div className="modal-content large-modal" onClick={e => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>Ordens de Serviço com status: {selectedStatus}</h3>
-            <button onClick={() => setShowStatusModal(false)} className="close-btn">×</button>
-          </div>
-          <div className="modal-body">
-            <div className="status-orders-container">
-              <table className="orders-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Setor</th>
-                    <th>Assunto</th>
-                    <th>Técnico</th>
-                    <th>Data</th>
-                    <th>Prioridade</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {statusOrders.length > 0 ? (
-                    statusOrders.map(order => (
-                      <tr key={order.id}>
-                        <td>{order.id}</td>
-                        <td>{order.sector}</td>
-                        <td>{order.assunto}</td>
-                        <td>{order.tech}</td>
-                        <td>{order.date}</td>
-                        <td>
-                          <span className={`status-badge status-${getPriority(order.priority)}`}>
-                            {order.priority}
-                          </span>
-                        </td>
-                        <td>
-                          <button
-                            className="view-btn"
-                            onClick={() => {
-                              setSelectedOrder(order);
-                              setShowModal(true);
-                              setShowStatusModal(false);
-                            }}
-                          >
-                            Ver
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={7} className="no-results">
-                        Nenhuma ordem encontrada para este status
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  // Atualizar os modais existentes para usar o novo componente FilteredOrdersModal
+  const StatusModal = () => (
+    <FilteredOrdersModal
+      title={`Ordens de Serviço com status: ${selectedStatus}`}
+      orders={statusOrders}
+      onClose={() => setShowStatusModal(false)}
+      showSectorColumn={true}
+      showStatusColumn={false}
+      showAssuntoColumn={true}
+    />
+  );
 
-  // Modal para mostrar as OS de um setor específico (quando "Todos os Setores" está selecionado)
-  const SectorModal = () => {
-    return (
-      <div className="modal-overlay" onClick={() => setShowSectorModal(false)}>
-        <div className="modal-content large-modal" onClick={e => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>Ordens de Serviço do setor: {selectedSectorModal}</h3>
-            <button onClick={() => setShowSectorModal(false)} className="close-btn">×</button>
-          </div>
-          <div className="modal-body">
-            <div className="sector-orders-container">
-              <table className="orders-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Assunto</th>
-                    <th>Técnico</th>
-                    <th>Status</th>
-                    <th>Data</th>
-                    <th>Prioridade</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sectorOrders.length > 0 ? (
-                    sectorOrders.map(order => (
-                      <tr key={order.id}>
-                        <td>{order.id}</td>
-                        <td>{order.assunto}</td>
-                        <td>{order.tech}</td>
-                        <td>
-                          <span className={`status-badge ${getStatusClass(order.status)}`}>
-                            {getStatusLabel(order.status)}
-                          </span>
-                        </td>
-                        <td>{order.date}</td>
-                        <td>
-                          <span className={`status-badge status-${getPriority(order.priority)}`}>
-                            {order.priority}
-                          </span>
-                        </td>
-                        <td>
-                          <button
-                            className="view-btn"
-                            onClick={() => {
-                              setSelectedOrder(order);
-                              setShowModal(true);
-                              setShowSectorModal(false);
-                            }}
-                          >
-                            Ver
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={7} className="no-results">
-                        Nenhuma ordem encontrada para este setor
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const SectorModal = () => (
+    <FilteredOrdersModal
+      title={`Ordens de Serviço do setor: ${selectedSectorModal}`}
+      orders={sectorOrders}
+      onClose={() => setShowSectorModal(false)}
+      showSectorColumn={false}
+      showStatusColumn={true}
+      showAssuntoColumn={true}
+    />
+  );
+
 
   const OrdersTable = () => {
     const statusOptions = [
@@ -1292,76 +1435,16 @@ const Connectbi = () => {
     );
   };
 
-  // Modal para mostrar as OS de um assunto específico
-  const AssuntoModal = () => {
-    return (
-      <div className="modal-overlay" onClick={() => setShowAssuntoModal(false)}>
-        <div className="modal-content large-modal" onClick={e => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>Ordens de Serviço para: {selectedAssunto}</h3>
-            <button onClick={() => setShowAssuntoModal(false)} className="close-btn">×</button>
-          </div>
-          <div className="modal-body">
-            <div className="assunto-orders-container">
-              <table className="orders-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Setor</th>
-                    <th>Técnico</th>
-                    <th>Status</th>
-                    <th>Data</th>
-                    <th>Prioridade</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {assuntoOrders.length > 0 ? (
-                    assuntoOrders.map(order => (
-                      <tr key={order.id}>
-                        <td>{order.id}</td>
-                        <td>{order.sector}</td>
-                        <td>{order.tech}</td>
-                        <td>
-                          <span className={`status-badge ${getStatusClass(order.status)}`}>
-                            {getStatusLabel(order.status)}
-                          </span>
-                        </td>
-                        <td>{order.date}</td>
-                        <td>
-                          <span className={`status-badge status-${getPriority(order.priority)}`}>
-                            {order.priority}
-                          </span>
-                        </td>
-                        <td>
-                          <button
-                            className="view-btn"
-                            onClick={() => {
-                              setSelectedOrder(order);
-                              setShowModal(true);
-                              setShowAssuntoModal(false);
-                            }}
-                          >
-                            Ver
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={7} className="no-results">
-                        Nenhuma ordem encontrada para este assunto
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const AssuntoModal = () => (
+    <FilteredOrdersModal
+      title={`Ordens de Serviço para: ${selectedAssunto}`}
+      orders={assuntoOrders}
+      onClose={() => setShowAssuntoModal(false)}
+      showSectorColumn={true}
+      showStatusColumn={true}
+      showAssuntoColumn={false}
+    />
+  );
 
   // Componente discreto para mostrar atualização em background
   const BackgroundUpdateIndicator = () => (
@@ -1404,6 +1487,21 @@ const Connectbi = () => {
       {showAssuntoModal && <AssuntoModal />}
       {showStatusModal && <StatusModal />}
       {showSectorModal && <SectorModal />}
+      {showOverviewModal && (
+        <FilteredOrdersModal
+          title={overviewFilter}
+          orders={overviewOrders}
+          onClose={() => {
+            setShowOverviewModal(false);
+            setModalFilterTech('');
+            setModalFilterSector('');
+            setModalFilterAssunto('');
+          }}
+          showSectorColumn={true}
+          showStatusColumn={true}
+          showAssuntoColumn={true}
+        />
+      )}
 
       <BackgroundUpdateIndicator />
     </div>

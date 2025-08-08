@@ -440,7 +440,7 @@ body:has(.sidebar.hidden) .dashboard-main {
 .modal-content {
     background-color: var(--colorDarkForm);
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 3cap rgba(0, 0, 0, 0.5);
     width: 90%;
     max-width: 800px;
     max-height: 90vh;
@@ -551,6 +551,19 @@ body:has(.sidebar.hidden) .dashboard-main {
     justify-content: flex-end;
     gap: 0.5rem;
     margin-top: 1.5rem;
+}
+
+.filter-group{
+    display: flex;
+    align-items: center;
+}
+.filter-group input{
+    padding: 5px;
+}
+
+.modal-filters{
+    display: flex;
+    gap: 10px;
 }
 
 .sector-select-container {
