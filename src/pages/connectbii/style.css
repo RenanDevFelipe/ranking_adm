@@ -430,7 +430,7 @@ body:has(.sidebar.hidden) .dashboard-main {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--colorDarkForm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -438,7 +438,7 @@ body:has(.sidebar.hidden) .dashboard-main {
 }
 
 .modal-content {
-    background-color: white;
+    background-color: var(--colorDarkForm);
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 90%;
@@ -458,7 +458,7 @@ body:has(.sidebar.hidden) .dashboard-main {
 .modal-header h3 {
     margin: 0;
     font-size: 1.25rem;
-    color: #1f2937;
+    color: var(--textColor);
 }
 
 .close-btn {
@@ -466,7 +466,7 @@ body:has(.sidebar.hidden) .dashboard-main {
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: #6b7280;
+    color: red;
     transition: color 0.2s;
 }
 
@@ -483,6 +483,7 @@ body:has(.sidebar.hidden) .dashboard-main {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
     margin-bottom: 1.5rem;
+    color: var(--textColor);
 }
 
 .modal-section {
@@ -492,7 +493,7 @@ body:has(.sidebar.hidden) .dashboard-main {
 .modal-section h4 {
     margin: 0 0 1rem;
     font-size: 1rem;
-    color: #1f2937;
+    color: var(--textColor);
 }
 
 .info-group p {
