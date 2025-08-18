@@ -4,32 +4,15 @@ import "../styles.css";
 import { getRankingDiario, getColaboradores } from '../../services/api.ts';
 import { logout } from '../../utils/auth.js';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
     Avatar,
     Collapse,
     IconButton,
-    Typography,
-    Card,
-    CardContent,
-    Grid,
-    useTheme,
     TextField,
-    Box
 } from '@mui/material';
-import {
-    KeyboardArrowDown,
-    KeyboardArrowUp,
-} from '@mui/icons-material';
+import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 
 export default function RankingDiario() {
-    const theme = useTheme();
     const [darkMode] = useState(() => {
         const savedMode = localStorage.getItem('darkMode');
         return savedMode ? JSON.parse(savedMode) : true;
@@ -46,7 +29,6 @@ export default function RankingDiario() {
         setIsSidebarVisible(!isSidebarVisible);
     };
 
-    // Aplica o tema ao body
     useEffect(() => {
         if (darkMode) {
             document.body.classList.remove('light-mode');
@@ -56,18 +38,15 @@ export default function RankingDiario() {
         localStorage.setItem('darkMode', JSON.stringify(darkMode));
     }, [darkMode]);
 
-    // Define a data inicial (mês atual)
     useEffect(() => {
         const currentDate = new Date();
-        const day = currentDate.getDate();
-        const month = currentDate.getMonth() + 1;
+        const day = currentDate.getDate().toString().padStart(2, '0');
+        const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
         const year = currentDate.getFullYear();
-        const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${day}`;
-        console.log(formattedDate);
+        const formattedDate = `${year}-${month}-${day}`;
         setSearchDate(formattedDate);
     }, []);
 
-    // Carrega dados do ranking e colaboradores
     useEffect(() => {
         if (searchDate) {
             fetchData(searchDate);
@@ -79,7 +58,6 @@ export default function RankingDiario() {
         setLoading(true);
 
         try {
-            // Carrega ranking e colaboradores em paralelo
             const [ranking, colaboradoresData] = await Promise.all([
                 getRankingDiario(token, date),
                 getColaboradores(token)
@@ -87,8 +65,6 @@ export default function RankingDiario() {
 
             setRankingData((ranking || []).filter(item => !item?.erro));
             setColaboradores(colaboradoresData || []);
-
-            console.log('rankingData: ', ranking)
 
         } catch (err) {
             console.error("Erro ao carregar dados:", err);
@@ -107,8 +83,6 @@ export default function RankingDiario() {
         setSearchDate(e.target.value);
     };
 
-
-    // E modifique a função getColaboradorFoto para ser mais resiliente
     const getColaboradorFoto = (nome) => {
         if (!nome || !colaboradores || colaboradores.length === 0) {
             return 'https://ticonnecte.com.br/ranking_api/api/uploads/default.png';
@@ -118,7 +92,6 @@ export default function RankingDiario() {
             colab.nome_colaborador && colab.nome_colaborador.toLowerCase() === nome.toLowerCase()
         );
 
-        // Verifica se a URL da imagem começa com http, se não, adiciona https://
         const url = colaborador?.url_image || 'default.png';
         return url.startsWith('http') ? url : `https://${url}`;
     };
@@ -130,46 +103,37 @@ export default function RankingDiario() {
         }));
     };
 
-    // Estilo do avatar baseado na posição
-    const getAvatarStyle = (position) => {
-        const baseStyle = {
-            width: 70,
-            height: 70,
-            borderWidth: 4,
-            borderStyle: 'solid',
-            objectFit: 'cover'
-        };
-
+    const getPositionColor = (position) => {
         switch (position) {
-            case 1:
-                return {
-                    ...baseStyle,
-                    borderColor: '#FFD700', // Ouro
-                    width: 100,
-                    height: 100,
-                    objectPosition: 'center top',
-                };
-            case 2:
-                return {
-                    ...baseStyle,
-                    borderColor: '#C0C0C0', // Prata
-                    width: 80,
-                    height: 80,
-                    objectPosition: 'center top'
-                };
-            case 3:
-                return {
-                    ...baseStyle,
-                    borderColor: '#CD7F32', // Bronze
-                    objectPosition: 'center top'
-                };
-            default:
-                return {
-                    ...baseStyle,
-                    borderColor: theme.palette.primary.main
-                };
+            case 1: return 'bg-yellow-300';
+            case 2: return 'bg-gray-300';
+            case 3: return 'bg-amber-600';
+            default: return 'bg-indigo-100';
         }
     };
+
+    const getPositionTextColor = (position) => {
+        switch (position) {
+            case 1: return 'text-yellow-700';
+            case 2: return 'text-gray-700';
+            case 3: return 'text-amber-800';
+            default: return 'text-indigo-700';
+        }
+    };
+
+    const getCardBgColor = (position) => {
+        switch (position) {
+            case 1: return 'bg-yellow-200';
+            case 2: return 'bg-gray-200';
+            case 3: return 'bg-amber-500';
+            default: return 'bg-white';
+        }
+    };
+
+    function getRandomLightColor() {
+        const lightness = Math.floor(Math.random() * 16) + 80;
+        return `hsl(0, 0%, ${lightness}%)`;
+    }
 
     if (loading) {
         return (
@@ -208,163 +172,146 @@ export default function RankingDiario() {
                     {isSidebarVisible ? <DehazeIcon /> : '►'}
                 </button>
                 <div className="ranking-container">
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                        <h1>Ranking Diario</h1>
-                        <Box display="flex" alignItems="center">
-                            <TextField
-                                className='input-date'
-                                label="Dia/Mês/Ano"
-                                type="date"
-                                value={searchDate}
-                                onChange={handleDateChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                inputProps={{
-                                    max: `${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`,
-                                }}
-                                variant="outlined"
-                                sx={{ mr: 2 }}
-                            />
-                            {/* <Button
-                                variant="contained"
-                                color="primary"
-                                startIcon={<Search />}
-                                onClick={handleSearch}
-                            >
-                                Buscar
-                            </Button> */}
-                        </Box>
-                    </Box>
-
-                    {/* Pódio - Top 3 */}
-                    <div className="podium-container">
-                        <Grid container spacing={3} justifyContent="center" alignItems="flex-end">
-                            {/* Segundo lugar */}
-                            {rankingData.length > 1 && (
-                                <Grid item xs={12} sm={4} className="podium-item second-place">
-                                    <Avatar
-                                        src={getColaboradorFoto(rankingData[1].colaborador)}
-                                        sx={getAvatarStyle(2)}
-                                    />
-                                    <Typography variant="h6">{rankingData[1].colaborador}</Typography>
-                                    <Typography variant="subtitle1">Média: {rankingData[1].media_total}</Typography>
-                                </Grid>
-                            )}
-
-                            {/* Primeiro lugar */}
-                            {rankingData.length > 0 && (
-                                <Grid item xs={12} sm={4} className="podium-item first-place">
-                                    <Avatar
-                                        src={getColaboradorFoto(rankingData[0].colaborador)}
-                                        sx={getAvatarStyle(1)}
-                                    />
-                                    <Typography variant="h5">{rankingData[0].colaborador}</Typography>
-                                    <Typography variant="subtitle1">Média: {rankingData[0].media_total}</Typography>
-                                </Grid>
-                            )}
-
-                            {/* Terceiro lugar */}
-                            {rankingData.length > 2 && (
-                                <Grid item xs={12} sm={4} className="podium-item third-place">
-                                    <Avatar
-                                        src={getColaboradorFoto(rankingData[2].colaborador)}
-                                        sx={getAvatarStyle(3)}
-                                    />
-                                    <Typography variant="h6">{rankingData[2].colaborador}</Typography>
-                                    <Typography variant="subtitle1">Média: {rankingData[2].media_total}</Typography>
-                                </Grid>
-                            )}
-                        </Grid>
+                    <div className="flex flex-col md:flex-row justify-around items-center mb-8">
+                        <h1 className="text-3xl font-bold text-center text-orange mb-4 md:mb-0">Ranking Diário</h1>
+                        <TextField
+                            className="input-date"
+                            label="Data"
+                            type="date"
+                            value={searchDate}
+                            onChange={handleDateChange}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            inputProps={{
+                                max: new Date().toISOString().split('T')[0],
+                            }}
+                            variant="outlined"
+                            sx={{ mr: 2 }}
+                        />
                     </div>
 
-                    {/* Tabela completa */}
-                    <TableContainer component={Paper} sx={{ marginTop: 4 }}>
-                        <Table aria-label="ranking table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Posição</TableCell>
-                                    <TableCell>Colaborador</TableCell>
-                                    <TableCell align="right">Total Avaliações</TableCell>
-                                    <TableCell align="right">Média Diaria</TableCell>
-                                    <TableCell />
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {rankingData.map((row, index) => (
+                    {/* Pódio */}
+                    <div className="flex justify-center items-end h-64 mb-12 gap-4">
+                        {/* Segundo lugar */}
+                        {rankingData.length > 1 && (
+                            <div className="podium-item flex flex-col w-1/5">
+                                <div className={`${getPositionColor(2)} w-full rounded-t-lg flex items-center justify-center`} style={{ height: '60%' }}>
+                                    <span className={`text-4xl font-bold ${getPositionTextColor(2)}`}>2</span>
+                                </div>
+                                <div className={`${getCardBgColor(2)} w-full p-3 rounded-b-lg text-center ${rankingData[1].colocacao === 3 ? 'text-white' : ''}`}>
+                                    <Avatar
+                                        src={getColaboradorFoto(rankingData[1].colaborador)}
+                                        sx={{ width: 48, height: 48, margin: '0 auto 8px', border: '2px solid white' }}
+                                    />
+                                    <p className="font-semibold">{rankingData[1].colaborador}</p>
+                                    <div className="text-xs">
+                                        <p className={rankingData[1].colocacao === 3 ? 'text-amber-100' : 'text-gray-600'}>
+                                            Média: <span className="font-medium">{rankingData[1].media_total}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
-                                    <>
-                                        <TableRow
-                                            key={row.tecnico}
-                                            sx={{
-                                                '& > *': { borderBottom: 'unset' },
-                                                cursor: 'pointer',
-                                                backgroundColor: expandedRows[index] ? theme.palette.action.selected : 'inherit'
-                                            }}
-                                            onClick={() => handleRowClick(index)}
-                                        >
-                                            <TableCell className='avatar-colocacao'>
-                                                <p>{row.colocacao}°</p>
-                                                <Avatar
-                                                    src={getColaboradorFoto(row.colaborador)}
-                                                    sx={getAvatarStyle(row.colocacao)}
-                                                />
-                                            </TableCell>
-                                            <TableCell component="th" scope="row">
-                                                {row.colaborador}
-                                            </TableCell>
-                                            <TableCell align="right">{row.total_registros}</TableCell>
-                                            <TableCell align="right">{row.media_total}</TableCell>
-                                            <TableCell>
-                                                <IconButton
-                                                    aria-label="expand row"
-                                                    size="small"
-                                                    onClick={() => handleRowClick(index)}
+                        {/* Primeiro lugar */}
+                        {rankingData.length > 0 && (
+                            <div className="podium-item flex flex-col w-1/4">
+                                <div className={`${getPositionColor(1)} w-full rounded-t-lg flex items-center justify-center`} style={{ height: '80%' }}>
+                                    <span className={`text-4xl font-bold ${getPositionTextColor(1)}`}>1</span>
+                                </div>
+                                <div className={`${getCardBgColor(1)} w-full p-3 rounded-b-lg text-center`}>
+                                    <Avatar
+                                        src={getColaboradorFoto(rankingData[0].colaborador)}
+                                        sx={{ width: 56, height: 56, margin: '0 auto 8px', border: '2px solid white' }}
+                                    />
+                                    <p className="font-semibold">{rankingData[0].colaborador}</p>
+                                    <div className="text-xs">
+                                        <p className="text-gray-600">
+                                            Média: <span className="font-medium">{rankingData[0].media_total}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Terceiro lugar */}
+                        {rankingData.length > 2 && (
+                            <div className="podium-item flex flex-col w-1/5">
+                                <div className={`${getPositionColor(3)} w-full rounded-t-lg flex items-center justify-center`} style={{ height: '40%' }}>
+                                    <span className={`text-4xl font-bold ${getPositionTextColor(3)}`}>3</span>
+                                </div>
+                                <div className={`${getCardBgColor(3)} w-full p-3 rounded-b-lg text-center`}>
+                                    <Avatar
+                                        src={getColaboradorFoto(rankingData[2].colaborador)}
+                                        sx={{ width: 48, height: 48, margin: '0 auto 8px', border: '2px solid white' }}
+                                    />
+                                    <p className="font-semibold text-white">{rankingData[2].colaborador}</p>
+                                    <div className="text-xs">
+                                        <p className="text-amber-100">
+                                            Média: <span className="font-medium">{rankingData[2].media_total}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Lista de Técnicos */}
+                    <div className="lista-tecnicos max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden mb-8">
+                        <div className="bg-orange px-6 py-3">
+                            <h2 className="text-xl font-semibold text-white">Lista de Técnicos</h2>
+                        </div>
+
+                        <div className="divide-y divide-gray-200">
+                            {rankingData.map((row, index) => (
+                                <div key={row.colaborador} className="technician-item">
+                                    <div 
+                                        className="flex items-center justify-between px-6 py-4 cursor-pointer technician-header"
+                                        onClick={() => handleRowClick(index)}
+                                    >
+                                        <div className="flex items-center">
+                                            <Avatar
+                                                src={getColaboradorFoto(row.colaborador)}
+                                                sx={{ width: 32, height: 32, marginRight: '16px', border: '2px solid white' }}
+                                            />
+                                            <div>
+                                                <h3 className="font-medium">{row.colaborador}</h3>
+                                                <div className="spans flex flex-wrap gap-4 gap-x-4 gap-y-1 text-xs">
+                                                    <span className="text-gray-500">
+                                                        Avaliações: <span className="font-medium">{row.total_registros}</span>
+                                                    </span>
+                                                    <span className="text-gray-500">
+                                                        Média: <span className="font-medium">{row.media_total}</span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <IconButton size="small">
+                                            {expandedRows[index] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                                        </IconButton>
+                                    </div>
+                                    
+                                    <Collapse in={expandedRows[index]} timeout="auto" unmountOnExit>
+                                        <div className="pt px-6 pb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {row.media_setor.map((setor) => (
+                                                <div
+                                                    key={setor.id_setor}
+                                                    className="ps bg-blue-50 p-3 rounded-lg"
+                                                    style={{ backgroundColor: getRandomLightColor() }}
                                                 >
-                                                    {expandedRows[index] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                                                </IconButton>
-                                            </TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
-                                                <Collapse in={expandedRows[index]} timeout="auto" unmountOnExit>
-                                                    <Card className='teste' sx={{ margin: 1 }}>
-                                                        <CardContent>
-                                                            <Typography variant="h6" gutterBottom>
-                                                                Desempenho por Setor
-                                                            </Typography>
-                                                            <Table size="small">
-                                                                <TableHead>
-                                                                    <TableRow>
-                                                                        <TableCell>Setor</TableCell>
-                                                                        <TableCell align="right">Avaliações</TableCell>
-                                                                        <TableCell align="right">Média</TableCell>
-                                                                        <TableCell align="right">Pontuação Total</TableCell>
-                                                                    </TableRow>
-                                                                </TableHead>
-                                                                <TableBody>
-                                                                    {row.media_setor.map((setor) => (
-                                                                        <TableRow key={setor.id_setor}>
-                                                                            <TableCell component="th" scope="row">
-                                                                                {setor.setor}
-                                                                            </TableCell>
-                                                                            <TableCell align="right">{setor.total_registros}</TableCell>
-                                                                            <TableCell align="right">{setor.media_diaria}</TableCell>
-                                                                            <TableCell align="right">{setor.soma_pontuacao}</TableCell>
-                                                                        </TableRow>
-                                                                    ))}
-                                                                </TableBody>
-                                                            </Table>
-                                                        </CardContent>
-                                                    </Card>
-                                                </Collapse>
-                                            </TableCell>
-                                        </TableRow>
-                                    </>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                                                    <p className="text-sm font-medium text-blue-700">{setor.setor}</p>
+                                                    <p className="text-lg font-bold">{setor.media_diaria}</p>
+                                                    <p className="text-xs text-gray-500">{setor.total_registros} avaliações</p>
+                                                    <p className="text-xs text-gray-500">{setor.soma_pontuacao} total</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </Collapse>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

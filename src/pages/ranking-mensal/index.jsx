@@ -4,32 +4,15 @@ import "../styles.css";
 import { getRankingMensal, getColaboradores, getRelatorio } from '../../services/api.ts';
 import { logout } from '../../utils/auth.js';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
     Avatar,
     Collapse,
     IconButton,
-    Typography,
-    Card,
-    CardContent,
-    Grid,
-    useTheme,
     TextField,
-    Box
 } from '@mui/material';
-import {
-    KeyboardArrowDown,
-    KeyboardArrowUp,
-} from '@mui/icons-material';
+import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 
 export default function RankingMensal() {
-    const theme = useTheme();
     const [darkMode] = useState(() => {
         const savedMode = localStorage.getItem('darkMode');
         return savedMode ? JSON.parse(savedMode) : true;
@@ -47,9 +30,6 @@ export default function RankingMensal() {
         setIsSidebarVisible(!isSidebarVisible);
     };
 
-
-
-    // Aplica o tema ao body
     useEffect(() => {
         if (darkMode) {
             document.body.classList.remove('light-mode');
@@ -59,7 +39,6 @@ export default function RankingMensal() {
         localStorage.setItem('darkMode', JSON.stringify(darkMode));
     }, [darkMode]);
 
-    // Define a data inicial (mês atual)
     useEffect(() => {
         const currentDate = new Date();
         const month = currentDate.getMonth() + 1;
@@ -69,7 +48,6 @@ export default function RankingMensal() {
         setToken(localStorage.getItem('access_token'));
     }, []);
 
-    // Carrega dados do ranking e colaboradores
     useEffect(() => {
         if (searchDate) {
             fetchData(searchDate);
@@ -81,7 +59,6 @@ export default function RankingMensal() {
         setLoading(true);
 
         try {
-            // Carrega ranking e colaboradores em paralelo
             const [ranking, colaboradoresData] = await Promise.all([
                 getRankingMensal(token, date),
                 getColaboradores(token)
@@ -89,8 +66,6 @@ export default function RankingMensal() {
 
             setRankingData((ranking || []).filter(item => !item?.erro));
             setColaboradores(colaboradoresData || []);
-
-            console.log('rankingData: ', ranking)
 
         } catch (err) {
             console.error("Erro ao carregar dados:", err);
@@ -109,8 +84,6 @@ export default function RankingMensal() {
         setSearchDate(e.target.value);
     };
 
-
-    // E modifique a função getColaboradorFoto para ser mais resiliente
     const getColaboradorFoto = (nome) => {
         if (!nome || !colaboradores || colaboradores.length === 0) {
             return 'https://ticonnecte.com.br/ranking_api/api/uploads/default.png';
@@ -120,7 +93,6 @@ export default function RankingMensal() {
             colab.nome_colaborador && colab.nome_colaborador.toLowerCase() === nome.toLowerCase()
         );
 
-        // Verifica se a URL da imagem começa com http, se não, adiciona https://
         const url = colaborador?.url_image || 'default.png';
         return url.startsWith('http') ? url : `https://${url}`;
     };
@@ -135,76 +107,57 @@ export default function RankingMensal() {
     const handleRelatorio = async () => {
         try {
             const response = await getRelatorio(token, searchDate);
-
-            // Cria um Blob com o conteúdo XML
             const blob = new Blob([response], { type: 'application/vnd.ms-excel' });
-
-            // Cria um link para download
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-
-            // Define o nome do arquivo com a data do relatório
             const formattedDate = searchDate.replace('-', '_');
             link.download = `Relatorio_Mensal_${formattedDate}.xls`;
-
-            // Dispara o download
             document.body.appendChild(link);
             link.click();
-
-            // Limpa o objeto URL
             setTimeout(() => {
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
             }, 100);
-
         } catch (error) {
             console.error("Erro ao gerar relatório:", error);
-            // Adicione aqui a lógica para exibir mensagem de erro ao usuário
         }
     };
 
-    // Estilo do avatar baseado na posição
-    const getAvatarStyle = (position) => {
-        const baseStyle = {
-            width: 70,
-            height: 70,
-            borderWidth: 4,
-            borderStyle: 'solid',
-            objectFit: 'cover'
-        };
-
+    const getPositionColor = (position) => {
         switch (position) {
-            case 1:
-                return {
-                    ...baseStyle,
-                    borderColor: '#FFD700', // Ouro
-                    width: 100,
-                    height: 100,
-                    objectPosition: 'center top',
-                };
-            case 2:
-                return {
-                    ...baseStyle,
-                    borderColor: '#C0C0C0', // Prata
-                    width: 80,
-                    height: 80,
-                    objectPosition: 'center top'
-                };
-            case 3:
-                return {
-                    ...baseStyle,
-                    borderColor: '#CD7F32', // Bronze
-                    objectPosition: 'center top'
-                };
-            default:
-                return {
-                    ...baseStyle,
-                    borderColor: theme.palette.primary.main
-                };
+            case 1: return 'bg-yellow-300';
+            case 2: return 'bg-gray-300';
+            case 3: return 'bg-amber-600';
+            default: return 'bg-indigo-100';
         }
     };
 
+    const getPositionTextColor = (position) => {
+        switch (position) {
+            case 1: return 'text-yellow-700';
+            case 2: return 'text-gray-700';
+            case 3: return 'text-amber-800';
+            default: return 'text-indigo-700';
+        }
+    };
+
+    const getCardBgColor = (position) => {
+        switch (position) {
+            case 1: return 'bg-yellow-200';
+            case 2: return 'bg-gray-200';
+            case 3: return 'bg-amber-500';
+            default: return 'bg-white';
+        }
+    };
+
+    const getMetaColorClass = (metaString) => {
+        const metaValue = parseFloat(metaString.replace('%', ''));
+
+        if (metaValue < 50) return 'text-red-700';
+        if (metaValue >= 50 && metaValue < 69) return 'text-yellow-700';
+        return 'text-green-700';
+    };
     if (loading) {
         return (
             <div className="loading-container">
@@ -231,8 +184,6 @@ export default function RankingMensal() {
         );
     }
 
-
-
     return (
         <div className="app-container">
             <Sidebar isVisible={isSidebarVisible} />
@@ -244,186 +195,181 @@ export default function RankingMensal() {
                     {isSidebarVisible ? <DehazeIcon /> : '►'}
                 </button>
                 <div className="ranking-container">
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                        <h1>Ranking Mensal</h1>
-                        <Box display="flex" alignItems="center">
-                            <TextField
-                                className='input-date'
-                                label="Mês/Ano"
-                                type="month"
-                                value={searchDate}
-                                onChange={handleDateChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                inputProps={{
-                                    max: `${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`,
-                                }}
-                                variant="outlined"
-                                sx={{ mr: 2 }}
-                            />
-                            {/* <Button
-                                variant="contained"
-                                color="primary"
-                                startIcon={<Search />}
-                                onClick={handleSearch}
-                            >
-                                Buscar
-                            </Button> */}
-                        </Box>
-                        <button
-                            onClick={() => handleRelatorio()}
-                            style={{
-                                padding: '8px 16px',
-                                backgroundColor: '#4CAF50',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                marginLeft: '10px'
+                    <div className="flex flex-col md:flex-row justify-around items-center mb-8">
+                        <h1 className="text-3xl font-bold text-center text-orange mb-4 md:mb-0">Ranking Mensal</h1>
+
+                        <TextField
+                            className="input-date"
+                            label="Mês/Ano"
+                            type="month"
+                            value={searchDate}
+                            onChange={handleDateChange}
+                            InputLabelProps={{
+                                shrink: true,
                             }}
+                            inputProps={{
+                                max: `${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`,
+                            }}
+                            variant="outlined"
+                            sx={{ mr: 2 }}
+                        />
+                        <button
+                            onClick={handleRelatorio}
+                            className="bg-orange cursor-pointer  text-white font-medium p-3 rounded-md transition-colors flex items-center gap-2"
                         >
-                            GERAR RELATÓRIO EXCEL
+                            <i className="fas fa-file-excel"></i>
+                            Gerar Relatório
                         </button>
-                    </Box>
 
-                    {/* Pódio - Top 3 */}
-                    <div className="podium-container">
-                        <Grid container spacing={3} justifyContent="center" alignItems="flex-end">
-                            {/* Segundo lugar */}
-                            {rankingData.length > 1 && (
-                                <Grid item xs={12} sm={4} className="podium-item second-place">
-                                    <Avatar
-                                        src={getColaboradorFoto(rankingData[1].tecnico)}
-                                        sx={getAvatarStyle(2)}
-                                    />
-                                    <Typography variant="h6">{rankingData[1].tecnico}</Typography>
-                                    <Typography variant="subtitle1">Média: {rankingData[1].media_mensal}</Typography>
-                                    <Typography variant="body2">Dias com nota 10: {rankingData[1].meta_mensal.total_dias_batidos}</Typography>
-                                </Grid>
-                            )}
-
-                            {/* Primeiro lugar */}
-                            {rankingData.length > 0 && (
-                                <Grid item xs={12} sm={4} className="podium-item first-place">
-                                    <Avatar
-                                        src={getColaboradorFoto(rankingData[0].tecnico)}
-                                        sx={getAvatarStyle(1)}
-                                    />
-                                    <Typography variant="h5">{rankingData[0].tecnico}</Typography>
-                                    <Typography variant="subtitle1">Média: {rankingData[0].media_mensal}</Typography>
-                                    <Typography variant="body2">Dias com nota 10: {rankingData[0].meta_mensal.total_dias_batidos}</Typography>
-                                </Grid>
-                            )}
-
-                            {/* Terceiro lugar */}
-                            {rankingData.length > 2 && (
-                                <Grid item xs={12} sm={4} className="podium-item third-place">
-                                    <Avatar
-                                        src={getColaboradorFoto(rankingData[2].tecnico)}
-                                        sx={getAvatarStyle(3)}
-                                    />
-                                    <Typography variant="h6">{rankingData[2].tecnico}</Typography>
-                                    <Typography variant="subtitle1">Média: {rankingData[2].media_mensal}</Typography>
-                                    <Typography variant="body2">Dias com nota 10: {rankingData[2].meta_mensal.total_dias_batidos}</Typography>
-                                </Grid>
-                            )}
-                        </Grid>
                     </div>
 
-                    {/* Tabela completa */}
-                    <TableContainer component={Paper} sx={{ marginTop: 4 }}>
-                        <Table aria-label="ranking table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Posição</TableCell>
-                                    <TableCell>Colaborador</TableCell>
-                                    <TableCell align="right">Total Avaliações</TableCell>
-                                    <TableCell align="right">Média Mensal</TableCell>
-                                    <TableCell align="right">Dias Nota 10</TableCell>
-                                    <TableCell align="right">Meta do Mês</TableCell>
-                                    <TableCell />
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {rankingData.map((row, index) => (
+                    {/* Pódio */}
+                    <div className="flex justify-center items-end h-64 mb-12 gap-4">
+                        {/* Segundo lugar */}
+                        {rankingData.length > 1 && (
+                            <div className="podium-item flex flex-col  w-1/5">
+                                <div className={`${getPositionColor(2)} w-full rounded-t-lg flex items-center justify-center`} style={{ height: '60%' }}>
+                                    <span className={`text-4xl font-bold ${getPositionTextColor(2)}`}>2</span>
+                                </div>
+                                <div className={`${getCardBgColor(2)} w-full p-3 rounded-b-lg text-center ${rankingData[1].colocacao === 3 ? 'text-white' : ''}`}>
+                                    <Avatar
+                                        src={getColaboradorFoto(rankingData[1].tecnico)}
+                                        sx={{ width: 48, height: 48, margin: '0 auto 8px', border: '2px solid white' }}
+                                    />
+                                    <p className="font-semibold">{rankingData[1].tecnico}</p>
+                                    <div className="text-xs">
+                                        <p className={rankingData[1].colocacao === 3 ? 'text-amber-100' : 'text-gray-600'}>
+                                            Média: <span className="font-medium">{rankingData[1].media_mensal}</span>
+                                        </p>
+                                        <p className={rankingData[1].colocacao === 3 ? 'text-amber-100' : 'text-gray-600'}>
+                                            Dias com Nota 10: <span className="font-medium">{rankingData[1].meta_mensal.total_dias_batidos}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
-                                    <>
-                                        <TableRow
-                                            key={row.tecnico}
-                                            sx={{
-                                                '& > *': { borderBottom: 'unset' },
-                                                cursor: 'pointer',
-                                                backgroundColor: expandedRows[index] ? theme.palette.action.selected : 'inherit'
-                                            }}
-                                            onClick={() => handleRowClick(index)}
-                                        >
-                                            <TableCell className='avatar-colocacao'>
-                                                <p>{row.colocacao}°</p>
-                                                <Avatar
-                                                    src={getColaboradorFoto(row.tecnico)}
-                                                    sx={getAvatarStyle(row.colocacao)}
-                                                />
-                                            </TableCell>
-                                            <TableCell component="th" scope="row">
-                                                {row.tecnico}
-                                            </TableCell>
-                                            <TableCell align="right">{row.total_registros}</TableCell>
-                                            <TableCell align="right">{row.media_mensal}</TableCell>
-                                            <TableCell align="right">{row.meta_mensal.total_dias_batidos}</TableCell>
-                                            <TableCell align="right">{row.meta_mensal.meta_do_mes}</TableCell>
-                                            <TableCell>
-                                                <IconButton
-                                                    aria-label="expand row"
-                                                    size="small"
-                                                    onClick={() => handleRowClick(index)}
+                        {/* Primeiro lugar */}
+                        {rankingData.length > 0 && (
+                            <div className="podium-item flex flex-col w-1/4">
+                                <div className={`${getPositionColor(1)} w-full rounded-t-lg flex items-center justify-center`} style={{ height: '80%' }}>
+                                    <span className={`text-4xl font-bold ${getPositionTextColor(1)}`}>1</span>
+                                </div>
+                                <div className={`${getCardBgColor(1)} w-full p-3 rounded-b-lg text-center`}>
+                                    <Avatar
+                                        src={getColaboradorFoto(rankingData[0].tecnico)}
+                                        sx={{ width: 56, height: 56, margin: '0 auto 8px', border: '2px solid white' }}
+                                    />
+                                    <p className="font-semibold">{rankingData[0].tecnico}</p>
+                                    <div className="text-xs">
+                                        <p className="text-gray-600">
+                                            Média: <span className="font-medium">{rankingData[0].media_mensal}</span>
+                                        </p>
+                                        <p className="text-gray-600">
+                                            Dias com Nota 10: <span className="font-medium">{rankingData[0].meta_mensal.total_dias_batidos}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Terceiro lugar */}
+                        {rankingData.length > 2 && (
+                            <div className="podium-item flex flex-col w-1/5">
+                                <div className={`${getPositionColor(3)} w-full rounded-t-lg flex items-center justify-center`} style={{ height: '40%' }}>
+                                    <span className={`text-4xl font-bold ${getPositionTextColor(3)}`}>3</span>
+                                </div>
+                                <div className={`${getCardBgColor(3)} w-full p-3 rounded-b-lg text-center`}>
+                                    <Avatar
+                                        src={getColaboradorFoto(rankingData[2].tecnico)}
+                                        sx={{ width: 48, height: 48, margin: '0 auto 8px', border: '2px solid white' }}
+                                    />
+                                    <p className="font-semibold">{rankingData[2].tecnico}</p>
+                                    <div className="text-xs">
+                                        <p className="text-amber-100">
+                                            Média: <span className="font-medium">{rankingData[2].media_mensal}</span>
+                                        </p>
+                                        <p className="text-amber-100">
+                                            Dias com Nota 10: <span className="font-medium">{rankingData[2].meta_mensal.total_dias_batidos}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Lista de Técnicos */}
+                    <div className="lista-tecnicos max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden mb-8">
+                        <div className="bg-orange px-6 py-3">
+                            <h2 className="text-xl font-semibold text-white">Lista de Técnicos</h2>
+                        </div>
+
+                        <div className="divide-y divide-gray-200">
+                            {rankingData.map((row, index) => (
+                                <div key={row.tecnico} className="technician-item">
+                                    <div
+                                        className="flex items-center justify-between px-6 py-4 cursor-pointer technician-header"
+                                        onClick={() => handleRowClick(index)}
+                                    >
+                                        <div className="flex items-center">
+                                            <Avatar
+                                                src={getColaboradorFoto(row.tecnico)}
+                                                sx={{ width: 32, height: 32, marginRight: '16px', border: '2px solid white' }}
+                                            />
+                                            <div>
+                                                <h3 className="font-medium">{row.tecnico}</h3>
+                                                <div className="spans flex flex-wrap gap-4 gap-x-4 gap-y-1 text-xs">
+                                                    <span className="text-gray-500">
+                                                        Avaliações: <span className="font-medium">{row.total_registros}</span>
+                                                    </span>
+                                                    <span className="text-gray-500">
+                                                        Média: <span className="font-medium">{row.media_mensal}</span>
+                                                    </span>
+                                                    <span className="text-gray-500">
+                                                        Dias 10: <span className="font-medium">{row.meta_mensal.total_dias_batidos}</span>
+                                                    </span>
+                                                    <span className="text-gray-500">
+                                                        Meta: <span className={`font-medium ${getMetaColorClass(row.meta_mensal.meta_do_mes)}`}>
+                                                            {row.meta_mensal.meta_do_mes}
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <IconButton size="small">
+                                            {expandedRows[index] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                                        </IconButton>
+                                    </div>
+
+                                    <Collapse in={expandedRows[index]} timeout="auto" unmountOnExit>
+                                        <div className="pt px-6 pb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {row.media_setor.map((setor) => (
+                                                <div
+                                                    key={setor.id_setor}
+                                                    className="ps bg-blue-50 p-3 rounded-lg"
+                                                    style={{ backgroundColor: getRandomLightColor() }}
                                                 >
-                                                    {expandedRows[index] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                                                </IconButton>
-                                            </TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
-                                                <Collapse in={expandedRows[index]} timeout="auto" unmountOnExit>
-                                                    <Card className='teste' sx={{ margin: 1 }}>
-                                                        <CardContent>
-                                                            <Typography variant="h6" gutterBottom>
-                                                                Desempenho por Setor
-                                                            </Typography>
-                                                            <Table size="small">
-                                                                <TableHead>
-                                                                    <TableRow>
-                                                                        <TableCell>Setor</TableCell>
-                                                                        <TableCell align="right">Avaliações</TableCell>
-                                                                        <TableCell align="right">Média</TableCell>
-                                                                        <TableCell align="right">Pontuação Total</TableCell>
-                                                                    </TableRow>
-                                                                </TableHead>
-                                                                <TableBody>
-                                                                    {row.media_setor.map((setor) => (
-                                                                        <TableRow key={setor.id_setor}>
-                                                                            <TableCell component="th" scope="row">
-                                                                                {setor.setor}
-                                                                            </TableCell>
-                                                                            <TableCell align="right">{setor.total_registros}</TableCell>
-                                                                            <TableCell align="right">{setor.media_mensal}</TableCell>
-                                                                            <TableCell align="right">{setor.soma_pontuacao}</TableCell>
-                                                                        </TableRow>
-                                                                    ))}
-                                                                </TableBody>
-                                                            </Table>
-                                                        </CardContent>
-                                                    </Card>
-                                                </Collapse>
-                                            </TableCell>
-                                        </TableRow>
-                                    </>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                                                    <p className="text-sm font-medium text-blue-700">{setor.setor}</p>
+                                                    <p className="text-lg font-bold">{setor.media_mensal}</p>
+                                                    <p className="text-xs text-gray-500">{setor.total_registros} avaliações</p>
+                                                    <p className="text-xs text-gray-500">{setor.soma_pontuacao} total</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </Collapse>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     );
+}
+
+// Função auxiliar para gerar cores pastel aleatórias
+function getRandomLightColor() {
+    // Gera um valor de luminosidade entre 80% e 95% (tons claros de cinza)
+    const lightness = Math.floor(Math.random() * 16) + 80;
+    return `hsl(0, 0%, ${lightness}%)`;
 }
