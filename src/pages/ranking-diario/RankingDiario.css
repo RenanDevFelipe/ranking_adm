@@ -1,0 +1,666 @@
+/* Modal Sticky Note Styles */
+.css-1ct5zyn{
+    width: 100%!important;
+    max-width: 1100px!important;
+}.sticky-note-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.sticky-note {
+    background-color: #fef9c3;
+    padding: 30px;
+    border-radius: 12px;
+    position: relative;
+    transform: rotate(-1deg);
+    box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 1000px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.sticky-note:hover {
+    transform: rotate(0deg) scale(1.01);
+    box-shadow: 10px 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.pin {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle, #d1d5db 30%, #9ca3af 70%);
+    border-radius: 50%;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.pin::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 12px;
+    background-color: #6b7280;
+    border-radius: 2px;
+}
+
+.note-header {
+    border-bottom: 2px dashed #f59e0b;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.header-border {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #fef9c3;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.note-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #374151;
+    margin: 0;
+    font-family: 'Gochi Hand', cursive;
+    flex: 1;
+}
+
+.close-button {
+    color: #6b7280 !important;
+    transition: color 0.3s ease;
+}
+
+.close-button:hover {
+    color: #374151 !important;
+}
+
+/* Conteúdo do Modal */
+.modal-content {
+    margin-top: 20px;
+    max-height: auto!important;
+}
+
+.loading-modal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 15px;
+}
+
+.loading-modal span {
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+.no-data {
+    text-align: center;
+    color: #6b7280;
+    font-size: 1.1rem;
+    padding: 60px 20px;
+    margin: 0;
+}
+
+.modal-content-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: #4f46e5;
+    margin: 0;
+}
+
+.stat-value.green {
+    color: #059669;
+}
+
+.stat-name {
+    font-size: 22px;
+    font-weight: bold;
+    color: #374151;
+    margin: 0;
+}
+
+/* Lista de OS */
+.os-list {
+    margin-top: 10px;
+}
+
+.os-section-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 20px;
+    font-family: 'Gochi Hand', cursive;
+}
+
+.os-grid {
+    display: grid;
+    gap: 20px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 5px;
+}
+
+.os-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 5px solid #3b82f6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.os-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.os-card.status-open {
+    border-left-color: #ef4444;
+}
+
+.os-card.status-closed {
+    border-left-color: #10b981;
+}
+
+.os-grid-inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.os-detail-label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.os-detail-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.status-open{
+    background-color: transparent!important;
+}
+.status-open-badge {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.status-closed-badge {
+    background-color: #d1fae5;
+    color: #059669;
+}
+
+/* Checklist */
+.checklist-container {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed #e5e7eb;
+}
+
+.checklist-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 15px;
+    font-family: 'Gochi Hand', cursive;
+}
+
+.checklist-content {
+    background-color: #f8fafc;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.checklist-item {
+    margin-bottom: 12px;
+}
+
+.checklist-text {
+    font-size: 14px;
+    color: #374151;
+    margin: 8px 0;
+    line-height: 1.5;
+}
+
+/* Checkbox personalizado com variantes */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 32px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #374151;
+    user-select: none;
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 22px;
+    width: 22px;
+    background-color: #fff;
+    border: 2px solid #4b5563;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+    border-color: #3b82f6;
+}
+
+/* Checkbox padrão marcado */
+.checkbox-container input:checked ~ .checkmark {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+/* Checkbox success (verde) */
+.checkbox-container.success input:checked ~ .checkmark {
+    background-color: #10b981;
+    border-color: #10b981;
+}
+
+/* Checkbox error (vermelho) */
+.checkbox-container.error input:checked ~ .checkmark {
+    background-color: #ef4444;
+    border-color: #ef4444;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-container .checkmark:after {
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-label {
+    margin-left: 8px;
+    line-height: 1.4;
+}
+
+/* Rating */
+.rating-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    margin-top: 15px;
+}
+
+.rating-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+
+.rating-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #f59e0b;
+}
+
+/* History Lists */
+.history-list {
+    margin-top: 20px;
+}
+
+.history-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 20px;
+    font-family: 'Gochi Hand', cursive;
+}
+
+.history-grid {
+    display: grid;
+    gap: 20px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 5px;
+}
+
+.history-item {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 5px solid #8b5cf6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.history-grid-inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.history-label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.history-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.history-notes {
+    padding-top: 15px;
+    border-top: 1px dashed #e5e7eb;
+    margin-top: 15px;
+}
+
+/* Checkbox personalizado */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 32px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #374151;
+    user-select: none;
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 22px;
+    width: 22px;
+    background-color: #fff;
+    border: 2px solid #4b5563;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+    border-color: #3b82f6;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+    background-color: #10b981;
+    border-color: #10b981;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-container .checkmark:after {
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-label {
+    margin-left: 8px;
+    line-height: 1.4;
+}
+
+/* Footer do Modal */
+.note-footer {
+    border-top: 2px dashed #f59e0b;
+    padding-top: 20px;
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.footer-date {
+    font-size: 14px;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-date i {
+    font-size: 16px;
+}
+
+.close-btn {
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.close-btn:hover {
+    background-color: #4338ca;
+    transform: translateY(-1px);
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .os-grid-inner,
+    .history-grid-inner {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .sticky-note {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .os-grid-inner,
+    .history-grid-inner {
+        grid-template-columns: 1fr;
+    }
+    
+    .note-footer {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .note-title {
+        font-size: 22px;
+    }
+    
+    .stat-value {
+        font-size: 28px;
+    }
+    
+    .stat-name {
+        font-size: 20px;
+    }
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-content-inner {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.os-card,
+.history-item {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Scroll personalizado */
+.os-grid::-webkit-scrollbar,
+.history-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.os-grid::-webkit-scrollbar-track,
+.history-grid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.os-grid::-webkit-scrollbar-thumb,
+.history-grid::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.os-grid::-webkit-scrollbar-thumb:hover,
+.history-grid::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Import das fontes */
+@import url('https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Poppins:wght@300;400;500;600&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../../components/sidebar/index.jsx';
 import "../styles.css";
+import "./RankingDiario.css";
 import { getRankingDiario, getColaboradores, getAvaliacoes, getHistoricoEstoque, getHistoricoRH, getHistorico } from '../../services/api.ts';
 import { logout } from '../../utils/auth.js';
 import {
@@ -33,6 +34,13 @@ const modalStyle = {
     p: 4,
     borderRadius: 2
 };
+const CustomCheckbox = ({ checked, label, variant = 'default' }) => (
+    <label className={`checkbox-container ${variant}`}>
+        <input type="checkbox" checked={checked} readOnly />
+        <span className="checkmark"></span>
+        {/* <span className="checkbox-label">{label}</span> */}
+    </label>
+);
 
 export default function RankingDiario() {
     const [darkMode] = useState(() => {
@@ -85,7 +93,7 @@ export default function RankingDiario() {
                 fetchHistoricoRHData(colaborador.id_colaborador, setor.id_setor);
             } else if (setor.id_setor === 9) {
                 fetchHistoricoN2Data(colaborador.id_colaborador, setor.id_setor);
-            } else if (setor.id_setor === 22){
+            } else if (setor.id_setor === 22) {
                 fetchHistoricoN2Data(colaborador.id_colaborador, setor.id_setor)
             }
         }
@@ -498,12 +506,11 @@ export default function RankingDiario() {
                                                     <p className="text-xs text-gray-500">{setor.total_registros} avaliações</p>
                                                     <p className="text-xs text-gray-500">{setor.soma_pontuacao} total</p>
                                                     {(setor.id_setor === 5 || setor.id_setor === 6 || setor.id_setor === 7 || setor.id_setor === 9 || setor.id_setor === 22) && (
-                                                        <p className={`text-xs mt-1 ${
-                                                            setor.id_setor === 5 ? 'text-blue-600' : 
-                                                            setor.id_setor === 6 ? 'text-green-600' : 
-                                                            setor.id_setor === 7 ? 'text-purple-600' : 
-                                                            'text-red-600'
-                                                        }`}>
+                                                        <p className={`text-xs mt-1 ${setor.id_setor === 5 ? 'text-blue-600' :
+                                                            setor.id_setor === 6 ? 'text-green-600' :
+                                                                setor.id_setor === 7 ? 'text-purple-600' :
+                                                                    'text-red-600'
+                                                            }`}>
                                                             {getSetorHintText(setor.id_setor)}
                                                         </p>
                                                     )}
@@ -518,7 +525,6 @@ export default function RankingDiario() {
                 </div>
             </div>
 
-            {/* Modal para detalhes dos setores 5, 6, 7 e 9 */}
             <Modal
                 open={modalOpen}
                 onClose={handleCloseModal}
@@ -526,69 +532,241 @@ export default function RankingDiario() {
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={modalStyle}>
-                    <div className="flex justify-between items-center mb-4">
-                        <Typography id="modal-modal-title" variant="h6" component="h2">
-                            {selectedSetor?.id_setor === 5
-                                ? `Detalhes do Setor 5 - ${selectedSetor?.tecnico}`
-                                : selectedSetor?.id_setor === 6
-                                ? `Histórico de Estoque - ${selectedSetor?.tecnico}`
-                                : selectedSetor?.id_setor === 7
-                                ? `Histórico de RH - ${selectedSetor?.tecnico}`
-                                : `Histórico N2 - ${selectedSetor?.tecnico}`
-                            }
-                        </Typography>
-                        <IconButton onClick={handleCloseModal}>
-                            <Close />
-                        </IconButton>
-                    </div>
+                    <div className="sticky-note-container">
+                        <div className="sticky-note">
+                            <div className="pin"></div>
 
-                    {selectedSetor?.id_setor === 5 && (
-                        <>
-                            {loadingAvaliacoes ? (
-                                <div className="flex justify-center py-8">
-                                    <CircularProgress />
-                                    <span className="ml-2">Carregando detalhes...</span>
+                            <div className="note-header">
+                                <div className="header-border"></div>
+                                <div className="header-content">
+                                    <h1 className="note-title">
+                                        {selectedSetor?.id_setor === 5
+                                            ? `Detalhes do Setor 5 - ${selectedSetor?.tecnico}`
+                                            : selectedSetor?.id_setor === 6
+                                                ? `Histórico de Estoque - ${selectedSetor?.tecnico}`
+                                                : selectedSetor?.id_setor === 7
+                                                    ? `Histórico de RH - ${selectedSetor?.tecnico}`
+                                                    : `Histórico N2 - ${selectedSetor?.tecnico}`
+                                        }
+                                    </h1>
+                                    <IconButton onClick={handleCloseModal} className="close-button">
+                                        <Close />
+                                    </IconButton>
                                 </div>
-                            ) : (
-                                <div id="modal-modal-description" className="mt-2">
-                                    {avaliacoesData.length === 0 ? (
-                                        <p>Nenhum dado encontrado para este setor na data selecionada.</p>
+                            </div>
+
+                            {selectedSetor?.id_setor === 5 && (
+                                <div className="modal-content">
+                                    {loadingAvaliacoes ? (
+                                        <div className="loading-modal">
+                                            <CircularProgress />
+                                            <span>Carregando detalhes...</span>
+                                        </div>
                                     ) : (
-                                        <div className="space-y-4">
-                                            <div className="bg-gray-100 p-3 rounded">
-                                                <p><strong>Total de Registros:</strong> {avaliacoesData.total_registros}</p>
-                                                <p><strong>OS Finalizadas:</strong> {avaliacoesData.total_os_finalizadas}</p>
-                                                <p><strong>Técnico:</strong> {avaliacoesData.nome_tecnico}</p>
-                                            </div>
+                                        <div>
+                                            {avaliacoesData.length === 0 ? (
+                                                <p className="no-data">Nenhum dado encontrado para este setor na data selecionada.</p>
+                                            ) : (
+                                                <div className="modal-content-inner">
+                                                    <div className="stats-grid">
+                                                        <div className="stat-card">
+                                                            <div className="stat-label">Total de Registros</div>
+                                                            <div className="stat-value">{avaliacoesData.total_registros || 0}</div>
+                                                        </div>
+                                                        <div className="stat-card">
+                                                            <div className="stat-label">OS Finalizadas</div>
+                                                            <div className="stat-value green">{avaliacoesData.total_os_finalizadas || 0}</div>
+                                                        </div>
+                                                        <div className="stat-card">
+                                                            <div className="stat-label">Técnico</div>
+                                                            <div className="stat-name">{avaliacoesData.nome_tecnico || selectedSetor?.tecnico}</div>
+                                                        </div>
+                                                    </div>
 
-                                            {avaliacoesData.registros && avaliacoesData.registros.length > 0 && (
-                                                <div>
-                                                    <Typography variant="h6" className="mb-2">Detalhes das OS:</Typography>
-                                                    <div className="space-y-3 max-h-96 overflow-auto">
-                                                        {avaliacoesData.registros.map((registro) => (
-                                                            <div key={registro.id} className="p-3 bg-gray-50 rounded border">
-                                                                <p><strong>ID OS:</strong> {registro.id}</p>
-                                                                <p><strong>Cliente:</strong> {registro.cliente}</p>
-                                                                <p><strong>ID Cliente:</strong> {registro.id_cliente}</p>
-                                                                <p><strong>Status:</strong> {registro.status}</p>
-                                                                <p><strong>Finalização:</strong> {new Date(registro.finalizacao).toLocaleString()}</p>
-
-                                                                {registro.checklist && registro.checklist !== "Não preenchido" && (
-                                                                    <div className="mt-2">
-                                                                        <p className="font-semibold">Checklist:</p>
-                                                                        <div className="text-xs bg-white p-2 rounded mt-1">
-                                                                            {registro.checklist.split('\r\n').map((line, i) => (
-                                                                                <p key={i}>{line}</p>
-                                                                            ))}
+                                                    {avaliacoesData.registros && avaliacoesData.registros.length > 0 && (
+                                                        <div className="os-list">
+                                                            <h2 className="os-section-title">Detalhes das OS</h2>
+                                                            <div className="os-grid">
+                                                                {avaliacoesData.registros.map((registro) => (
+                                                                    <div key={registro.id} className={`os-card ${registro.status === 'Finalizada' ? 'status-closed' : 'status-open'
+                                                                        }`}>
+                                                                        <div className="os-grid-inner">
+                                                                            <div>
+                                                                                <div className="os-detail-label">ID OS</div>
+                                                                                <div className="os-detail-value">{registro.id}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="os-detail-label">Cliente</div>
+                                                                                <div className="os-detail-value">{registro.cliente}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="os-detail-label">ID Cliente</div>
+                                                                                <div className="os-detail-value">{registro.id_cliente}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="os-detail-label">Status</div>
+                                                                                <span className={`status-badge ${registro.status === 'Finalizada' ? 'status-closed-badge' : 'status-open-badge'
+                                                                                    }`}>
+                                                                                    {registro.status}
+                                                                                </span>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="os-detail-label">Finalização</div>
+                                                                                <div className="os-detail-value">{new Date(registro.finalizacao).toLocaleString()}</div>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                )}
 
-                                                                {registro.nota_os && (
-                                                                    <p><strong>Nota:</strong> {registro.nota_os}</p>
-                                                                )}
+                                                                        {registro.checklist && registro.checklist !== "Não preenchido" && (
+                                                                            <div className="checklist-container">
+                                                                                <h3 className="checklist-title">Checklist</h3>
+                                                                                <div className="checklist-content">
+                                                                                    {registro.checklist.split('\r\n').map((line, i) => {
+                                                                                        // Verifica se é "Sim (X)" - marcado verde
+                                                                                        if (line.includes('Sim (X)')) {
+                                                                                            return (
+                                                                                                <div key={i} className="checklist-item">
+                                                                                                    <CustomCheckbox
+                                                                                                        checked={true}
+                                                                                                        label={line.replace('Sim (X)', 'Sim').replace('Não ( )', 'Não')}
+                                                                                                        variant="success"
+                                                                                                    />
+                                                                                                </div>
+                                                                                            );
+                                                                                        }
+                                                                                        // Verifica se é "Não (X)" - marcado vermelho
+                                                                                        else if (line.includes('Não (X)')) {
+                                                                                            return (
+                                                                                                <div key={i} className="checklist-item">
+                                                                                                    <CustomCheckbox
+                                                                                                        checked={true}
+                                                                                                        label={line.replace('Não (X)', 'Não').replace('Sim ( )', 'Sim')}
+                                                                                                        variant="error"
+                                                                                                    />
+                                                                                                </div>
+                                                                                            );
+                                                                                        }
+                                                                                        // Verifica se é "Sim ( )" - não marcado
+                                                                                        else if (line.includes('Sim ( )')) {
+                                                                                            return (
+                                                                                                <div key={i} className="checklist-item">
+                                                                                                    <CustomCheckbox
+                                                                                                        checked={false}
+                                                                                                        label={line.replace('Sim ( )', 'Sim').replace('Não ( )', 'Não')}
+                                                                                                    />
+                                                                                                </div>
+                                                                                            );
+                                                                                        }
+                                                                                        // Verifica se é "Não ( )" - não marcado
+                                                                                        else if (line.includes('Não ( )')) {
+                                                                                            return (
+                                                                                                <div key={i} className="checklist-item">
+                                                                                                    <CustomCheckbox
+                                                                                                        checked={false}
+                                                                                                        label={line.replace('Não ( )', 'Não').replace('Sim ( )', 'Sim')}
+                                                                                                    />
+                                                                                                </div>
+                                                                                            );
+                                                                                        }
+                                                                                        // Linhas que não são opções de checkbox
+                                                                                        return <p key={i} className="checklist-text">{line}</p>;
+                                                                                    })}
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+
+                                                                        {registro.nota_os && (
+                                                                            <div className="rating-container">
+                                                                                <div className="rating-label">Nota</div>
+                                                                                <div className="rating-value">{registro.nota_os}</div>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                ))}
                                                             </div>
-                                                        ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {selectedSetor?.id_setor === 6 && (
+                                <div className="modal-content">
+                                    {loadingAvaliacoes ? (
+                                        <div className="loading-modal">
+                                            <CircularProgress />
+                                            <span>Carregando histórico...</span>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            {!historicoEstoqueData || historicoEstoqueData.length === 0 ? (
+                                                <p className="no-data">Nenhum dado encontrado para o histórico de estoque na data selecionada.</p>
+                                            ) : (
+                                                <div className="modal-content-inner">
+                                                    <div className="stats-grid">
+                                                        <div className="stat-card">
+                                                            <div className="stat-label">Técnico</div>
+                                                            <div className="stat-name">{selectedSetor?.tecnico}</div>
+                                                        </div>
+                                                        <div className="stat-card">
+                                                            <div className="stat-label">Data</div>
+                                                            <div className="stat-value">{searchDate}</div>
+                                                        </div>
+                                                        <div className="stat-card">
+                                                            <div className="stat-label">Total de Itens</div>
+                                                            <div className="stat-value">{historicoEstoqueData.length}</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="history-list">
+                                                        <h2 className="history-title">Histórico de Estoque</h2>
+                                                        <div className="history-grid">
+                                                            {historicoEstoqueData.map((item, index) => {
+                                                                const diferenca = item.pontuacao_anterior - item.pontuacao_atual;
+                                                                const sinal = diferenca > 0 ? '-' : '+';
+                                                                const tipo = diferenca > 0 ? 'Diminuído' : 'Acrescentado';
+                                                                const valorAbsoluto = Math.abs(diferenca);
+
+                                                                return (
+                                                                    <div key={index} className="history-item">
+                                                                        <div className="history-grid-inner">
+                                                                            <div>
+                                                                                <div className="history-label">Avaliador</div>
+                                                                                <div className="history-value">{item.nome_avaliador || 'N/A'}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Data da Avaliação</div>
+                                                                                <div className="history-value">{item.data_avaliacao ? new Date(item.data_avaliacao).toLocaleString() : 'N/A'}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Pontuação Anterior</div>
+                                                                                <div className="history-value">{item.pontuacao_anterior || 'N/A'}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Pontuação Atual</div>
+                                                                                <div className="history-value">{item.pontuacao_atual || 'N/A'}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Quantidade</div>
+                                                                                <div className="history-value">{sinal} {valorAbsoluto} pontos</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Tipo</div>
+                                                                                <div className="history-value">{tipo}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                        {item.observacao && (
+                                                                            <div className="history-notes">
+                                                                                <div className="history-label">Observação</div>
+                                                                                <div className="history-value">{item.observacao}</div>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
@@ -596,191 +774,188 @@ export default function RankingDiario() {
                                     )}
                                 </div>
                             )}
-                        </>
-                    )}
 
-                    {selectedSetor?.id_setor === 6 && (
-                        <>
-                            {loadingAvaliacoes ? (
-                                <div className="flex justify-center py-8">
-                                    <CircularProgress />
-                                    <span className="ml-2">Carregando histórico...</span>
-                                </div>
-                            ) : (
-                                <div id="modal-modal-description" className="mt-2">
-                                    {!historicoEstoqueData || (Array.isArray(historicoEstoqueData) && historicoEstoqueData.length === 0) ? (
-                                        <p>Nenhum dado encontrado para o histórico de estoque na data selecionada.</p>
+                            {selectedSetor?.id_setor === 7 && (
+                                <div className="modal-content">
+                                    {loadingAvaliacoes ? (
+                                        <div className="loading-modal">
+                                            <CircularProgress />
+                                            <span>Carregando histórico de RH...</span>
+                                        </div>
                                     ) : (
-                                        <div className="space-y-4">
-                                            <div className="bg-gray-100 p-3 rounded">
-                                                <p><strong>Técnico:</strong> {selectedSetor?.tecnico}</p>
-                                                <p><strong>Data:</strong> {searchDate}</p>
-                                                <p><strong>Total de Itens:</strong> {Array.isArray(historicoEstoqueData) ? historicoEstoqueData.length : 'N/A'}</p>
-                                            </div>
-
-                                            <div>
-                                                <Typography variant="h6" className="mb-2">Histórico de Estoque:</Typography>
-                                                <div className="space-y-3 max-h-96 overflow-auto">
-                                                    {Array.isArray(historicoEstoqueData) ? (
-                                                        historicoEstoqueData.map((item, index) => {
-                                                            const diferenca = item.pontuacao_anterior - item.pontuacao_atual;
-                                                            const sinal = diferenca > 0 ? '-' : '+';
-                                                            const tipo = diferenca > 0 ? 'Diminuído' : 'Acrescentado';
-                                                            const valorAbsoluto = Math.abs(diferenca);
-
-                                                            return (
-                                                                <div key={index} className="p-3 bg-gray-50 rounded border">
-                                                                    <p><strong>Avaliador:</strong> {item.nome_avaliador || 'N/A'}</p>
-                                                                    <p><strong>Data da Avaliação:</strong> {item.data_avaliacao ? new Date(item.data_avaliacao).toLocaleString() : 'N/A'}</p>
-                                                                    <p><strong>Data da Infração:</strong> {item.data_infracao || 'N/A'}</p>
-                                                                    <p><strong>Pontuação Anterior:</strong> {item.pontuacao_anterior || 'N/A'}</p>
-                                                                    <p><strong>Pontuação Atual:</strong> {item.pontuacao_atual || 'N/A'}</p>
-                                                                    <p><strong>Quantidade:</strong> {sinal} {valorAbsoluto} pontos</p>
-                                                                    <p><strong>Tipo:</strong> {tipo}</p>
-                                                                    {item.observacao && (
-                                                                        <p><strong>Observação:</strong> {item.observacao}</p>
-                                                                    )}
-                                                                </div>
-                                                            );
-                                                        })
-                                                    ) : (
-                                                        <div className="p-3 bg-gray-50 rounded border">
-                                                            <p><strong>Formato de dados inesperado:</strong></p>
-                                                            <pre className="text-xs mt-2">
-                                                                {JSON.stringify(historicoEstoqueData, null, 2)}
-                                                            </pre>
+                                        <div>
+                                            {!historicoRHData || historicoRHData.length === 0 ? (
+                                                <p className="no-data">Nenhum dado encontrado para o histórico de RH na data selecionada.</p>
+                                            ) : (
+                                                <div className="modal-content-inner">
+                                                    <div className="stats-grid">
+                                                        <div className="stat-card">
+                                                            <div className="stat-label">Técnico</div>
+                                                            <div className="stat-name">{selectedSetor?.tecnico}</div>
                                                         </div>
-                                                    )}
+                                                        <div className="stat-card">
+                                                            <div className="stat-label">Data</div>
+                                                            <div className="stat-value">{searchDate}</div>
+                                                        </div>
+                                                        <div className="stat-card">
+                                                            <div className="stat-label">Total de Itens</div>
+                                                            <div className="stat-value">{historicoRHData.length}</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="history-list">
+                                                        <h2 className="history-title">Histórico de RH</h2>
+                                                        <div className="history-grid">
+                                                            {historicoRHData.map((item, index) => {
+                                                                const diferenca = item.pontuacao_anterior - item.pontuacao_atual;
+                                                                const sinal = diferenca > 0 ? '-' : '+';
+                                                                const tipo = diferenca > 0 ? 'Diminuído' : 'Acrescentado';
+                                                                const valorAbsoluto = Math.abs(diferenca);
+
+                                                                return (
+                                                                    <div key={index} className="history-item">
+                                                                        <div className="history-grid-inner">
+                                                                            <div>
+                                                                                <div className="history-label">Avaliador</div>
+                                                                                <div className="history-value">{item.nome_avaliador || 'N/A'}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Data da Avaliação</div>
+                                                                                <div className="history-value">{item.data_avaliacao ? new Date(item.data_avaliacao).toLocaleString() : 'N/A'}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Pontuação Anterior</div>
+                                                                                <div className="history-value">{item.pontuacao_anterior || 'N/A'}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Pontuação Atual</div>
+                                                                                <div className="history-value">{item.pontuacao_atual || 'N/A'}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Quantidade</div>
+                                                                                <div className="history-value">{sinal} {valorAbsoluto} pontos</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Tipo</div>
+                                                                                <div className="history-value">{tipo}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                        {item.observacao && (
+                                                                            <div className="history-notes">
+                                                                                <div className="history-label">Observação</div>
+                                                                                <div className="history-value">{item.observacao}</div>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
                             )}
-                        </>
-                    )}
 
-                    {selectedSetor?.id_setor === 7 && (
-                        <>
-                            {loadingAvaliacoes ? (
-                                <div className="flex justify-center py-8">
-                                    <CircularProgress />
-                                    <span className="ml-2">Carregando histórico de RH...</span>
-                                </div>
-                            ) : (
-                                <div id="modal-modal-description" className="mt-2">
-                                    {!historicoRHData || (Array.isArray(historicoRHData) && historicoRHData.length === 0) ? (
-                                        <p>Nenhum dado encontrado para o histórico de RH na data selecionada.</p>
+                            {(selectedSetor?.id_setor === 9 || selectedSetor?.id_setor === 22) && (
+                                <div className="modal-content">
+                                    {loadingAvaliacoes ? (
+                                        <div className="loading-modal">
+                                            <CircularProgress />
+                                            <span>Carregando histórico N2...</span>
+                                        </div>
                                     ) : (
-                                        <div className="space-y-4">
-                                            <div className="bg-gray-100 p-3 rounded">
-                                                <p><strong>Técnico:</strong> {selectedSetor?.tecnico}</p>
-                                                <p><strong>Data:</strong> {searchDate}</p>
-                                                <p><strong>Total de Itens:</strong> {Array.isArray(historicoRHData) ? historicoRHData.length : 'N/A'}</p>
-                                            </div>
-
-                                            <div>
-                                                <Typography variant="h6" className="mb-2">Histórico de RH:</Typography>
-                                                <div className="space-y-3 max-h-96 overflow-auto">
-                                                    {Array.isArray(historicoRHData) ? (
-                                                        historicoRHData.map((item, index) => {
-                                                            const diferenca = item.pontuacao_anterior - item.pontuacao_atual;
-                                                            const sinal = diferenca > 0 ? '-' : '+';
-                                                            const tipo = diferenca > 0 ? 'Diminuído' : 'Acrescentado';
-                                                            const valorAbsoluto = Math.abs(diferenca);
-
-                                                            return (
-                                                                <div key={index} className="p-3 bg-gray-50 rounded border">
-                                                                    <p><strong>Avaliador:</strong> {item.nome_avaliador || 'N/A'}</p>
-                                                                    <p><strong>Data da Avaliação:</strong> {item.data_avaliacao ? new Date(item.data_avaliacao).toLocaleString() : 'N/A'}</p>
-                                                                    <p><strong>Data da Infração:</strong> {item.data_infracao || 'N/A'}</p>
-                                                                    <p><strong>Pontuação Anterior:</strong> {item.pontuacao_anterior || 'N/A'}</p>
-                                                                    <p><strong>Pontuação Atual:</strong> {item.pontuacao_atual || 'N/A'}</p>
-                                                                    <p><strong>Quantidade:</strong> {sinal} {valorAbsoluto} pontos</p>
-                                                                    <p><strong>Tipo:</strong> {tipo}</p>
-                                                                    {item.observacao && (
-                                                                        <p><strong>Observação:</strong> {item.observacao}</p>
-                                                                    )}
-                                                                </div>
-                                                            );
-                                                        })
-                                                    ) : (
-                                                        <div className="p-3 bg-gray-50 rounded border">
-                                                            <p><strong>Formato de dados inesperado:</strong></p>
-                                                            <pre className="text-xs mt-2">
-                                                                {JSON.stringify(historicoRHData, null, 2)}
-                                                            </pre>
+                                        <div>
+                                            {!historicoN2Data || historicoN2Data.length === 0 ? (
+                                                <p className="no-data">Nenhum dado encontrado para o histórico N2 na data selecionada.</p>
+                                            ) : (
+                                                <div className="modal-content-inner">
+                                                    <div className="stats-grid">
+                                                        <div className="stat-card">
+                                                            <div className="stat-label">Técnico</div>
+                                                            <div className="stat-name">{selectedSetor?.tecnico}</div>
                                                         </div>
-                                                    )}
+                                                        <div className="stat-card">
+                                                            <div className="stat-label">Data</div>
+                                                            <div className="stat-value">{searchDate}</div>
+                                                        </div>
+                                                        <div className="stat-card">
+                                                            <div className="stat-label">Total de Itens</div>
+                                                            <div className="stat-value">{historicoN2Data.length}</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="history-list">
+                                                        <h2 className="history-title">Histórico N2</h2>
+                                                        <div className="history-grid">
+                                                            {historicoN2Data.map((item, index) => {
+                                                                const diferenca = item.pontuacao_anterior - item.pontuacao_atual;
+                                                                const sinal = diferenca > 0 ? '-' : '+';
+                                                                const tipo = diferenca > 0 ? 'Diminuído' : 'Acrescentado';
+                                                                const valorAbsoluto = Math.abs(diferenca);
+
+                                                                return (
+                                                                    <div key={index} className="history-item">
+                                                                        <div className="history-grid-inner">
+                                                                            <div>
+                                                                                <div className="history-label">Avaliador</div>
+                                                                                <div className="history-value">{item.nome_avaliador || 'N/A'}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Data da Avaliação</div>
+                                                                                <div className="history-value">{item.data_avaliacao ? new Date(item.data_avaliacao).toLocaleString() : 'N/A'}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Pontuação Anterior</div>
+                                                                                <div className="history-value">{item.pontuacao_anterior || 'N/A'}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Pontuação Atual</div>
+                                                                                <div className="history-value">{item.pontuacao_atual || 'N/A'}</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Quantidade</div>
+                                                                                <div className="history-value">{sinal} {valorAbsoluto} pontos</div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="history-label">Tipo</div>
+                                                                                <div className="history-value">{tipo}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                        {item.observacao && (
+                                                                            <div className="history-notes">
+                                                                                <div className="history-label">Observação</div>
+                                                                                <div className="history-value">{item.observacao}</div>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
                             )}
-                        </>
-                    )}
 
-                    {(selectedSetor?.id_setor === 9 || selectedSetor?.id_setor === 22) && (
-                        <>
-                            {loadingAvaliacoes ? (
-                                <div className="flex justify-center py-8">
-                                    <CircularProgress />
-                                    <span className="ml-2">Carregando histórico N2...</span>
+                            <div className="note-footer">
+                                <div className="footer-date">
+                                    <i className="fas fa-calendar-alt"></i>
+                                    Gerado em: {new Date().toLocaleDateString('pt-BR')}
                                 </div>
-                            ) : (
-                                <div id="modal-modal-description" className="mt-2">
-                                    {!historicoN2Data || (Array.isArray(historicoN2Data) && historicoN2Data.length === 0) ? (
-                                        <p>Nenhum dado encontrado para o histórico N2 na data selecionada.</p>
-                                    ) : (
-                                        <div className="space-y-4">
-                                            <div className="bg-gray-100 p-3 rounded">
-                                                <p><strong>Técnico:</strong> {selectedSetor?.tecnico}</p>
-                                                <p><strong>Data:</strong> {searchDate}</p>
-                                                <p><strong>Total de Itens:</strong> {Array.isArray(historicoN2Data) ? historicoN2Data.length : 'N/A'}</p>
-                                            </div>
-
-                                            <div>
-                                                <Typography variant="h6" className="mb-2">Histórico N2:</Typography>
-                                                <div className="space-y-3 max-h-96 overflow-auto">
-                                                    {Array.isArray(historicoN2Data) ? (
-                                                        historicoN2Data.map((item, index) => {
-                                                            const diferenca = item.pontuacao_anterior - item.pontuacao_atual;
-                                                            const sinal = diferenca > 0 ? '-' : '+';
-                                                            const tipo = diferenca > 0 ? 'Diminuído' : 'Acrescentado';
-                                                            const valorAbsoluto = Math.abs(diferenca);
-
-                                                            return (
-                                                                <div key={index} className="p-3 bg-gray-50 rounded border">
-                                                                    <p><strong>Avaliador:</strong> {item.nome_avaliador || 'N/A'}</p>
-                                                                    <p><strong>Data da Avaliação:</strong> {item.data_avaliacao ? new Date(item.data_avaliacao).toLocaleString() : 'N/A'}</p>
-                                                                    <p><strong>Data da Infração:</strong> {item.data_infracao || 'N/A'}</p>
-                                                                    <p><strong>Pontuação Anterior:</strong> {item.pontuacao_anterior || 'N/A'}</p>
-                                                                    <p><strong>Pontuação Atual:</strong> {item.pontuacao_atual || 'N/A'}</p>
-                                                                    <p><strong>Quantidade:</strong> {sinal} {valorAbsoluto} pontos</p>
-                                                                    <p><strong>Tipo:</strong> {tipo}</p>
-                                                                    {item.observacao && (
-                                                                        <p><strong>Observação:</strong> {item.observacao}</p>
-                                                                    )}
-                                                                </div>
-                                                            );
-                                                        })
-                                                    ) : (
-                                                        <div className="p-3 bg-gray-50 rounded border">
-                                                            <p><strong>Formato de dados inesperado:</strong></p>
-                                                            <pre className="text-xs mt-2">
-                                                                {JSON.stringify(historicoN2Data, null, 2)}
-                                                            </pre>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </>
-                    )}
+                                <button
+                                    className="close-btn"
+                                    onClick={handleCloseModal}
+                                >
+                                    <i className="fas fa-check"></i>
+                                    Fechar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </Box>
             </Modal>
         </div>
