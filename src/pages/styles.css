@@ -683,6 +683,9 @@ input[type="file"] {
     color: black;
 }
 .technician-item:hover p{
+    color: var(--text-color);
+}
+.technician-item:hover svg{
     color: var(--colorDark);
 }
 .lista-tecnicos{
@@ -698,8 +701,8 @@ input[type="file"] {
 .bg-purple-50 { background-color: #f5f3ff; }
 .bg-yellow-50 { background-color: #fef9c3; }
 .bg-red-50 { background-color: #fee2e2; }
-.bg-orange {background-color: #FF6200;}
-.bg-orange:hover{ background-color: #c74d01;
+.bg-orange {background-color: var(--colorPrimary);}
+.bg-orange:hover{ background-color: var(--colorPrimary);
 }
 
 .text-blue-700 { color: #1d4ed8; }
@@ -747,6 +750,7 @@ input[type="file"] {
 .text-gray-700 { color: #374151; }
 .text-indigo-700 { color: #4338ca; }
 .text-green-600 { color: #16a34a; }
+.text-red-600 { color: rgb(247, 38, 38)}
 .bg-indigo-600 { background-color: #4f46e5; }
 .bg-yellow-300 { background-color: #fde047; }
 .bg-yellow-200 { background-color: #fef08a; }
@@ -1086,7 +1090,7 @@ input[type="file"] {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background-color: #FF6200;
+    background-color: var(--colorPrimary);
     color: white;
     border: none;
     font-size: 1.5rem;
