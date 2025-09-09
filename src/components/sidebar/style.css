@@ -150,7 +150,8 @@
     gap: 10px;
 }
 
-.theme-toggle, .logout-button {
+.theme-toggle,
+.logout-button {
     background: none;
     border: none;
     color: var(--textColor);
@@ -163,10 +164,232 @@
     border-radius: 4px;
 }
 
-.theme-toggle:hover, .logout-button:hover {
+.theme-toggle:hover,
+.logout-button:hover {
     background-color: rgba(var(--colorPrimary-rgb), 0.1);
     color: var(--colorPrimary);
 }
+
+
+
+/* */
+
+/* Estilos para a seção finOS */
+.finOS {
+    margin-top: auto;
+    padding: 15px;
+    border-top: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.finOS.clickable:hover {
+    background-color: #f0f0f0;
+}
+
+.dark .finOS.clickable:hover {
+    background-color: #3a3a3a;
+}
+
+.os-section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.os-icon {
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+.os-preview {
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+    min-height: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.os-total {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4caf50;
+    margin-bottom: 5px;
+}
+
+.dark .os-total {
+    color: #66bb6a;
+}
+
+.os-loading-small {
+    font-size: 12px;
+    color: #888;
+    padding: 5px;
+}
+
+/* Estilos para o modal */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+}
+
+.date-filter {
+    margin-bottom: 20px;
+}
+
+.date-filter label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.date-filter input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #333;
+}
+
+.dark .date-filter input {
+    background-color: #3a3a3a;
+    border-color: #555;
+    color: #fff;
+}
+
+.os-count {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: var(--colorDarkForm);
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.dark .os-count {
+    background-color: #3a3a3a;
+}
+
+.os-list-modal {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.os-item-modal {
+    padding: 12px;
+    margin-bottom: 10px;
+    background-color: var(--colorDarkForm);
+    border-radius: 6px;
+    border-left: 4px solid #4caf50;
+}
+
+.dark .os-item-modal {
+    background-color: #2a2a2a;
+    border-left: 4px solid #66bb6a;
+}
+
+.os-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.os-number {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.os-status {
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background-color: #2B5C56;
+    color: white;
+}
+
+.os-client {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.dark .os-client {
+    color: #ccc;
+}
+
+.os-time {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.os-assunto {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--textColor);
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px dashed #ddd;
+}
+.os-cliente{
+     font-size: 13px;
+    font-style: italic;
+    color: var(--textColor);
+
+}
+
+.dark .os-assunto {
+    color: #aaa;
+    border-top: 1px dashed #555;
+}
+
+.os-loading, .no-os {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #888;
+}
+
+/* Scrollbar personalizada */
+.os-list-modal::-webkit-scrollbar {
+    width: 6px;
+}
+
+.os-list-modal::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.dark .os-list-modal::-webkit-scrollbar-track {
+    background: #3a3a3a;
+}
+
+.os-list-modal::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.os-list-modal::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* */
 
 
 /* Responsividade */
@@ -174,6 +397,7 @@
     .sidebar {
         width: 20%;
     }
+
     .main-content {
         margin-left: 20%;
     }
@@ -183,6 +407,7 @@
     .sidebar {
         width: 20%;
     }
+
     .main-content {
         margin-left: 20%;
     }
@@ -194,9 +419,11 @@
         transform: translateX(-100%);
         transition: transform 0.3s ease;
     }
+
     .sidebar.open {
         transform: translateX(0);
     }
+
     .main-content {
         margin-left: 0;
         width: 100%;

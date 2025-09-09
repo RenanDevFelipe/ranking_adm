@@ -287,7 +287,7 @@ export default function AddColaborador() {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="submit-button"
+                                    className="submit-button-tutorial"
                                 >
                                     {isEditMode ? 'Atualizar' : 'Adicionar'}
                                 </button>

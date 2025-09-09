@@ -436,6 +436,60 @@ export const getAvaliacoes = async (
   }
 }
 
+export const getAvaliacoesN3 = async (token: string, id_tecnico: number, data: string) => {
+  try {
+    const response = await api.post(
+      'IXCSoft/FinOs',
+      {
+        id_tecnico,
+        data
+      },
+      {
+        timeout: 100000,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    if (!response.data) {
+      throw new Error('Formato de dados inválido na resposta da API');
+    }
+
+    return response.data;
+
+  } catch (error:any) {
+    console.error('Erro ao buscar Avaliações:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao carregar Avaliações');
+  }
+}
+
+export const getAvaliacoesN3Mensal = async (token: string, id_tecnico: number, data: string) => {
+  try {
+    const response = await api.post(
+      'IXCSoft/FinOsM',
+      {
+        id_tecnico,
+        data
+      },
+      {
+        timeout: 100000,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    if (!response.data) {
+      throw new Error('Formato de dados inválido na resposta da API');
+    }
+
+    return response.data;
+
+  } catch (error:any) {
+    console.error('Erro ao buscar Avaliações:', error);
+    throw new Error(error.response?.data?.message || 'Erro ao carregar Avaliações');
+  }
+}
+
 
 
 export const getRankingDiario = async (token: string, data_request: string): Promise<RankingDiarioItem[]> => {
