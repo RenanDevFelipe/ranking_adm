@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../../components/sidebar';
 import "../styles.css";
-import { getUsuarioById, getSetores, addUsuario, updateUsuario } from '../../services/api.ts';
+import { getUsuarioById, getSetores, getRoles, addUsuario, updateUsuario } from '../../services/api.ts';
 import { logout } from '../../utils/auth';
 import Swal from 'sweetalert2';
 import DehazeIcon from '@mui/icons-material/Dehaze';
@@ -16,6 +16,7 @@ export default function AddUsuario() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const [setores, setSetores] = useState([]);
+    const [roles, setRoles] = useState([]);
     const [showPassword, setShowPassword] = useState(false);
     const [darkMode] = useState(() => {
         const savedMode = localStorage.getItem('darkMode');
@@ -76,9 +77,12 @@ export default function AddUsuario() {
 
         const fetchInitialData = async () => {
             try {
-                // Carrega lista de setores
-                const setoresData = await getSetores(token);
+                const [setoresData, rolesData] = await Promise.all([
+                    getSetores(token),
+                    getRoles(token)
+                ]);
                 setSetores(setoresData);
+                setRoles(rolesData);
 
                 // Se for modo de edição, carrega os dados do colaborador
                 if (id && id !== '0') {
@@ -493,9 +497,11 @@ export default function AddUsuario() {
                                     className={pulsingFields.role ? 'pulse' : ''}
                                 >
                                     <option value="">Selecione um nível</option>
-                                    <option value="1">Administrador</option>
-                                    <option value="2">Colaborador</option>
-                                    <option value="3">ConnectBi</option>
+                                    {roles.map(role => (
+                                        <option key={role.id_role} value={role.id_role}>
+                                            {role.nome_role}
+                                        </option>
+                                    ))}
                                 </select>
                                 {fieldErrors.role && (
                                     <div className="error-message">{fieldErrors.role}</div>

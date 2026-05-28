@@ -36,7 +36,7 @@
 }
 
 .stat-card {
-    background-color: #f5f5f5;
+    background: var(--surfaceGradient, #f5f5f5);
     padding: 15px 25px;
     border-radius: 8px;
     text-align: center;
@@ -44,7 +44,7 @@
 }
 
 .dark-mode .stat-card {
-    background-color: #2d2d2d;
+    background: var(--surfaceGradient, #2d2d2d);
 }
 
 .stat-value {
@@ -82,7 +82,7 @@
     position: relative;
     width: 45%;
     height: fit-content;
-    background-color: white;
+    background: var(--surfaceGradient, white);
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
@@ -112,7 +112,7 @@
 }
 
 .dark-mode .avaliacao-card {
-    background-color: #2d2d2d;
+    background: var(--surfaceGradient, #2d2d2d);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -239,14 +239,14 @@
 .checklist-container {
     margin-top: 15px;
     padding: 15px;
-    background-color: #f5f5f5;
+    background: var(--surfaceGradient, #f5f5f5);
     border-radius: 8px;
     border: 1px solid #ddd;
     transition: all 0.3s ease;
 }
 
 .dark-mode .checklist-container {
-    background-color: #2d2d2d;
+    background: var(--surfaceGradient, #2d2d2d);
     border-color: #444;
 }
 

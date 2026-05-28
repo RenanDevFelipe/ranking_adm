@@ -1,337 +1,399 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Sidebar from '../../components/sidebar';
-import "../styles.css";
-import { addChecklist, getAssuntos } from '../../services/api.ts';
-import { logout } from '../../utils/auth';
-import Swal from 'sweetalert2';
+import Sidebar from '../../components/sidebar/index.jsx';
+import '../styles.css';
 import {
-    Select,
-    MenuItem,
-    InputLabel,
-    FormControl
-} from '@mui/material';
+    addChecklist,
+    addChecklistItem,
+    deleteChecklistItem,
+    getChecklistById,
+    updateChecklist,
+    updateChecklistItem
+} from '../../services/api.ts';
+import { logout } from '../../utils/auth.js';
+import Swal from 'sweetalert2';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import DehazeIcon from '@mui/icons-material/Dehaze';
 
-export default function Checklist() {
+const createEmptyItem = (ordem) => ({
+    pergunta: '',
+    tipo_resposta: 'sim_nao',
+    peso: 1,
+    obrigatorio: true,
+    ordem
+});
+
+const reorderItems = (items) => items.map((item, index) => ({
+    ...item,
+    ordem: index + 1
+}));
+
+export default function ChecklistForm() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [isEditMode, setIsEditMode] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const checklistId = id && id !== 'undefined' && id !== 'null' ? id : '0';
+    const isEditMode = checklistId !== '0';
+    const [loading, setLoading] = useState(Boolean(isEditMode));
     const [error, setError] = useState(null);
-    const [assuntos, setAssuntos] = useState([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [draggedIndex, setDraggedIndex] = useState(null);
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
     const [darkMode] = useState(() => {
         const savedMode = localStorage.getItem('darkMode');
         return savedMode ? JSON.parse(savedMode) : true;
     });
-    const [isSidebarVisible] = useState(true);
-
-    // const toggleSidebar = () => {
-    //     setIsSidebarVisible(!isSidebarVisible);
-    // };
-
-    // Dados do formulário
     const [formData, setFormData] = useState({
-        checklist_id: id || 0,
-        assunto_id: '',
-        fields: [
-            {
-                label: '',
-                type: 'checkbox',
-                max_score: '',
-                action: 'create'
-            }
-        ]
+        nome_checklist: '',
+        ativo: true,
+        itens: [createEmptyItem(1)]
     });
+    const [deletedItemIds, setDeletedItemIds] = useState([]);
 
-    // Aplica o tema ao body
     useEffect(() => {
-        if (darkMode) {
-            document.body.classList.remove('light-mode');
-        } else {
-            document.body.classList.add('light-mode');
-        }
-        localStorage.setItem('darkMode', JSON.stringify(darkMode));
-    }, [darkMode]);
+        if (!isEditMode) return;
 
-    // Carrega dados iniciais
-    useEffect(() => {
+        let isMounted = true;
         const token = localStorage.getItem('access_token');
 
-        const fetchInitialData = async () => {
+        const fetchChecklist = async () => {
             try {
-                // Carrega a lista de assuntos
-                const assuntosData = await getAssuntos(token);
-                setAssuntos(assuntosData);
-
-                // Se for modo de edição, carrega os dados do checklist
-                if (id && id !== '0') {
-                    setIsEditMode(true);
-                    // const checklistData = await getChecklistById(token, parseInt(id));
-                    // setFormData({
-                    //     ...checklistData,
-                    //     fields: checklistData.fields || [{
-                    //         label: '',
-                    //         type: 'checkbox',
-                    //         max_score: '',
-                    //         action: 'update'
-                    //     }]
-                    // });
+                const data = await getChecklistById(token, checklistId);
+                if (isMounted) {
+                    setFormData({
+                        nome_checklist: data.nome_checklist || '',
+                        ativo: Boolean(data.ativo),
+                        itens: reorderItems((data.itens || []).slice().sort((a, b) => Number(a.ordem) - Number(b.ordem)))
+                    });
+                    setDeletedItemIds([]);
                 }
             } catch (err) {
-                console.error("Erro ao carregar dados:", err);
-                if (err.response?.status === 401) {
-                    setError('Sessão expirada. Redirecionando para login...');
-                    logout();
-                } else {
-                    setError(err.message || 'Erro ao carregar dados');
+                if (isMounted) {
+                    if (err.response?.status === 401) {
+                        logout();
+                        navigate('/');
+                        return;
+                    }
+                    setError(err.message || 'Erro ao carregar checklist');
                 }
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
 
-        fetchInitialData();
-    }, [id]);
+        fetchChecklist();
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    const handleFieldChange = (index, e) => {
-        const { name, value } = e.target;
-        const updatedFields = [...formData.fields];
-        updatedFields[index] = {
-            ...updatedFields[index],
-            [name]: value
+        return () => {
+            isMounted = false;
         };
+    }, [checklistId, isEditMode, navigate]);
 
+    const handleChecklistChange = (e) => {
+        const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            fields: updatedFields
+            [name]: type === 'checkbox' ? checked : value
         }));
     };
 
-    const addNewField = () => {
-        setFormData(prev => ({
-            ...prev,
-            fields: [
-                ...prev.fields,
-                {
-                    label: '',
-                    type: 'checkbox',
-                    max_score: '',
-                    action: 'create'
-                }
-            ]
-        }));
-    };
+    const handleItemChange = (index, field, value) => {
+        setFormData(prev => {
+            const itens = [...prev.itens];
+            itens[index] = {
+                ...itens[index],
+                [field]: field === 'obrigatorio' ? Boolean(value) : value
+            };
 
-    const removeField = (index) => {
-        if (formData.fields.length > 1) {
-            const updatedFields = [...formData.fields];
-            updatedFields.splice(index, 1);
-
-            setFormData(prev => ({
+            return {
                 ...prev,
-                fields: updatedFields
-            }));
+                itens
+            };
+        });
+    };
+
+    const addItem = () => {
+        setFormData(prev => ({
+            ...prev,
+            itens: [...prev.itens, createEmptyItem(prev.itens.length + 1)]
+        }));
+    };
+
+    const removeItem = (index) => {
+        setFormData(prev => {
+            if (prev.itens.length === 1) return prev;
+            const itemToRemove = prev.itens[index];
+
+            if (itemToRemove?.id_item) {
+                setDeletedItemIds(ids => [...ids, itemToRemove.id_item]);
+            }
+
+            return {
+                ...prev,
+                itens: reorderItems(prev.itens.filter((_, itemIndex) => itemIndex !== index))
+            };
+        });
+    };
+
+    const handleDrop = (targetIndex) => {
+        if (draggedIndex === null || draggedIndex === targetIndex) return;
+
+        setFormData(prev => {
+            const itens = [...prev.itens];
+            const [draggedItem] = itens.splice(draggedIndex, 1);
+            itens.splice(targetIndex, 0, draggedItem);
+
+            return {
+                ...prev,
+                itens: reorderItems(itens)
+            };
+        });
+
+        setDraggedIndex(null);
+    };
+
+    const validateForm = () => {
+        if (!formData.nome_checklist.trim()) {
+            return 'Informe o nome do checklist.';
         }
+
+        if (!formData.itens.length) {
+            return 'Adicione pelo menos um item.';
+        }
+
+        const invalidItem = formData.itens.find(item => !item.pergunta.trim());
+        if (invalidItem) {
+            return 'Todos os itens precisam ter uma pergunta.';
+        }
+
+        return null;
+    };
+
+    const itemPayload = (item, index) => ({
+        id_checklist: Number(checklistId),
+        pergunta: item.pergunta.trim(),
+        tipo_resposta: item.tipo_resposta,
+        peso: Number(item.peso || 0),
+        obrigatorio: Boolean(item.obrigatorio),
+        ordem: index + 1
+    });
+
+    const syncChecklistItems = async (token, items) => {
+        await Promise.all(deletedItemIds.map(itemId => deleteChecklistItem(token, itemId)));
+
+        await Promise.all(items.map((item, index) => {
+            const payload = itemPayload(item, index);
+
+            if (item.id_item) {
+                return updateChecklistItem(token, item.id_item, payload);
+            }
+
+            return addChecklistItem(token, payload);
+        }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const token = localStorage.getItem('access_token');
-        setIsSubmitting(true);
+
+        const validationError = validateForm();
+        if (validationError) {
+            Swal.fire('Atenção!', validationError, 'warning');
+            return;
+        }
 
         try {
-            // Envia cada field individualmente
-            for (const field of formData.fields) {
-                const formDataToSend = new FormData();
-                formDataToSend.append('checklist_id', formData.checklist_id.toString());
-                formDataToSend.append('label', field.label);
-                formDataToSend.append('type', field.type);
-                formDataToSend.append('max_score', field.max_score);
-                formDataToSend.append('action', field.action);
+            const token = localStorage.getItem('access_token');
+            const itensOrdenados = reorderItems(formData.itens);
 
-                if (isEditMode) {
-                    // await updateChecklistField(token, formDataToSend);
-                } else {
-                    await addChecklist(token, formDataToSend);
-                }
+            if (isEditMode) {
+                await updateChecklist(token, checklistId, {
+                    nome_checklist: formData.nome_checklist,
+                    ativo: formData.ativo
+                });
+                await syncChecklistItems(token, itensOrdenados);
+            } else {
+                await addChecklist(token, {
+                    ...formData,
+                    itens: itensOrdenados
+                });
             }
 
             Swal.fire(
                 'Sucesso!',
-                `Checklist ${isEditMode ? 'atualizado' : 'adicionado'} com sucesso.`,
+                isEditMode ? 'Checklist atualizado com sucesso.' : 'Checklist criado com sucesso.',
                 'success'
-            ).then(() => {
-                navigate('/checklists');
-            });
+            ).then(() => navigate('/checklists'));
         } catch (err) {
-            console.error("Erro ao salvar checklist:", err);
-            Swal.fire(
-                'Erro!',
-                err.response?.data?.message || `Ocorreu um erro ao ${isEditMode ? 'atualizar' : 'adicionar'} o checklist.`,
-                'error'
-            );
-        } finally {
-            setIsSubmitting(false);
+            Swal.fire('Erro!', err.message || 'Erro ao salvar checklist.', 'error');
         }
     };
 
     if (loading) {
         return (
-            <div className="app-container">
-                <div className="loading-spinner">
-                    <div className="spinner"></div>
-                    <p>Carregando dados...</p>
-                </div>
+            <div className="loading-container">
+                <div className="spinner"></div>
+                <p>Carregando checklist...</p>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="app-container">
-                <Sidebar isVisible={isSidebarVisible} />
-                <div className="error-container">
-                    <div className="error-message">{error}</div>
-                    <button
-                        className="retry-button"
-                        onClick={() => window.location.reload()}
-                    >
-                        Tentar novamente
-                    </button>
-                </div>
+            <div className="error-container">
+                <div className="error-message">{error}</div>
+                <button className="retry-button" onClick={() => window.location.reload()}>
+                    Tentar novamente
+                </button>
             </div>
         );
     }
 
     return (
-        <div className="app-container">
+        <div className={`app-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
             <Sidebar isVisible={isSidebarVisible} />
-            <div className="main-content">
-                <div className="sidebar-footer">
-                    <div className="form-container">
-                        <h1>{isEditMode ? 'Editar Checklist' : 'Adicionar Checklist'}</h1>
+            <main className="main-content-checklist">
+                <div className="checklist-editor-page">
+                    <header className="checklist-admin-header">
+                        <button
+                            className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
+                            onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+                        >
+                            {isSidebarVisible ? <DehazeIcon /> : '>'}
+                        </button>
+                        <div>
+                            <h1>{isEditMode ? 'Editar checklist' : 'Adicionar checklist'}</h1>
+                            <p>Arraste os itens para gerenciar a ordem de exibicao</p>
+                        </div>
+                    </header>
 
-                        <form onSubmit={handleSubmit}>
-                            <div className="form-group">
-                                <FormControl fullWidth>
-                                    <InputLabel id="assunto-label">Assunto</InputLabel>
-                                    <Select
-                                        labelId="assunto-label"
-                                        id="checklist_id"
-                                        name="checklist_id"
-                                        value={formData.checklist_id}
-                                        onChange={handleInputChange}
+                    <form onSubmit={handleSubmit} className="checklist-editor-form">
+                        <section className="checklist-editor-panel">
+                            <div className="checklist-editor-grid">
+                                <label>
+                                    Nome do checklist
+                                    <input
+                                        type="text"
+                                        name="nome_checklist"
+                                        value={formData.nome_checklist}
+                                        onChange={handleChecklistChange}
                                         required
-                                        label="Assunto"
-                                    >
-                                        {assuntos.map((assunto) => (
-                                            <MenuItem key={assunto.id} value={assunto.id}>
-                                                {assunto.name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+                                    />
+                                </label>
+
+                                <label className="checklist-editor-active">
+                                    <input
+                                        type="checkbox"
+                                        name="ativo"
+                                        checked={formData.ativo}
+                                        onChange={handleChecklistChange}
+                                    />
+                                    Ativo
+                                </label>
+                            </div>
+                        </section>
+
+                        <section className="checklist-editor-panel">
+                            <div className="checklist-items-header">
+                                <div>
+                                    <h2>Itens do checklist</h2>
+                                    <span>{formData.itens.length} item(ns)</span>
+                                </div>
+                                <button type="button" className="checklist-add-item-button" onClick={addItem}>
+                                    <AddIcon />
+                                    Adicionar item
+                                </button>
                             </div>
 
-                            {formData.fields.map((field, index) => (
-                                <div key={index} className="field-group">
-                                    <h3>Campo {index + 1}</h3>
+                            <div className="checklist-items-list">
+                                {formData.itens.map((item, index) => (
+                                    <article
+                                        key={`${item.id_item || 'new'}-${index}`}
+                                        className={`checklist-item-editor ${draggedIndex === index ? 'dragging' : ''}`}
+                                        draggable
+                                        onDragStart={() => setDraggedIndex(index)}
+                                        onDragOver={(e) => e.preventDefault()}
+                                        onDrop={() => handleDrop(index)}
+                                        onDragEnd={() => setDraggedIndex(null)}
+                                    >
+                                        <div className="checklist-drag-handle" title="Arrastar item">
+                                            <DragIndicatorIcon />
+                                            <strong>{item.ordem}</strong>
+                                        </div>
 
-                                    <div className="form-group">
-                                        <label htmlFor={`label-${index}`}>Nome do campo</label>
-                                        <input
-                                            type="text"
-                                            id={`label-${index}`}
-                                            name="label"
-                                            value={field.label}
-                                            onChange={(e) => handleFieldChange(index, e)}
-                                            required
-                                        />
-                                    </div>
+                                        <div className="checklist-item-fields">
+                                            <label className="checklist-question-field">
+                                                Pergunta
+                                                <input
+                                                    type="text"
+                                                    value={item.pergunta}
+                                                    onChange={(e) => handleItemChange(index, 'pergunta', e.target.value)}
+                                                    required
+                                                />
+                                            </label>
 
-                                    <div className="form-group">
-                                        <label htmlFor={`type-${index}`}>Tipo do campo</label>
-                                        <select
-                                            id={`type-${index}`}
-                                            name="type"
-                                            value={field.type}
-                                            onChange={(e) => handleFieldChange(index, e)}
-                                            required
-                                        >
-                                            <option value="checkbox">Checkbox</option>
-                                            <option value="text">Text</option>
-                                        </select>
-                                    </div>
+                                            <label>
+                                                Tipo
+                                                <select
+                                                    value={item.tipo_resposta}
+                                                    onChange={(e) => handleItemChange(index, 'tipo_resposta', e.target.value)}
+                                                >
+                                                    <option value="sim_nao">Sim/Não</option>
+                                                    <option value="nota">Nota</option>
+                                                    <option value="texto">Texto</option>
+                                                </select>
+                                            </label>
 
-                                    <div className="form-group">
-                                        <label htmlFor={`max_score-${index}`}>Valor do campo</label>
-                                        <input
-                                            type="number"
-                                            id={`max_score-${index}`}
-                                            name="max_score"
-                                            value={field.max_score}
-                                            onChange={(e) => handleFieldChange(index, e)}
-                                            required
-                                        />
-                                    </div>
+                                            <label>
+                                                Peso
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={item.peso}
+                                                    onChange={(e) => handleItemChange(index, 'peso', e.target.value)}
+                                                />
+                                            </label>
 
-                                    <input
-                                        type="hidden"
-                                        name="action"
-                                        value={field.action}
-                                        onChange={(e) => handleFieldChange(index, e)}
-                                    />
+                                            <label className="checklist-required-field">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={Boolean(item.obrigatorio)}
+                                                    onChange={(e) => handleItemChange(index, 'obrigatorio', e.target.checked)}
+                                                />
+                                                Obrigatorio
+                                            </label>
+                                        </div>
 
-                                    {formData.fields.length > 1 && (
                                         <button
                                             type="button"
-                                            className="remove-field-button"
-                                            onClick={() => removeField(index)}
+                                            className="checklist-remove-item-button"
+                                            onClick={() => removeItem(index)}
+                                            disabled={formData.itens.length === 1}
+                                            title="Remover item"
                                         >
-                                            Remover Campo
+                                            <DeleteIcon />
                                         </button>
-                                    )}
-                                </div>
-                            ))}
+                                    </article>
+                                ))}
+                            </div>
+                        </section>
 
+                        <div className="form-actions">
                             <button
                                 type="button"
-                                className="add-field-button"
-                                onClick={addNewField}
+                                className="cancel-button"
+                                onClick={() => navigate('/checklists')}
                             >
-                                Adicionar Novo Campo
+                                Cancelar
                             </button>
-
-                            <div className="form-actions">
-                                <button
-                                    type="button"
-                                    className="cancel-button"
-                                    onClick={() => navigate('/checklists')}
-                                    disabled={isSubmitting}
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="submit-button"
-                                    disabled={isSubmitting}
-                                >
-                                    {isSubmitting ? 'Enviando...' : isEditMode ? 'Atualizar' : 'Adicionar'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                            <button type="submit" className="submit-button-tutorial">
+                                {isEditMode ? 'Atualizar' : 'Adicionar'}
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

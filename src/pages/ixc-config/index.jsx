@@ -2,22 +2,23 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/index.jsx';
 import '../styles.css';
-import { deleteChecklistAssunto, getChecklistAssuntos } from '../../services/api.ts';
+import {
+    deleteIxcConfig,
+    getIxcConfigs,
+    testarConexaoIxc
+} from '../../services/api.ts';
 import { logout } from '../../utils/auth.js';
 import Swal from 'sweetalert2';
 import { FaPlus } from 'react-icons/fa';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import LinkIcon from '@mui/icons-material/Link';
+import CableIcon from '@mui/icons-material/Cable';
 import DehazeIcon from '@mui/icons-material/Dehaze';
+import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 
-const getVinculoChecklist = (vinculo) => vinculo?.checklist || {};
-const getChecklistNome = (vinculo) => getVinculoChecklist(vinculo).nome_checklist || 'Checklist nao informado';
-const getChecklistId = (vinculo) => getVinculoChecklist(vinculo).id_checklist || getVinculoChecklist(vinculo).id;
-
-export default function Assunto() {
+export default function IxcConfigs() {
     const navigate = useNavigate();
-    const [assuntos, setAssuntos] = useState([]);
+    const [configs, setConfigs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -31,11 +32,11 @@ export default function Assunto() {
         let isMounted = true;
         const token = localStorage.getItem('access_token');
 
-        const fetchAssuntos = async () => {
+        const fetchConfigs = async () => {
             try {
-                const data = await getChecklistAssuntos(token);
+                const data = await getIxcConfigs(token);
                 if (isMounted) {
-                    setAssuntos(Array.isArray(data) ? data : []);
+                    setConfigs(data);
                 }
             } catch (err) {
                 if (isMounted) {
@@ -44,7 +45,7 @@ export default function Assunto() {
                         navigate('/');
                         return;
                     }
-                    setError(err.message || 'Erro ao carregar vinculos de assuntos');
+                    setError(err.message || 'Erro ao carregar configuracoes IXC');
                 }
             } finally {
                 if (isMounted) {
@@ -53,36 +54,22 @@ export default function Assunto() {
             }
         };
 
-        fetchAssuntos();
+        fetchConfigs();
 
         return () => {
             isMounted = false;
         };
     }, [navigate]);
 
-    const filteredAssuntos = assuntos.filter((assunto) => {
-        const term = searchTerm.toLowerCase();
-        return [
-            assunto.nome_assunto_ixc,
-            String(assunto.id_assunto_ixc || ''),
-            getChecklistNome(assunto)
-        ].some(value => String(value || '').toLowerCase().includes(term));
-    });
-
     const handleDelete = async (id, nome) => {
-        if (!id) {
-            Swal.fire('Erro!', 'Nao foi possivel identificar este vinculo.', 'error');
-            return;
-        }
-
         const result = await Swal.fire({
             title: 'Tem certeza?',
-            text: `Voce esta prestes a remover o vinculo do assunto ${nome}.`,
+            text: `Voce esta prestes a excluir a configuracao ${nome}.`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#FF6200',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Sim, remover!',
+            confirmButtonText: 'Sim, excluir!',
             cancelButtonText: 'Cancelar'
         });
 
@@ -90,19 +77,40 @@ export default function Assunto() {
 
         try {
             const token = localStorage.getItem('access_token');
-            await deleteChecklistAssunto(token, id);
-            setAssuntos(prev => prev.filter(assunto => assunto.id !== id));
-            Swal.fire('Removido!', 'Vinculo removido com sucesso.', 'success');
+            await deleteIxcConfig(token, id);
+            setConfigs(configs.filter(config => config.id !== id));
+            Swal.fire('Excluido!', 'Configuracao IXC removida com sucesso.', 'success');
         } catch (err) {
-            Swal.fire('Erro!', err.message || 'Erro ao remover vinculo.', 'error');
+            Swal.fire('Erro!', err.message || 'Erro ao remover configuracao IXC.', 'error');
         }
     };
+
+    const handleTestConnection = async () => {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await testarConexaoIxc(token);
+            const data = response.data;
+
+            Swal.fire(
+                response.success ? 'Conexao realizada!' : 'Falha na conexao',
+                data?.nome ? `${response.message}<br/><br/>Config: ${data.nome}` : response.message,
+                response.success ? 'success' : 'error'
+            );
+        } catch (err) {
+            Swal.fire('Erro!', err.message || 'Erro ao testar conexao IXC.', 'error');
+        }
+    };
+
+    const filteredConfigs = configs.filter(config =>
+        config.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        config.base_url.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     if (loading) {
         return (
             <div className="loading-container">
                 <div className="spinner"></div>
-                <p>Carregando assuntos vinculados...</p>
+                <p>Carregando configuracoes IXC...</p>
             </div>
         );
     }
@@ -122,8 +130,8 @@ export default function Assunto() {
         <div className={`tutorial-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
             <Sidebar isVisible={isSidebarVisible} />
             <main className="main-content-assunto">
-                <div className="subject-page">
-                    <header className="subject-header">
+                <div className="ixc-page">
+                    <header className="ixc-page-header">
                         <button
                             className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
                             onClick={() => setIsSidebarVisible(!isSidebarVisible)}
@@ -131,48 +139,48 @@ export default function Assunto() {
                             {isSidebarVisible ? <DehazeIcon /> : '>'}
                         </button>
                         <div>
-                            <h1>Assuntos IXC</h1>
-                            <p>Vincule assuntos do IXC aos checklists de avaliacao</p>
+                            <h1>Integração IXC</h1>
+                            <p>Configurações de conexão com o IXCSoft</p>
                         </div>
                     </header>
 
-                    <div className="subject-toolbar">
-                        <div className="subject-search">
-                            <LinkIcon />
+                    <div className="ixc-toolbar">
+                        <div className="ixc-search">
+                            <SettingsEthernetIcon />
                             <input
                                 type="text"
-                                placeholder="Pesquisar por assunto, ID IXC ou checklist"
+                                placeholder="Pesquisar por nome ou URL"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
+                        <button className="ixc-test-button" onClick={handleTestConnection}>
+                            <CableIcon />
+                            Testar conexão
+                        </button>
                     </div>
 
-                    {filteredAssuntos.length > 0 ? (
-                        <div className="subject-grid">
-                            {filteredAssuntos.map((assunto) => (
-                                <article key={assunto.id} className="subject-card">
-                                    <div className="subject-card-header">
+                    {filteredConfigs.length > 0 ? (
+                        <div className="ixc-config-grid">
+                            {filteredConfigs.map(config => (
+                                <article key={config.id} className="ixc-config-card">
+                                    <div className="ixc-card-header">
                                         <div>
-                                            <span>Assunto IXC #{assunto.id_assunto_ixc}</span>
-                                            <h2>{assunto.nome_assunto_ixc}</h2>
+                                            <h2>{config.nome}</h2>
+                                            <span>ID #{config.id}</span>
                                         </div>
+                                        <span className={`ixc-status ${config.ativo ? 'active' : 'inactive'}`}>
+                                            {config.ativo ? 'Ativo' : 'Inativo'}
+                                        </span>
                                     </div>
 
-                                    <div className="subject-card-link">
-                                        <LinkIcon />
-                                        <div>
-                                            <span>Checklist vinculado</span>
-                                            <strong>{getChecklistNome(assunto)}</strong>
-                                            {getChecklistId(assunto) && <small>ID {getChecklistId(assunto)}</small>}
-                                        </div>
-                                    </div>
+                                    <div className="ixc-url">{config.base_url}</div>
 
                                     <div className="ixc-card-actions">
-                                        <button title="Editar" onClick={() => navigate(`/assunto/${assunto.id}`)}>
+                                        <button title="Editar" onClick={() => navigate(`/ixc-config/${config.id}`)}>
                                             <EditIcon />
                                         </button>
-                                        <button title="Excluir" onClick={() => handleDelete(assunto.id, assunto.nome_assunto_ixc)}>
+                                        <button title="Excluir" onClick={() => handleDelete(config.id, config.nome)}>
                                             <DeleteIcon />
                                         </button>
                                     </div>
@@ -180,14 +188,14 @@ export default function Assunto() {
                             ))}
                         </div>
                     ) : searchTerm ? (
-                        <p className="no-results">Nenhum vinculo encontrado para "{searchTerm}"</p>
+                        <p className="no-results">Nenhuma configuracao encontrada para "{searchTerm}"</p>
                     ) : (
-                        <p className="no-results">Nenhum assunto vinculado</p>
+                        <p className="no-results">Nenhuma configuracao IXC disponivel</p>
                     )}
                 </div>
             </main>
 
-            <button className="add-button" onClick={() => navigate('/assunto/0')}>
+            <button className="add-button" onClick={() => navigate('/ixc-config/0')}>
                 <FaPlus />
             </button>
         </div>

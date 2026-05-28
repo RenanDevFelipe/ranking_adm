@@ -2,22 +2,23 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/index.jsx';
 import '../styles.css';
-import { deleteChecklistAssunto, getChecklistAssuntos } from '../../services/api.ts';
+import { deletePontuacaoAssunto, getPontuacoesAssunto } from '../../services/api.ts';
 import { logout } from '../../utils/auth.js';
 import Swal from 'sweetalert2';
 import { FaPlus } from 'react-icons/fa';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import LinkIcon from '@mui/icons-material/Link';
+import ScoreIcon from '@mui/icons-material/Score';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 
-const getVinculoChecklist = (vinculo) => vinculo?.checklist || {};
-const getChecklistNome = (vinculo) => getVinculoChecklist(vinculo).nome_checklist || 'Checklist nao informado';
-const getChecklistId = (vinculo) => getVinculoChecklist(vinculo).id_checklist || getVinculoChecklist(vinculo).id;
+const getAssunto = (score) => score?.assunto || {};
+const getChecklist = (score) => getAssunto(score)?.checklist || {};
+const getAssuntoNome = (score) => getAssunto(score).nome_assunto_ixc || 'Assunto nao informado';
+const getChecklistNome = (score) => getChecklist(score).nome_checklist || 'Checklist nao informado';
 
-export default function Assunto() {
+export default function ChecklistScores() {
     const navigate = useNavigate();
-    const [assuntos, setAssuntos] = useState([]);
+    const [scores, setScores] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -31,11 +32,11 @@ export default function Assunto() {
         let isMounted = true;
         const token = localStorage.getItem('access_token');
 
-        const fetchAssuntos = async () => {
+        const fetchScores = async () => {
             try {
-                const data = await getChecklistAssuntos(token);
+                const data = await getPontuacoesAssunto(token);
                 if (isMounted) {
-                    setAssuntos(Array.isArray(data) ? data : []);
+                    setScores(Array.isArray(data) ? data : []);
                 }
             } catch (err) {
                 if (isMounted) {
@@ -44,7 +45,7 @@ export default function Assunto() {
                         navigate('/');
                         return;
                     }
-                    setError(err.message || 'Erro ao carregar vinculos de assuntos');
+                    setError(err.message || 'Erro ao carregar pontuacoes');
                 }
             } finally {
                 if (isMounted) {
@@ -53,31 +54,32 @@ export default function Assunto() {
             }
         };
 
-        fetchAssuntos();
+        fetchScores();
 
         return () => {
             isMounted = false;
         };
     }, [navigate]);
 
-    const filteredAssuntos = assuntos.filter((assunto) => {
+    const filteredScores = scores.filter((score) => {
         const term = searchTerm.toLowerCase();
         return [
-            assunto.nome_assunto_ixc,
-            String(assunto.id_assunto_ixc || ''),
-            getChecklistNome(assunto)
+            getAssuntoNome(score),
+            getChecklistNome(score),
+            String(getAssunto(score).id_assunto_ixc || ''),
+            String(score.pontos || '')
         ].some(value => String(value || '').toLowerCase().includes(term));
     });
 
     const handleDelete = async (id, nome) => {
         if (!id) {
-            Swal.fire('Erro!', 'Nao foi possivel identificar este vinculo.', 'error');
+            Swal.fire('Erro!', 'Nao foi possivel identificar esta pontuacao.', 'error');
             return;
         }
 
         const result = await Swal.fire({
             title: 'Tem certeza?',
-            text: `Voce esta prestes a remover o vinculo do assunto ${nome}.`,
+            text: `Voce esta prestes a remover a pontuacao de ${nome}.`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#FF6200',
@@ -90,11 +92,11 @@ export default function Assunto() {
 
         try {
             const token = localStorage.getItem('access_token');
-            await deleteChecklistAssunto(token, id);
-            setAssuntos(prev => prev.filter(assunto => assunto.id !== id));
-            Swal.fire('Removido!', 'Vinculo removido com sucesso.', 'success');
+            await deletePontuacaoAssunto(token, id);
+            setScores(prev => prev.filter(score => score.id !== id));
+            Swal.fire('Removido!', 'Pontuacao removida com sucesso.', 'success');
         } catch (err) {
-            Swal.fire('Erro!', err.message || 'Erro ao remover vinculo.', 'error');
+            Swal.fire('Erro!', err.message || 'Erro ao remover pontuacao.', 'error');
         }
     };
 
@@ -102,7 +104,7 @@ export default function Assunto() {
         return (
             <div className="loading-container">
                 <div className="spinner"></div>
-                <p>Carregando assuntos vinculados...</p>
+                <p>Carregando pontuacoes...</p>
             </div>
         );
     }
@@ -122,7 +124,7 @@ export default function Assunto() {
         <div className={`tutorial-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
             <Sidebar isVisible={isSidebarVisible} />
             <main className="main-content-assunto">
-                <div className="subject-page">
+                <div className="score-page">
                     <header className="subject-header">
                         <button
                             className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
@@ -131,48 +133,55 @@ export default function Assunto() {
                             {isSidebarVisible ? <DehazeIcon /> : '>'}
                         </button>
                         <div>
-                            <h1>Assuntos IXC</h1>
-                            <p>Vincule assuntos do IXC aos checklists de avaliacao</p>
+                            <h1>Pontuacao dos checklists</h1>
+                            <p>Defina os pontos por assunto para o ranking de quantidade</p>
                         </div>
                     </header>
 
                     <div className="subject-toolbar">
                         <div className="subject-search">
-                            <LinkIcon />
+                            <ScoreIcon />
                             <input
                                 type="text"
-                                placeholder="Pesquisar por assunto, ID IXC ou checklist"
+                                placeholder="Pesquisar por assunto, checklist ou pontos"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
                     </div>
 
-                    {filteredAssuntos.length > 0 ? (
+                    {filteredScores.length > 0 ? (
                         <div className="subject-grid">
-                            {filteredAssuntos.map((assunto) => (
-                                <article key={assunto.id} className="subject-card">
+                            {filteredScores.map((score) => (
+                                <article key={score.id} className="subject-card score-card">
                                     <div className="subject-card-header">
                                         <div>
-                                            <span>Assunto IXC #{assunto.id_assunto_ixc}</span>
-                                            <h2>{assunto.nome_assunto_ixc}</h2>
+                                            <span>Assunto IXC #{getAssunto(score).id_assunto_ixc || '-'}</span>
+                                            <h2>{getAssuntoNome(score)}</h2>
                                         </div>
+                                        <span className={`score-status ${score.ativo ? 'active' : 'inactive'}`}>
+                                            {score.ativo ? 'Ativo' : 'Inativo'}
+                                        </span>
+                                    </div>
+
+                                    <div className="score-card-value">
+                                        <strong>{Number(score.pontos || 0).toLocaleString('pt-BR')}</strong>
+                                        <span>pontos por OS</span>
                                     </div>
 
                                     <div className="subject-card-link">
-                                        <LinkIcon />
+                                        <ScoreIcon />
                                         <div>
                                             <span>Checklist vinculado</span>
-                                            <strong>{getChecklistNome(assunto)}</strong>
-                                            {getChecklistId(assunto) && <small>ID {getChecklistId(assunto)}</small>}
+                                            <strong>{getChecklistNome(score)}</strong>
                                         </div>
                                     </div>
 
                                     <div className="ixc-card-actions">
-                                        <button title="Editar" onClick={() => navigate(`/assunto/${assunto.id}`)}>
+                                        <button title="Editar" onClick={() => navigate(`/checklist-score/${score.id}`)}>
                                             <EditIcon />
                                         </button>
-                                        <button title="Excluir" onClick={() => handleDelete(assunto.id, assunto.nome_assunto_ixc)}>
+                                        <button title="Excluir" onClick={() => handleDelete(score.id, getAssuntoNome(score))}>
                                             <DeleteIcon />
                                         </button>
                                     </div>
@@ -180,14 +189,14 @@ export default function Assunto() {
                             ))}
                         </div>
                     ) : searchTerm ? (
-                        <p className="no-results">Nenhum vinculo encontrado para "{searchTerm}"</p>
+                        <p className="no-results">Nenhuma pontuacao encontrada para "{searchTerm}"</p>
                     ) : (
-                        <p className="no-results">Nenhum assunto vinculado</p>
+                        <p className="no-results">Nenhuma pontuacao cadastrada</p>
                     )}
                 </div>
             </main>
 
-            <button className="add-button" onClick={() => navigate('/assunto/0')}>
+            <button className="add-button" onClick={() => navigate('/checklist-score/0')}>
                 <FaPlus />
             </button>
         </div>

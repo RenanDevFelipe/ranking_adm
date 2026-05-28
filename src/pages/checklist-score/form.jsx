@@ -3,31 +3,35 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/index.jsx';
 import '../styles.css';
 import {
-    addChecklistAssunto,
-    getChecklistAssuntoById,
-    getChecklists,
-    updateChecklistAssunto
+    addPontuacaoAssunto,
+    getChecklistAssuntos,
+    getPontuacaoAssuntoById,
+    updatePontuacaoAssunto
 } from '../../services/api.ts';
 import { logout } from '../../utils/auth.js';
 import Swal from 'sweetalert2';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 
 const initialFormData = {
-    id_checklist: '',
-    id_assunto_ixc: '',
-    nome_assunto_ixc: ''
+    id_checklist_assunto: '',
+    pontos: '',
+    ativo: true
 };
 
-const getChecklistId = (checklist) => checklist?.id ?? checklist?.id_checklist;
+const getChecklistNome = (assunto) => assunto?.checklist?.nome_checklist || 'Checklist nao informado';
+const getAssuntoLabel = (assunto) => {
+    const idIxc = assunto?.id_assunto_ixc ? `#${assunto.id_assunto_ixc} - ` : '';
+    return `${idIxc}${assunto?.nome_assunto_ixc || 'Assunto sem nome'} | ${getChecklistNome(assunto)}`;
+};
 
-export default function AddAssunto() {
+export default function ChecklistScoreForm() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const vinculoId = id && id !== 'undefined' && id !== 'null' ? id : '0';
-    const isEditMode = vinculoId !== '0';
+    const scoreId = id && id !== 'undefined' && id !== 'null' ? id : '0';
+    const isEditMode = scoreId !== '0';
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [checklists, setChecklists] = useState([]);
+    const [assuntos, setAssuntos] = useState([]);
     const [formData, setFormData] = useState(initialFormData);
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
     const [darkMode] = useState(() => {
@@ -41,19 +45,19 @@ export default function AddAssunto() {
 
         const fetchData = async () => {
             try {
-                const [checklistsData, assuntoData] = await Promise.all([
-                    getChecklists(token),
-                    isEditMode ? getChecklistAssuntoById(token, vinculoId) : Promise.resolve(null)
+                const [assuntosData, scoreData] = await Promise.all([
+                    getChecklistAssuntos(token),
+                    isEditMode ? getPontuacaoAssuntoById(token, scoreId) : Promise.resolve(null)
                 ]);
 
                 if (isMounted) {
-                    setChecklists(Array.isArray(checklistsData) ? checklistsData : []);
+                    setAssuntos(Array.isArray(assuntosData) ? assuntosData : []);
 
-                    if (assuntoData) {
+                    if (scoreData) {
                         setFormData({
-                            id_checklist: String(assuntoData.id_checklist || assuntoData.checklist?.id_checklist || assuntoData.checklist?.id || ''),
-                            id_assunto_ixc: String(assuntoData.id_assunto_ixc || ''),
-                            nome_assunto_ixc: assuntoData.nome_assunto_ixc || ''
+                            id_checklist_assunto: String(scoreData.id_checklist_assunto || scoreData.assunto?.id || ''),
+                            pontos: String(scoreData.pontos ?? ''),
+                            ativo: Boolean(scoreData.ativo)
                         });
                     }
                 }
@@ -64,7 +68,7 @@ export default function AddAssunto() {
                         navigate('/');
                         return;
                     }
-                    setError(err.message || 'Erro ao carregar vinculo de assunto');
+                    setError(err.message || 'Erro ao carregar pontuacao');
                 }
             } finally {
                 if (isMounted) {
@@ -78,20 +82,20 @@ export default function AddAssunto() {
         return () => {
             isMounted = false;
         };
-    }, [isEditMode, navigate, vinculoId]);
+    }, [isEditMode, navigate, scoreId]);
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value
         }));
     };
 
     const validateForm = () => {
-        if (!formData.id_checklist) return 'Selecione um checklist.';
-        if (!formData.id_assunto_ixc) return 'Informe o ID do assunto no IXC.';
-        if (!formData.nome_assunto_ixc.trim()) return 'Informe o nome do assunto no IXC.';
+        if (!formData.id_checklist_assunto) return 'Selecione um assunto vinculado.';
+        if (formData.pontos === '') return 'Informe a pontuacao.';
+        if (Number(formData.pontos) < 0) return 'A pontuacao nao pode ser negativa.';
         return null;
     };
 
@@ -107,24 +111,24 @@ export default function AddAssunto() {
         try {
             const token = localStorage.getItem('access_token');
             const payload = {
-                id_checklist: Number(formData.id_checklist),
-                id_assunto_ixc: Number(formData.id_assunto_ixc),
-                nome_assunto_ixc: formData.nome_assunto_ixc.trim()
+                id_checklist_assunto: Number(formData.id_checklist_assunto),
+                pontos: Number(formData.pontos),
+                ativo: Boolean(formData.ativo)
             };
 
             if (isEditMode) {
-                await updateChecklistAssunto(token, vinculoId, payload);
+                await updatePontuacaoAssunto(token, scoreId, payload);
             } else {
-                await addChecklistAssunto(token, payload);
+                await addPontuacaoAssunto(token, payload);
             }
 
             Swal.fire(
                 'Sucesso!',
-                isEditMode ? 'Vinculo atualizado com sucesso.' : 'Assunto vinculado com sucesso.',
+                isEditMode ? 'Pontuacao atualizada com sucesso.' : 'Pontuacao cadastrada com sucesso.',
                 'success'
-            ).then(() => navigate('/assuntos'));
+            ).then(() => navigate('/checklist-scores'));
         } catch (err) {
-            Swal.fire('Erro!', err.message || 'Erro ao salvar vinculo de assunto.', 'error');
+            Swal.fire('Erro!', err.message || 'Erro ao salvar pontuacao.', 'error');
         }
     };
 
@@ -132,7 +136,7 @@ export default function AddAssunto() {
         return (
             <div className="loading-container">
                 <div className="spinner"></div>
-                <p>Carregando vinculo de assunto...</p>
+                <p>Carregando pontuacao...</p>
             </div>
         );
     }
@@ -152,7 +156,7 @@ export default function AddAssunto() {
         <div className={`app-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
             <Sidebar isVisible={isSidebarVisible} />
             <main className="main-content-assunto">
-                <div className="subject-page subject-form-page">
+                <div className="score-page score-form-page">
                     <header className="subject-header">
                         <button
                             className={`sidebar-toggle ${darkMode ? 'dark' : 'light'}`}
@@ -161,52 +165,52 @@ export default function AddAssunto() {
                             {isSidebarVisible ? <DehazeIcon /> : '>'}
                         </button>
                         <div>
-                            <h1>{isEditMode ? 'Editar vinculo' : 'Vincular assunto'}</h1>
-                            <p>Relacione o assunto do IXC ao checklist usado na avaliacao</p>
+                            <h1>{isEditMode ? 'Editar pontuacao' : 'Adicionar pontuacao'}</h1>
+                            <p>Defina os pontos do assunto para o ranking de quantidade</p>
                         </div>
                     </header>
 
                     <form onSubmit={handleSubmit} className="subject-form">
                         <section className="subject-panel">
-                            <div className="subject-form-grid">
-                                <label>
-                                    Checklist
+                            <div className="score-form-grid">
+                                <label className="score-subject-field">
+                                    Assunto vinculado ao checklist
                                     <select
-                                        name="id_checklist"
-                                        value={formData.id_checklist}
+                                        name="id_checklist_assunto"
+                                        value={formData.id_checklist_assunto}
                                         onChange={handleInputChange}
                                         required
                                     >
-                                        <option value="">Selecione um checklist</option>
-                                        {checklists.map((checklist) => (
-                                            <option key={getChecklistId(checklist)} value={getChecklistId(checklist)}>
-                                                {checklist.nome_checklist}
+                                        <option value="">Selecione um assunto</option>
+                                        {assuntos.map((assunto) => (
+                                            <option key={assunto.id} value={assunto.id}>
+                                                {getAssuntoLabel(assunto)}
                                             </option>
                                         ))}
                                     </select>
                                 </label>
 
                                 <label>
-                                    ID do assunto IXC
+                                    Pontos
                                     <input
                                         type="number"
-                                        min="1"
-                                        name="id_assunto_ixc"
-                                        value={formData.id_assunto_ixc}
+                                        min="0"
+                                        step="0.01"
+                                        name="pontos"
+                                        value={formData.pontos}
                                         onChange={handleInputChange}
                                         required
                                     />
                                 </label>
 
-                                <label className="subject-name-field">
-                                    Nome do assunto IXC
+                                <label className="checklist-editor-active">
                                     <input
-                                        type="text"
-                                        name="nome_assunto_ixc"
-                                        value={formData.nome_assunto_ixc}
+                                        type="checkbox"
+                                        name="ativo"
+                                        checked={formData.ativo}
                                         onChange={handleInputChange}
-                                        required
                                     />
+                                    Ativo
                                 </label>
                             </div>
                         </section>
@@ -215,12 +219,12 @@ export default function AddAssunto() {
                             <button
                                 type="button"
                                 className="cancel-button"
-                                onClick={() => navigate('/assuntos')}
+                                onClick={() => navigate('/checklist-scores')}
                             >
                                 Cancelar
                             </button>
                             <button type="submit" className="submit-button-tutorial">
-                                {isEditMode ? 'Atualizar' : 'Vincular'}
+                                {isEditMode ? 'Atualizar' : 'Adicionar'}
                             </button>
                         </div>
                     </form>

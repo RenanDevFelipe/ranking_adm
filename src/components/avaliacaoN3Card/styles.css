@@ -1,0 +1,77 @@
+@import '../avaliacaoCard/styles.css';
+
+.n3-card .avaliacao-status {
+    background-color: rgba(255, 98, 0, 0.16);
+    color: #ff7a22;
+}
+
+.n3-card.finalizada .avaliacao-status {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.n3-card .checklist-item {
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(127, 127, 127, 0.22);
+}
+
+.n3-card .checklist-item:last-child {
+    border-bottom: none;
+}
+
+.n3-card .checklist-item label {
+    flex: 1;
+}
+
+.n3-card .checklist-item input[type="text"],
+.n3-card .checklist-item input[type="number"] {
+    width: 140px;
+}
+
+.n3-finalizacao-message {
+    display: grid;
+    gap: 8px;
+    margin-top: 18px;
+    padding: 14px;
+    border: 1px solid rgba(255, 98, 0, 0.18);
+    border-radius: 8px;
+    background: rgba(255, 98, 0, 0.08);
+}
+
+.n3-finalizacao-message label {
+    display: grid;
+    gap: 3px;
+    font-weight: 700;
+}
+
+.n3-finalizacao-message label span {
+    color: var(--textColor);
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.7;
+}
+
+.n3-finalizacao-message textarea {
+    width: 100%;
+    min-height: 110px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 6px;
+    background: var(--colorDark);
+    color: var(--textColor);
+    font: inherit;
+    resize: vertical;
+    outline: none;
+}
+
+.n3-finalizacao-message textarea:focus {
+    border-color: var(--colorPrimary);
+    box-shadow: 0 0 0 3px rgba(255, 98, 0, 0.16);
+}
+
+@media (max-width: 900px) {
+    .avaliacao-card {
+        width: 100%;
+    }
+}

@@ -11,6 +11,9 @@ import AddColaborador from './pages/colaborador/colaborador.jsx';
 import AddUsuario from './pages/user/usuario.jsx';
 import RankingMensal from './pages/ranking-mensal/index.jsx'
 import RankingDiario from './pages/ranking-diario/index.jsx'
+import RankingAnual from './pages/ranking-anual/index.jsx'
+import RankingConfigs from './pages/ranking-config/index.jsx';
+import RankingConfigForm from './pages/ranking-config/form.jsx';
 import Checklists from './pages/checklist/index.jsx';
 import AddAssunto from './pages/assunto/assunto.jsx';
 import Assunto from './pages/assunto/index.jsx';
@@ -18,6 +21,8 @@ import Usuarios from './pages/user/index.jsx';
 import Setores from './pages/setor/index.jsx';
 import AddSetor from './pages/setor/setor.jsx';
 import Checklist from './pages/checklist/checklist.jsx'
+import ChecklistScores from './pages/checklist-score/index.jsx';
+import ChecklistScoreForm from './pages/checklist-score/form.jsx';
 import AvaliarN3 from './pages/avaliacoes/n3/index.jsx';
 import AvaliarN2 from './pages/avaliacoes/n2/index.jsx';
 import AvaliarEstoque from './pages/avaliacoes/estoque/index.jsx';
@@ -26,7 +31,11 @@ import Movimentacoes from './pages/avaliacoes/n2/movimentacoes.jsx';
 import MovimentacoesEstoque from './pages/avaliacoes/estoque/movimentacoes.jsx';
 import MovimentacoesRH from './pages/avaliacoes/rh/movimentacoes.jsx';
 import { ThemeProvider } from './context/ThemeContext.js';
-import Connectbi from './pages/connectbii/index.tsx';
+import Dashboard from './pages/dashboard/index.jsx';
+import IxcConfigs from './pages/ixc-config/index.jsx';
+import IxcConfigForm from './pages/ixc-config/form.jsx';
+import IxcFinalizacaoConfigs from './pages/ixc-finalizacao-config/index.jsx';
+import IxcFinalizacaoConfigForm from './pages/ixc-finalizacao-config/form.jsx';
 
 
 
@@ -38,6 +47,11 @@ export default function App() {
                 <Route path="/home" element={
                     <PrivateRoute>
                         <Home />
+                    </PrivateRoute>
+                } />
+                <Route path="/dashboard" element={
+                    <PrivateRoute>
+                        <Dashboard />
                     </PrivateRoute>
                 } />
                 <Route path="/tutoriais" element={
@@ -70,6 +84,11 @@ export default function App() {
                         <RankingDiario />
                     </PrivateRoute>
                 } />
+                <Route path="/ranking-anual" element={
+                    <PrivateRoute>
+                        <RankingAnual />
+                    </PrivateRoute>
+                } />
                 <Route path="/checklists" element={
                     <PrivateRoute>
                         <Checklists />
@@ -88,6 +107,16 @@ export default function App() {
                 <Route path="/checklist/:id" element={
                     <PrivateRoute>
                         <Checklist />
+                    </PrivateRoute>
+                } />
+                <Route path="/checklist-scores" element={
+                    <PrivateRoute>
+                        <ChecklistScores />
+                    </PrivateRoute>
+                } />
+                <Route path="/checklist-score/:id" element={
+                    <PrivateRoute>
+                        <ChecklistScoreForm />
                     </PrivateRoute>
                 } />
                 <Route path="/avaliar/N3/:id" element={
@@ -148,12 +177,42 @@ export default function App() {
                     </PrivateRoute>
                 } />
 
-                <Route path="/connectbi" element={
+                <Route path="/ixc-configs" element={
                     <PrivateRoute>
-                        <Connectbi />
+                        <IxcConfigs />
                     </PrivateRoute>
                 } />
-                
+
+                <Route path="/ixc-config/:id" element={
+                    <PrivateRoute>
+                        <IxcConfigForm />
+                    </PrivateRoute>
+                } />
+
+                <Route path="/ixc-finalizacao-configs" element={
+                    <PrivateRoute>
+                        <IxcFinalizacaoConfigs />
+                    </PrivateRoute>
+                } />
+
+                <Route path="/ixc-finalizacao-config/:id" element={
+                    <PrivateRoute>
+                        <IxcFinalizacaoConfigForm />
+                    </PrivateRoute>
+                } />
+
+                <Route path="/ranking-configuracoes" element={
+                    <PrivateRoute>
+                        <RankingConfigs />
+                    </PrivateRoute>
+                } />
+
+                <Route path="/ranking-configuracao/:id" element={
+                    <PrivateRoute>
+                        <RankingConfigForm />
+                    </PrivateRoute>
+                } />
+
             </Routes>
         </ThemeProvider>
     );

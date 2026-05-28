@@ -18,8 +18,6 @@ export default function AddColaborador() {
         const savedMode = localStorage.getItem('darkMode');
         return savedMode ? JSON.parse(savedMode) : true;
     });
-    const [previewImage, setPreviewImage] = useState(null);
-    const [selectedFile, setSelectedFile] = useState(null);
 
     // Dados do formulário
     const [formData, setFormData] = useState({
@@ -27,7 +25,6 @@ export default function AddColaborador() {
         id_ixc: 0,
         nome_colaborador: '',
         setor_colaborador: null,
-        imagem: '',
         action: '',
     });
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
@@ -65,14 +62,9 @@ export default function AddColaborador() {
                         id_ixc: colaboradorData.id_ixc || 0,
                         nome_colaborador: colaboradorData.nome_colaborador,
                         setor_colaborador: colaboradorData.setor_colaborador,
-                        imagem: colaboradorData.imagem || '',
                         action: colaboradorData.action || ''
                     });
 
-                    // Se já existir uma imagem, mostra o preview
-                    if (colaboradorData.imagem) {
-                        setPreviewImage(colaboradorData.imagem);
-                    }
                 }
             } catch (err) {
                 console.error("Erro ao carregar dados:", err);
@@ -98,20 +90,6 @@ export default function AddColaborador() {
         }));
     };
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-
-            // Cria um preview da imagem
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewImage(reader.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('access_token');
@@ -124,10 +102,6 @@ export default function AddColaborador() {
             formDataToSend.append('setor_colaborador', formData.setor_colaborador);
             formDataToSend.append('id_ixc', formData.id_ixc);
             formDataToSend.append('action', isEditMode ? "update" : "create");
-
-            if (selectedFile) {
-                formDataToSend.append('imagem', selectedFile);
-            }
 
             if (isEditMode) {
                 await updateColaborador(token, formDataToSend);
@@ -250,31 +224,6 @@ export default function AddColaborador() {
                                     value={formData.id_ixc}
                                     onChange={handleInputChange}
                                 />
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="image">Imagem do Colaborador</label>
-                                <input
-                                    type="file"
-                                    id="image"
-                                    name="imagem"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                />
-                                {previewImage && (
-                                    <div className="image-preview">
-                                        <img
-                                            src={previewImage}
-                                            alt="Preview"
-                                            style={{
-                                                maxWidth: '200px',
-                                                maxHeight: '200px',
-                                                marginTop: '10px',
-                                                borderRadius: '5px'
-                                            }}
-                                        />
-                                    </div>
-                                )}
                             </div>
 
                             <div className="form-actions">

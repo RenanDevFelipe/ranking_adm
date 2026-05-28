@@ -90,8 +90,6 @@ export default function Setor() {
         navigate(`/Usuario/${id}`);
     };
 
-    console.log(colaboradores);
-
     const handleDelete = async (id, nome) => {
         const result = await Swal.fire({
             title: 'Tem certeza?',
@@ -128,9 +126,27 @@ export default function Setor() {
         }
     };
 
-    const filteredColaboradores = colaboradores.filter(colab =>
-        colab.nome_user.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const normalizeSearch = (value) => {
+        return String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+    };
+
+    const filteredColaboradores = colaboradores.filter(colab => {
+        const searchableText = [
+            colab.nome_user,
+            colab.email_user,
+            colab.id_user,
+            colab.id_ixc_user,
+            colab.role,
+            colab.setor_user,
+            getNomeSetor(colab.setor_user)
+        ].map(normalizeSearch).join(' ');
+
+        return searchableText.includes(normalizeSearch(searchTerm));
+    });
 
     const isLoading = loading.colaboradores || loading.setores;
 
@@ -172,7 +188,7 @@ export default function Setor() {
                             {isSidebarVisible ? <DehazeIcon /> : '►'}
                         </button>
                         <input
-                            placeholder='Pesquise pelo nome do técnico'
+                            placeholder='Pesquise por nome, email, setor ou ID'
                             className="search"
                             type="text"
                             value={searchTerm}

@@ -31,35 +31,29 @@ const Login = () => {
   const onSubmit = async (data) => {
     try {
       const response = await authService.login(data);
+      const user = response.user || {};
 
-      if (!response.access_token) {
-        throw new Error('Email ou senha incorreto!');
-      }
-
+      // Mantem as chaves antigas porque as telas atuais ainda leem esses nomes.
       login({
         access_token: response.access_token,
-        id_ixc: response.id_ixc,
-        email: response.email,
-        nome: response.nome,
-        role: response.role,
-        setor: response.setor.id_setor
+        id_user: user.id_user,
+        id_ixc_user: user.id_ixc_user,
+        email_user: user.email_user,
+        nome_user: user.nome_user,
+        role: user.role,
+        setor_user: user.setor_user
       });
 
       toast.success('Login realizado com sucesso!');
-      if (response.role == 3) {
-        navigate('/connectBi')
-      } else {
-        navigate('/home');
-      }
-
+      navigate('/dashboard');
 
     } catch (error) {
       logout();
 
       let errorMessage = 'Email ou senha incorreto!';
 
-      if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
+      if (error.response?.data?.message || error.response?.data?.erro || error.response?.data?.error) {
+        errorMessage = error.response.data.message || error.response.data.erro || error.response.data.error;
       } else if (error.message) {
         errorMessage = error.message;
       }

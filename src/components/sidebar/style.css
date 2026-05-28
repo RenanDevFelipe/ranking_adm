@@ -31,6 +31,44 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--colorPrimary-rgb), 0.85) rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-menu::-webkit-scrollbar {
+    width: 10px;
+}
+
+.sidebar-menu::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb {
+    min-height: 64px;
+    background: linear-gradient(180deg, var(--colorPrimary), #ff8a1d);
+    border: 2px solid var(--colorDarkForm);
+    border-radius: 999px;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #ff8a1d, var(--colorPrimary));
+}
+
+.light-mode .sidebar-menu,
+.sidebar.light .sidebar-menu {
+    scrollbar-color: rgba(var(--colorPrimary-rgb), 0.85) rgba(0, 0, 0, 0.08);
+}
+
+.light-mode .sidebar-menu::-webkit-scrollbar-track,
+.sidebar.light .sidebar-menu::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-left-color: rgba(0, 0, 0, 0.08);
+}
+
+.light-mode .sidebar-menu::-webkit-scrollbar-thumb,
+.sidebar.light .sidebar-menu::-webkit-scrollbar-thumb {
+    border-color: var(--colorDarkForm);
 }
 
 .sidebar-menu ul {

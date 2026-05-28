@@ -9,7 +9,7 @@
 
     border: 1px solid var(--colorDark);
     box-shadow: var(--BSPrimary);
-    background-color: var(--colorDarkForm);
+    background: var(--surfaceGradient, var(--colorDarkForm));
 
 }
 
