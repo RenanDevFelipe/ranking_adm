@@ -12,6 +12,19 @@ import Swal from 'sweetalert2';
 
 const hojeIso = () => new Date().toISOString().split('T')[0];
 
+const normalizarData = (valor) => {
+    if (!valor) return '';
+
+    const valorComoTexto = String(valor).trim();
+    if (!valorComoTexto) return '';
+
+    const data = new Date(valorComoTexto.includes('T') ? valorComoTexto : `${valorComoTexto}T00:00:00`);
+
+    if (Number.isNaN(data.getTime())) return valorComoTexto;
+
+    return data.toISOString().split('T')[0];
+};
+
 const formatarData = (dataString) => {
     if (!dataString) return '-';
     const data = new Date(String(dataString).replace(' ', 'T'));
@@ -122,8 +135,9 @@ export default function AvaliacaoN3Card({
 
     const isAvaliada = Boolean(avaliacaoAtual || avaliacaoVerificada?.avaliada);
     const assuntoId = os.assunto?.id || os.raw?.id_assunto;
-    const dataFinalizacao = os.datas?.finalizacao || os.raw?.data_final || os.raw?.data_fechamento;
-    const descOs = os.raw?.mensagem_resposta || os.mensagem || '';
+    const dataFinalizacao = os.datas?.finalizacao || os.raw?.data_final || os.raw?.data_fechamento || os.raw?.data_finalizacao_os;
+    const dataFinalizacaoOs = normalizarData(dataFinalizacao);
+    const descOs = os.raw?.mensagem_resposta || os.mensagem || os.raw?.desc_os || '';
 
     const carregarChecklist = async () => {
         setLoadingChecklist(true);
@@ -224,13 +238,14 @@ export default function AvaliacaoN3Card({
             const respostasPayload = montarRespostas();
             const mensagensPayload = montarMensagensFinalizacao();
             const payloadBase = {
+                id_os: Number(os.id_os),
                 desc_os: descOs,
                 id_assunto_ixc: Number(assuntoId),
-                id_checklist: idChecklist,
-                data_finalizacao_os: dataFinalizacao?.split(' ')[0] || dataFinalizacao,
+                id_checklist: Number(idChecklist || 0),
+                data_finalizacao_os: dataFinalizacaoOs,
                 data_finalizacao: hojeIso(),
-                id_tecnico: Number(idTecnicoColaborador || os.tecnico?.id || os.raw?.id_tecnico),
-                id_setor: Number(idSetor),
+                id_tecnico: Number(idTecnicoColaborador || os.tecnico?.id || os.raw?.id_tecnico || 0),
+                id_setor: Number(idSetor || 0),
                 respostas: respostasPayload,
                 mensagens_finalizacao: mensagensPayload
             };
@@ -238,10 +253,7 @@ export default function AvaliacaoN3Card({
             if (isAvaliada && avaliacaoAtual?.id_avaliacao) {
                 await updateAvaliacaoN3(token, avaliacaoAtual.id_avaliacao, payloadBase);
             } else {
-                await addAvaliacaoN3(token, {
-                    id_os: Number(os.id_os),
-                    ...payloadBase
-                });
+                await addAvaliacaoN3(token, payloadBase);
             }
 
             await Swal.fire('Sucesso!', 'Avaliacao N3 salva com sucesso.', 'success');

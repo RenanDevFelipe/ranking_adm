@@ -24,6 +24,8 @@ const payloadPadrao = {
 
 const emptyForm = {
     id_checklist_assunto: '',
+    id_assunto_ixc: '',
+    nome_assunto_ixc: '',
     id_item_condicao: '',
     resposta_tipo: 'sem_condicao',
     resposta_condicao: '',
@@ -37,6 +39,8 @@ const emptyForm = {
 const getChecklistItens = (assunto) => assunto?.checklist?.itens || [];
 const getChecklistId = (assunto) => assunto?.id_checklist || assunto?.checklist?.id_checklist || assunto?.checklist?.id;
 const getChecklistNome = (assunto) => assunto?.checklist?.nome_checklist || 'Checklist nao informado';
+const getAssuntoIxcId = (assunto) => assunto?.id_assunto_ixc ?? assunto?.assunto_ixc?.id ?? assunto?.config?.id_assunto_ixc ?? null;
+const getAssuntoIxcNome = (assunto) => assunto?.nome_assunto_ixc ?? assunto?.assunto_ixc?.nome ?? assunto?.config?.nome_assunto_ixc ?? '';
 const getAssuntoLabel = (assunto) => {
     const idIxc = assunto?.id_assunto_ixc ? `#${assunto.id_assunto_ixc} - ` : '';
     return `${idIxc}${assunto?.nome_assunto_ixc || 'Assunto sem nome'} | ${getChecklistNome(assunto)}`;
@@ -91,8 +95,14 @@ export default function IxcFinalizacaoConfigForm() {
 
                 if (configData) {
                     const respostaTipo = inferirTipoResposta(configData.resposta_condicao);
+                    const assuntoBase = configData.checklist_assunto || configData.assunto || {};
+                    const assuntoIxcId = configData.id_assunto_ixc ?? getAssuntoIxcId(assuntoBase) ?? '';
+                    const assuntoIxcNome = configData.nome_assunto_ixc ?? getAssuntoIxcNome(assuntoBase) ?? '';
+
                     setFormData({
                         id_checklist_assunto: String(configData.id_checklist_assunto || ''),
+                        id_assunto_ixc: assuntoIxcId ? String(assuntoIxcId) : '',
+                        nome_assunto_ixc: String(assuntoIxcNome || ''),
                         id_item_condicao: configData.id_item_condicao ? String(configData.id_item_condicao) : '',
                         resposta_tipo: respostaTipo,
                         resposta_condicao: respostaTipo === 'texto' || respostaTipo === 'numero'
@@ -131,6 +141,16 @@ export default function IxcFinalizacaoConfigForm() {
     const assuntoSelecionado = useMemo(() => {
         return assuntos.find(assunto => String(assunto.id) === String(formData.id_checklist_assunto));
     }, [assuntos, formData.id_checklist_assunto]);
+
+    useEffect(() => {
+        if (assuntoSelecionado) {
+            setFormData(prev => ({
+                ...prev,
+                id_assunto_ixc: prev.id_assunto_ixc || String(getAssuntoIxcId(assuntoSelecionado) || ''),
+                nome_assunto_ixc: prev.nome_assunto_ixc || String(getAssuntoIxcNome(assuntoSelecionado) || '')
+            }));
+        }
+    }, [assuntoSelecionado]);
 
     useEffect(() => {
         let isMounted = true;
@@ -193,8 +213,8 @@ export default function IxcFinalizacaoConfigForm() {
 
     const validateForm = () => {
         if (!formData.id_checklist_assunto) return 'Selecione o assunto vinculado ao checklist.';
-        if (!assuntoSelecionado?.id_assunto_ixc) return 'Nao foi possivel identificar o ID do assunto IXC.';
-        if (!assuntoSelecionado?.nome_assunto_ixc) return 'Nao foi possivel identificar o nome do assunto IXC.';
+        if (!String(formData.id_assunto_ixc || '').trim()) return 'Nao foi possivel identificar o ID do assunto IXC.';
+        if (!String(formData.nome_assunto_ixc || '').trim()) return 'Nao foi possivel identificar o nome do assunto IXC.';
         if (formData.resposta_tipo !== 'sem_condicao' && !formData.id_item_condicao) return 'Selecione o item de condicao.';
         if (['texto', 'numero'].includes(formData.resposta_tipo) && String(formData.resposta_condicao).trim() === '') {
             return 'Informe a resposta da condicao.';
@@ -225,13 +245,17 @@ export default function IxcFinalizacaoConfigForm() {
             const token = localStorage.getItem('access_token');
             const respostaCondicao = respostaCondicaoFromForm(formData);
             const payload = {
-                id_checklist_assunto: Number(formData.id_checklist_assunto),
-                id_assunto_ixc: Number(assuntoSelecionado.id_assunto_ixc),
+                assuntos: [
+                    {
+                        id_checklist_assunto: Number(formData.id_checklist_assunto),
+                        id_assunto_ixc: Number(formData.id_assunto_ixc),
+                        nome_assunto_ixc: String(formData.nome_assunto_ixc || '').trim()
+                    }
+                ],
                 id_item_condicao: formData.resposta_tipo === 'sem_condicao' ? null : Number(formData.id_item_condicao),
                 resposta_condicao: respostaCondicao,
                 origem_mensagem: formData.origem_mensagem,
                 ordem_execucao: Number(formData.ordem_execucao || 1),
-                nome_assunto_ixc: assuntoSelecionado.nome_assunto_ixc,
                 ativo: Boolean(formData.ativo),
                 finalizar_atendimento: formData.finalizar_atendimento,
                 payload: JSON.parse(formData.payload || '{}')
@@ -352,6 +376,28 @@ export default function IxcFinalizacaoConfigForm() {
                                         />
                                     </label>
                                 )}
+
+                                <label>
+                                    ID do Assunto IXC
+                                    <input
+                                        type="number"
+                                        name="id_assunto_ixc"
+                                        value={formData.id_assunto_ixc || ''}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </label>
+
+                                <label>
+                                    Nome do Assunto IXC
+                                    <input
+                                        type="text"
+                                        name="nome_assunto_ixc"
+                                        value={formData.nome_assunto_ixc || ''}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </label>
 
                                 <label>
                                     Origem da mensagem
