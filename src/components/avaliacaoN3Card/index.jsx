@@ -380,6 +380,7 @@ export default function AvaliacaoN3Card({
                                         onChange={(e) => handleMensagemFinalizacaoChange(config.id_checklist_assunto, e.target.value)}
                                         placeholder="Digite a mensagem que sera enviada ao IXC no fechamento desta OS."
                                         rows={4}
+                                        
                                     />
                                 </div>
                             ))}
